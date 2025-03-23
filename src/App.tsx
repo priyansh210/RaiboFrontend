@@ -11,10 +11,13 @@ import Browse from "./pages/Browse";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import BuyerLogin from "./pages/BuyerLogin";
+import SellerLogin from "./pages/SellerLogin";
+import BuyerRegister from "./pages/BuyerRegister";
+import SellerRegister from "./pages/SellerRegister";
 import ForYou from "./pages/ForYou";
 import NotFound from "./pages/NotFound";
+import SellerDashboard from "./pages/SellerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -33,8 +36,18 @@ const App = () => (
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              
+              {/* Buyer Authentication Routes */}
+              <Route path="/buyer/login" element={<BuyerLogin />} />
+              <Route path="/buyer/register" element={<BuyerRegister />} />
+              
+              {/* Seller Authentication Routes */}
+              <Route path="/seller/login" element={<SellerLogin />} />
+              <Route path="/seller/register" element={<SellerRegister />} />
+              
+              {/* Seller Dashboard Routes */}
+              <Route path="/seller/dashboard" element={<SellerDashboard />} />
+              
               <Route path="/for-you" element={<ForYou />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
