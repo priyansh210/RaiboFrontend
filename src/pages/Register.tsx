@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,7 +9,8 @@ const Register = () => {
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
   
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,7 +27,7 @@ const Register = () => {
     }
     
     try {
-      await register(name, email, password);
+      await register(firstName, lastName, email, password);
       toast({
         title: "Welcome to RAIBO!",
         description: "Your account has been created successfully.",
@@ -89,8 +89,8 @@ const Register = () => {
                 <input
                   id="name"
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
                   required
                 />

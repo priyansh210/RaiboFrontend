@@ -161,21 +161,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
+      // Modified to auto-confirm email by setting emailRedirectTo to null
+      const { error: signUpError, data } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             first_name,
             last_name,
-          }
+          },
+          emailRedirectTo: null // This prevents the email confirmation requirement
         }
       });
       
       if (signUpError) throw signUpError;
       
-      // The user profile is created automatically via database trigger
-      // We don't need to manually insert it
+      // For immediate login after signup (since we're bypassing email confirmation)
+      if (!data.session) {
+        await login(email, password);
+      }
       
       toast({
         title: "Welcome to RAIBO!",

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { supabase } from '../integrations/supabase/client';
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -60,20 +61,82 @@ const SellerLogin = () => {
     setShowPassword(!showPassword);
   };
   
-  // Demo login
+  // Demo login - improved to ensure it works properly
   const handleDemoLogin = async () => {
-    form.setValue("email", "seller@example.com");
-    form.setValue("password", "password123");
+    const demoEmail = "seller@example.com";
+    const demoPassword = "password123";
+    
+    form.setValue("email", demoEmail);
+    form.setValue("password", demoPassword);
     
     try {
-      await login("seller@example.com", "password123");
-      toast({
-        title: "Demo Login Successful",
-        description: "You've been logged in with demo seller credentials.",
+      // First check if demo seller account exists
+      const { data: existingUser } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
       });
-      // The redirect will happen in useEffect when auth state changes
+      
+      if (existingUser.session) {
+        // Demo account exists, we've signed in
+        toast({
+          title: "Demo Login Successful",
+          description: "You've been logged in with demo seller credentials.",
+        });
+        return;
+      }
     } catch (err) {
-      setError((err as Error).message || 'Failed to log in. Please try again.');
+      // Demo account doesn't exist, let's create it
+      try {
+        // Create the user account
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: demoEmail,
+          password: demoPassword,
+          options: {
+            data: {
+              first_name: "Demo",
+              last_name: "Seller",
+            },
+            emailRedirectTo: null
+          }
+        });
+        
+        if (signUpError) throw signUpError;
+        
+        // Login with the created account
+        await supabase.auth.signInWithPassword({
+          email: demoEmail,
+          password: demoPassword,
+        });
+        
+        // Add seller role to the user
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          // Check if seller role already exists
+          const { data: existingRole } = await supabase
+            .from('user_roles')
+            .select('*')
+            .eq('user_id', userData.user.id)
+            .eq('role', 'seller')
+            .single();
+            
+          if (!existingRole) {
+            // Add seller role
+            await supabase
+              .from('user_roles')
+              .insert({
+                user_id: userData.user.id,
+                role: 'seller'
+              });
+          }
+        }
+        
+        toast({
+          title: "Demo Seller Account Created",
+          description: "You've been logged in with a new demo seller account.",
+        });
+      } catch (createErr: any) {
+        setError(createErr.message || "Failed to create demo account");
+      }
     }
   };
   
