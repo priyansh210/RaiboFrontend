@@ -1,10 +1,24 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CartItem, loadCart, saveCart, calculateCartTotals } from '../services/CartService';
+import { toast } from '@/hooks/use-toast';
 import { Product } from '../data/products';
+import { supabase } from '../integrations/supabase/client';
 
+// Define CartItem type
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+  selectedColor: { name: string; code: string };
+}
+
+// Define context props
 interface CartContextProps {
   cartItems: CartItem[];
+  cart: CartItem[]; // Added for compatibility
+  total: number; // Added for total calculation
   addToCart: (product: Product & { selectedColor: { name: string; code: string }; quantity: number }) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -17,8 +31,38 @@ interface CartContextProps {
   };
 }
 
+// Load cart from localStorage
+export const loadCart = (): CartItem[] => {
+  if (typeof window === 'undefined') return [];
+  const savedCart = localStorage.getItem('cart');
+  return savedCart ? JSON.parse(savedCart) : [];
+};
+
+// Save cart to localStorage
+export const saveCart = (cart: CartItem[]): void => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('cart', JSON.stringify(cart));
+};
+
+// Calculate cart totals
+export const calculateCartTotals = (cart: CartItem[]) => {
+  const subtotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  const shipping = subtotal > 0 ? 10 : 0; // Free shipping over $100
+  const tax = subtotal * 0.07; // 7% tax
+  const total = subtotal + shipping + tax;
+
+  return {
+    subtotal,
+    shipping,
+    tax,
+    total,
+  };
+};
+
 const CartContext = createContext<CartContextProps>({
   cartItems: [],
+  cart: [], // Added for compatibility
+  total: 0, // Added for total calculation
   addToCart: () => {},
   removeFromCart: () => {},
   updateQuantity: () => {},
@@ -67,7 +111,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return updatedItems;
       } else {
         // Add new item to cart
-        return [...prevItems, { ...product, quantity: product.quantity }];
+        const newItem: CartItem = {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg',
+          quantity: product.quantity,
+          selectedColor: product.selectedColor,
+        };
+        return [...prevItems, newItem];
       }
     });
   };
@@ -88,10 +140,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCartItems([]);
   };
 
+  // Calculate total
+  const total = cartTotals.total;
+
   return (
     <CartContext.Provider
       value={{
         cartItems,
+        cart: cartItems, // Added for compatibility
+        total, // Added for total
         addToCart,
         removeFromCart,
         updateQuantity,

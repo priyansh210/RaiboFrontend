@@ -18,6 +18,7 @@ import SellerRegister from "./pages/SellerRegister";
 import ForYou from "./pages/ForYou";
 import NotFound from "./pages/NotFound";
 import SellerDashboard from "./pages/SellerDashboard";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,9 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               
+              {/* Authentication Routes */}
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              
               {/* Buyer Authentication Routes */}
               <Route path="/buyer/login" element={<BuyerLogin />} />
               <Route path="/buyer/register" element={<BuyerRegister />} />
@@ -47,6 +51,10 @@ const App = () => (
               
               {/* Seller Dashboard Routes */}
               <Route path="/seller/dashboard" element={<SellerDashboard />} />
+              <Route path="/seller/dashboard/products" element={<SellerDashboard />} />
+              <Route path="/seller/dashboard/orders" element={<SellerDashboard />} />
+              <Route path="/seller/dashboard/reviews" element={<SellerDashboard />} />
+              <Route path="/seller/dashboard/analytics" element={<SellerDashboard />} />
               
               <Route path="/for-you" element={<ForYou />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

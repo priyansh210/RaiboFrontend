@@ -18,7 +18,7 @@ const formSchema = z.object({
 });
 
 const SellerLogin = () => {
-  const { login, isAuthenticated, isLoading, roles } = useAuth();
+  const { login, isAuthenticated, isLoading, roles, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
@@ -40,9 +40,9 @@ const SellerLogin = () => {
     if (isAuthenticated && roles.includes('seller')) {
       navigate('/seller/dashboard', { replace: true });
     }
-    // If authenticated but is a buyer, redirect to home
-    else if (isAuthenticated && roles.includes('buyer')) {
-      navigate('/', { replace: true });
+    // If authenticated but isn't a seller, show error message
+    else if (isAuthenticated && !roles.includes('seller')) {
+      setError('Your account does not have seller permissions.');
     }
   }, [isAuthenticated, roles, navigate]);
 
@@ -61,82 +61,79 @@ const SellerLogin = () => {
     setShowPassword(!showPassword);
   };
   
-  // Demo login - improved to ensure it works properly
+  // Demo login
   const handleDemoLogin = async () => {
     const demoEmail = "seller@example.com";
     const demoPassword = "password123";
     
-    form.setValue("email", demoEmail);
-    form.setValue("password", demoPassword);
-    
     try {
-      // First check if demo seller account exists
-      const { data: existingUser } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: demoPassword,
-      });
+      // Check if demo seller account exists
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('role', 'seller');
       
-      if (existingUser.session) {
-        // Demo account exists, we've signed in
+      if (!userRoles || userRoles.length === 0) {
+        // If no seller exists, create one
         toast({
-          title: "Demo Login Successful",
-          description: "You've been logged in with demo seller credentials.",
+          title: "Creating demo seller account",
+          description: "This will take a moment...",
         });
-        return;
-      }
-    } catch (err) {
-      // Demo account doesn't exist, let's create it
-      try {
-        // Create the user account
-        const { error: signUpError } = await supabase.auth.signUp({
+        
+        // Register new seller account
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email: demoEmail,
           password: demoPassword,
           options: {
             data: {
               first_name: "Demo",
               last_name: "Seller",
-            },
-            emailRedirectTo: null
+            }
           }
         });
         
         if (signUpError) throw signUpError;
         
-        // Login with the created account
-        await supabase.auth.signInWithPassword({
-          email: demoEmail,
-          password: demoPassword,
-        });
-        
-        // Add seller role to the user
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData.user) {
-          // Check if seller role already exists
-          const { data: existingRole } = await supabase
+        // If demo user created, assign seller role
+        if (data.user) {
+          // Insert into user_roles
+          const { error: roleError } = await supabase
             .from('user_roles')
-            .select('*')
-            .eq('user_id', userData.user.id)
-            .eq('role', 'seller')
-            .single();
+            .insert({
+              user_id: data.user.id,
+              role: 'seller'
+            });
             
-          if (!existingRole) {
-            // Add seller role
-            await supabase
-              .from('user_roles')
-              .insert({
-                user_id: userData.user.id,
-                role: 'seller'
-              });
-          }
+          if (roleError) throw roleError;
+          
+          // Log in with the new account
+          await login(demoEmail, demoPassword);
+          
+          // Wait for auth state to update
+          setTimeout(async () => {
+            await refreshUserProfile();
+            navigate('/seller/dashboard', { replace: true });
+          }, 1500);
+          
+          toast({
+            title: "Demo Seller Account Created",
+            description: "You've been logged in with demo seller credentials.",
+          });
         }
+      } else {
+        // If seller exists, just log in
+        form.setValue("email", demoEmail);
+        form.setValue("password", demoPassword);
         
+        await login(demoEmail, demoPassword);
         toast({
-          title: "Demo Seller Account Created",
-          description: "You've been logged in with a new demo seller account.",
+          title: "Demo Login Successful",
+          description: "You've been logged in with demo seller credentials.",
         });
-      } catch (createErr: any) {
-        setError(createErr.message || "Failed to create demo account");
       }
+    } catch (err) {
+      console.error(err);
+      setError((err as Error).message || 'Failed to log in with demo account. Please try again.');
     }
   };
   

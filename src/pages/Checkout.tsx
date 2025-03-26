@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -5,24 +6,41 @@ import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import { toast } from '@/hooks/use-toast';
 import { Button } from "@/components/ui/button"
+import { supabase } from '../integrations/supabase/client';
 
 const Checkout = () => {
-  const { cart, total, clearCart } = useCart();
+  const { cart, cartItems, total, clearCart } = useCart();
   const { user, profile, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  
+  // Shipping information
+  const [shippingAddress, setShippingAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [country, setCountry] = useState('USA');
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: '/checkout' } });
+      navigate('/buyer/login', { state: { from: '/checkout' } });
     }
-  }, [isAuthenticated, navigate]);
+    
+    // Pre-fill with user profile data if available
+    if (profile) {
+      setShippingAddress(profile.address || '');
+      setCity(profile.city || '');
+      setState(profile.state || '');
+      setZipCode(profile.zip || '');
+      setCountry(profile.country || 'USA');
+    }
+  }, [isAuthenticated, navigate, profile]);
 
   const fullName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : '';
 
   const handleSubmit = async () => {
-    if (cart.length === 0) {
+    if (cartItems.length === 0) {
       toast({
         title: "Your cart is empty",
         description: "Please add items to your cart before proceeding to checkout.",
@@ -30,12 +48,50 @@ const Checkout = () => {
       return;
     }
 
+    // Validate shipping address
+    if (!shippingAddress || !city || !state || !zipCode) {
+      toast({
+        title: "Missing shipping information",
+        description: "Please fill in all shipping fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage('');
 
+    const formattedAddress = `${shippingAddress}, ${city}, ${state} ${zipCode}, ${country}`;
+
     try {
-      // Simulate a successful checkout process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create order in Supabase
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          buyer_id: user?.id,
+          total_amount: total,
+          shipping_address: formattedAddress,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items
+      const orderItems = cartItems.map(item => ({
+        order_id: order.id,
+        product_id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        color: item.selectedColor?.name || null
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
 
       toast({
         title: "Order confirmed!",
@@ -81,8 +137,75 @@ const Checkout = () => {
             </div>
 
             <div className="mb-6">
+              <h2 className="font-medium text-charcoal mb-2">Shipping Address</h2>
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="address" className="block text-sm text-earth mb-1">Street Address</label>
+                  <input
+                    id="address"
+                    type="text"
+                    value={shippingAddress}
+                    onChange={(e) => setShippingAddress(e.target.value)}
+                    required
+                    className="w-full p-2 border border-taupe/30 rounded-sm"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="city" className="block text-sm text-earth mb-1">City</label>
+                    <input
+                      id="city"
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      required
+                      className="w-full p-2 border border-taupe/30 rounded-sm"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="state" className="block text-sm text-earth mb-1">State</label>
+                    <input
+                      id="state"
+                      type="text"
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      required
+                      className="w-full p-2 border border-taupe/30 rounded-sm"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="zipCode" className="block text-sm text-earth mb-1">ZIP Code</label>
+                    <input
+                      id="zipCode"
+                      type="text"
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value)}
+                      required
+                      className="w-full p-2 border border-taupe/30 rounded-sm"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="country" className="block text-sm text-earth mb-1">Country</label>
+                    <select
+                      id="country"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="w-full p-2 border border-taupe/30 rounded-sm"
+                    >
+                      <option value="USA">United States</option>
+                      <option value="Canada">Canada</option>
+                      <option value="UK">United Kingdom</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
               <h2 className="font-medium text-charcoal mb-2">Order Summary</h2>
-              {cart.map((item) => (
+              {cartItems.map((item) => (
                 <div key={item.id} className="flex items-center justify-between py-2 border-b border-taupe/20">
                   <div className="flex items-center">
                     <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-sm mr-4" />
@@ -100,17 +223,12 @@ const Checkout = () => {
             </div>
 
             <div className="mb-6">
-              <h2 className="font-medium text-charcoal mb-2">Shipping Address</h2>
-              <p className="text-sm text-earth">
-                123 Main Street, Anytown, USA
-              </p>
-            </div>
-
-            <div className="mb-6">
               <h2 className="font-medium text-charcoal mb-2">Payment Method</h2>
-              <p className="text-sm text-earth">
-                Credit Card ending in 4242
-              </p>
+              <div className="p-3 bg-linen rounded-sm">
+                <p className="text-sm text-earth">
+                  Credit Card ending in 4242 (Demo Mode)
+                </p>
+              </div>
             </div>
 
             <Button

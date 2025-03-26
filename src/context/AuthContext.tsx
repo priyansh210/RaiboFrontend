@@ -10,12 +10,12 @@ interface UserProfile {
   last_name: string | null;
   email: string;
   avatar_url: string | null;
-}
-
-interface UserRole {
-  id: string;
-  user_id: string;
-  role: string;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
+  country: string | null;
+  phone: string | null;
 }
 
 interface AuthContextProps {
@@ -31,6 +31,7 @@ interface AuthContextProps {
   register: (first_name: string, last_name: string, email: string, password: string, role?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUserProfile: () => Promise<void>;
+  googleLogin: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps>({
@@ -46,6 +47,7 @@ const AuthContext = createContext<AuthContextProps>({
   register: async () => {},
   logout: async () => {},
   refreshUserProfile: async () => {},
+  googleLogin: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -151,6 +153,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const googleLogin = async (): Promise<void> => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      toast({
+        title: "Login with Google failed",
+        description: error.message || 'Failed to log in with Google. Please try again.',
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const register = async (
     first_name: string, 
     last_name: string, 
@@ -179,6 +202,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // For immediate login after signup (since we're bypassing email confirmation)
       if (!data.session) {
         await login(email, password);
+      }
+      
+      // If the role is seller, add the role manually
+      if (role === 'seller' && data.user) {
+        // We need to wait a bit for the trigger to create the buyer role first
+        setTimeout(async () => {
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: data.user?.id,
+              role: 'seller'
+            });
+            
+          if (roleError) {
+            console.error('Error assigning seller role:', roleError);
+          } else {
+            // Refresh profile to get updated roles
+            await refreshUserProfile();
+          }
+        }, 1000);
       }
       
       toast({
@@ -230,6 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         logout,
         refreshUserProfile,
+        googleLogin,
       }}
     >
       {children}
