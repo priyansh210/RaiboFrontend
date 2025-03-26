@@ -1,260 +1,258 @@
 
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import Layout from '../components/Layout';
-import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { supabase } from '../integrations/supabase/client';
 
-const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-});
-
 const SellerLogin = () => {
-  const { login, isAuthenticated, isLoading, roles, refreshUserProfile } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Get the redirect URL from the location state or default to seller dashboard
-  const from = (location.state as any)?.from || '/seller/dashboard';
+  const { login } = useAuth();
+  const navigate = useNavigate();
   
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  useEffect(() => {
-    // If already authenticated and has seller role, redirect to seller dashboard
-    if (isAuthenticated && roles.includes('seller')) {
-      navigate('/seller/dashboard', { replace: true });
-    }
-    // If authenticated but isn't a seller, show error message
-    else if (isAuthenticated && !roles.includes('seller')) {
-      setError('Your account does not have seller permissions.');
-    }
-  }, [isAuthenticated, roles, navigate]);
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setError('');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
     
     try {
-      await login(values.email, values.password);
-      // The redirect will happen in useEffect when auth state changes
-    } catch (err) {
-      setError((err as Error).message || 'Failed to log in. Please try again.');
+      const result = await login(email, password);
+      if (result.error) {
+        toast({
+          title: "Login failed",
+          description: result.error.message,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Check if user has seller role
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', result.data.user.id);
+      
+      if (rolesError) {
+        throw rolesError;
+      }
+      
+      const roles = rolesData?.map(r => r.role) || [];
+      
+      if (!roles.includes('seller')) {
+        // Log out if not a seller
+        await supabase.auth.signOut();
+        toast({
+          title: "Access denied",
+          description: "This account does not have seller privileges",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+      
+      navigate('/seller/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login failed",
+        description: (error as Error).message || 'An unexpected error occurred',
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
   
-  const toggleShowPassword = () => {
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Use the demo seller account
+      const demoEmail = 'seller@example.com';
+      const demoPassword = 'password123';
+      
+      const result = await login(demoEmail, demoPassword);
+      if (result.error) {
+        toast({
+          title: "Demo login failed",
+          description: result.error.message,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      toast({
+        title: "Demo login successful",
+        description: "Welcome to the seller dashboard!",
+      });
+      
+      navigate('/seller/dashboard');
+    } catch (error) {
+      console.error('Demo login error:', error);
+      toast({
+        title: "Demo login failed",
+        description: (error as Error).message || 'An unexpected error occurred',
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
   
-  // Demo login
-  const handleDemoLogin = async () => {
-    const demoEmail = "seller@example.com";
-    const demoPassword = "password123";
-    
-    try {
-      // Check if demo seller account exists
-      const { data: userRoles } = await supabase
-        .from('user_roles')
-        .select('*')
-        .eq('role', 'seller');
-      
-      if (!userRoles || userRoles.length === 0) {
-        // If no seller exists, create one
-        toast({
-          title: "Creating demo seller account",
-          description: "This will take a moment...",
-        });
-        
-        // Register new seller account
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email: demoEmail,
-          password: demoPassword,
-          options: {
-            data: {
-              first_name: "Demo",
-              last_name: "Seller",
-            }
-          }
-        });
-        
-        if (signUpError) throw signUpError;
-        
-        // If demo user created, assign seller role
-        if (data.user) {
-          // Insert into user_roles
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: data.user.id,
-              role: 'seller'
-            });
-            
-          if (roleError) throw roleError;
-          
-          // Log in with the new account
-          await login(demoEmail, demoPassword);
-          
-          // Wait for auth state to update
-          setTimeout(async () => {
-            await refreshUserProfile();
-            navigate('/seller/dashboard', { replace: true });
-          }, 1500);
-          
-          toast({
-            title: "Demo Seller Account Created",
-            description: "You've been logged in with demo seller credentials.",
-          });
-        }
-      } else {
-        // If seller exists, just log in
-        form.setValue("email", demoEmail);
-        form.setValue("password", demoPassword);
-        
-        await login(demoEmail, demoPassword);
-        toast({
-          title: "Demo Login Successful",
-          description: "You've been logged in with demo seller credentials.",
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      setError((err as Error).message || 'Failed to log in with demo account. Please try again.');
-    }
-  };
-  
   return (
-    <Layout>
-      <div className="page-transition min-h-screen bg-cream py-10">
-        <div className="container-custom max-w-md">
-          <div className="bg-white p-8 rounded-sm shadow-sm animate-fade-in">
-            <h1 className="font-playfair text-2xl text-center text-charcoal mb-6">Seller Sign In</h1>
-            
-            {error && (
-              <div className="mb-6 p-3 bg-red-50 text-red-700 rounded-sm flex items-center">
-                <AlertCircle size={18} className="mr-2 flex-shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-            
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-earth">Email address</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="email" 
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-earth">Password</FormLabel>
-                      <div className="relative">
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type={showPassword ? 'text' : 'password'} 
-                            className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
-                          />
-                        </FormControl>
-                        <button
-                          type="button"
-                          onClick={toggleShowPassword}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-earth"
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        >
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="flex justify-between items-center">
-                  <label className="flex items-center text-sm text-earth">
-                    <input type="checkbox" className="mr-2" />
-                    <span>Remember me</span>
-                  </label>
-                  
-                  <Link to="/forgot-password" className="text-sm text-terracotta hover:underline">
-                    Forgot password?
-                  </Link>
+    <div className="h-screen flex flex-col md:flex-row">
+      <div className="hidden md:block md:w-1/2 bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=2158&auto=format&fit=crop)' }}>
+        <div className="h-full w-full bg-gradient-to-r from-charcoal/70 to-charcoal/40 flex items-center justify-center text-white p-10">
+          <div className="max-w-md">
+            <h1 className="font-playfair text-4xl mb-6">Sell Your Products with Us</h1>
+            <p className="mb-8">Join our marketplace and reach thousands of customers looking for quality products like yours.</p>
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <div className="bg-terracotta text-white p-2 rounded-full mr-4">
+                  <span>1</span>
                 </div>
-                
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-terracotta hover:bg-umber text-white py-2 transition-colors disabled:bg-taupe"
-                >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
-                </button>
-              </form>
-            </Form>
-            
-            <div className="mt-6">
-              <div className="relative flex items-center justify-center">
-                <div className="border-t border-taupe/20 absolute w-full"></div>
-                <span className="bg-white px-2 text-sm text-earth relative">
-                  Or continue with
-                </span>
+                <div>
+                  <h3 className="font-medium mb-1">Create your seller account</h3>
+                  <p className="text-white/80 text-sm">Quick and easy setup process</p>
+                </div>
               </div>
-              
-              <div className="mt-4">
-                <button
-                  onClick={handleDemoLogin}
-                  className="w-full py-2 border border-charcoal text-charcoal hover:bg-linen transition-colors"
-                >
-                  Demo Seller Account
-                </button>
+              <div className="flex items-start">
+                <div className="bg-terracotta text-white p-2 rounded-full mr-4">
+                  <span>2</span>
+                </div>
+                <div>
+                  <h3 className="font-medium mb-1">List your products</h3>
+                  <p className="text-white/80 text-sm">Add details, photos, and pricing</p>
+                </div>
               </div>
-            </div>
-            
-            <div className="mt-6 text-center text-sm text-earth">
-              Don't have a seller account?{' '}
-              <Link to="/seller/register" className="text-terracotta hover:underline">
-                Apply to become a seller
-              </Link>
-            </div>
-
-            <div className="mt-4 text-center text-sm text-earth">
-              Are you a buyer?{' '}
-              <Link to="/buyer/login" className="text-terracotta hover:underline">
-                Login as Buyer
-              </Link>
+              <div className="flex items-start">
+                <div className="bg-terracotta text-white p-2 rounded-full mr-4">
+                  <span>3</span>
+                </div>
+                <div>
+                  <h3 className="font-medium mb-1">Start selling</h3>
+                  <p className="text-white/80 text-sm">Reach customers and grow your business</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </Layout>
+      
+      <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-10 bg-cream">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h2 className="font-playfair text-3xl text-charcoal mb-2">Seller Login</h2>
+            <p className="text-earth">Access your seller dashboard</p>
+          </div>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-earth mb-1">
+                Email Address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-sand bg-white focus:outline-none focus:ring-1 focus:ring-terracotta"
+                placeholder="your@email.com"
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-earth mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border border-sand bg-white focus:outline-none focus:ring-1 focus:ring-terracotta"
+                  placeholder="•••••••••"
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-earth"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex justify-end">
+              <a href="#" className="text-sm text-earth hover:text-terracotta">
+                Forgot your password?
+              </a>
+            </div>
+            
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 bg-terracotta hover:bg-umber text-white transition-colors flex items-center justify-center disabled:bg-earth/50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <span className="flex items-center">
+                  <span className="animate-spin h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full"></span>
+                  Signing in...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <LogIn size={18} className="mr-2" />
+                  Sign In
+                </span>
+              )}
+            </button>
+          </form>
+          
+          <div className="mt-6">
+            <button
+              onClick={handleDemoLogin}
+              disabled={isLoading}
+              className="w-full py-3 border border-terracotta text-terracotta hover:bg-terracotta hover:text-white transition-colors flex items-center justify-center disabled:border-earth/50 disabled:text-earth/50 disabled:cursor-not-allowed"
+            >
+              Try Demo Account
+            </button>
+          </div>
+          
+          <div className="mt-8 text-center">
+            <p className="text-earth">
+              Don't have a seller account?{' '}
+              <Link to="/seller/register" className="text-terracotta hover:text-umber">
+                Register now
+              </Link>
+            </p>
+          </div>
+          
+          <div className="mt-6 text-center">
+            <Link to="/buyer/login" className="text-earth hover:text-terracotta text-sm">
+              Login as Buyer Instead
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

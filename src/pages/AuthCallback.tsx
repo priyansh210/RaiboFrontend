@@ -24,11 +24,22 @@ const AuthCallback = () => {
         
         if (data?.session) {
           // Get the user roles to determine where to redirect
-          const { data: rolesData } = await supabase
+          const { data: rolesData, error: rolesError } = await supabase
             .from('user_roles')
             .select('role')
             .eq('user_id', data.session.user.id);
             
+          if (rolesError) {
+            console.error('Error fetching user roles:', rolesError);
+            toast({
+              title: "Error fetching user roles",
+              description: "We couldn't determine your account type. Please contact support.",
+              variant: "destructive",
+            });
+            navigate('/buyer/login', { replace: true });
+            return;
+          }
+          
           const roles = rolesData?.map(r => r.role) || [];
           
           // Redirect based on role

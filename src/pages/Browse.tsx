@@ -5,21 +5,39 @@ import Layout from '../components/Layout';
 import ProductCard from '../components/ProductCard';
 import CategoryFilter from '../components/CategoryFilter';
 import PriceRangeSlider from '../components/PriceRangeSlider';
-import { products, categories } from '../data/products';
+import { categories } from '../data/products';
+import { fetchProducts } from '../services/ProductService';
 import { Filter, Grid, List, SlidersHorizontal, X } from 'lucide-react';
+import { Product } from '../data/products';
 
 const Browse = () => {
   const { category } = useParams();
   const [searchParams] = useSearchParams();
   
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   
+  // Fetch products from database
+  useEffect(() => {
+    const getProducts = async () => {
+      setIsLoading(true);
+      const productsData = await fetchProducts();
+      setProducts(productsData);
+      setIsLoading(false);
+    };
+    
+    getProducts();
+  }, []);
+  
   // Filtering products based on category parameter, search query, and active filters
   useEffect(() => {
+    if (products.length === 0) return;
+    
     let result = [...products];
     
     // Filter by URL category parameter
@@ -99,7 +117,7 @@ const Browse = () => {
     );
     
     setFilteredProducts(result);
-  }, [category, searchParams, activeFilters, priceRange]);
+  }, [category, searchParams, activeFilters, priceRange, products]);
   
   const handleFilterChange = (group: string, selectedOptions: string[]) => {
     setActiveFilters(prev => ({
@@ -267,18 +285,28 @@ const Browse = () => {
                 </div>
               </div>
               
-              {/* Products Grid */}
-              {filteredProducts.length > 0 ? (
-                <div className={view === 'grid' ? 'product-grid' : 'space-y-4'}>
-                  {filteredProducts.map(product => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
+              {/* Loading State */}
+              {isLoading ? (
+                <div className="bg-white p-8 text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta mx-auto mb-4"></div>
+                  <p className="text-earth">Loading products...</p>
                 </div>
               ) : (
-                <div className="bg-white p-8 text-center">
-                  <p className="text-lg text-earth mb-2">No products found</p>
-                  <p className="text-sm text-earth/70">Try adjusting your filters or search terms</p>
-                </div>
+                <>
+                  {/* Products Grid */}
+                  {filteredProducts.length > 0 ? (
+                    <div className={view === 'grid' ? 'product-grid' : 'space-y-4'}>
+                      {filteredProducts.map(product => (
+                        <ProductCard key={product.id} product={product} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-white p-8 text-center">
+                      <p className="text-lg text-earth mb-2">No products found</p>
+                      <p className="text-sm text-earth/70">Try adjusting your filters or search terms</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
