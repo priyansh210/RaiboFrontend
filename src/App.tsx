@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import Index from "./pages/Index";
@@ -44,6 +44,10 @@ const App = () => (
               {/* Buyer Authentication Routes */}
               <Route path="/buyer/login" element={<BuyerLogin />} />
               <Route path="/buyer/register" element={<BuyerRegister />} />
+              
+              {/* Redirect old login routes to the buyer login */}
+              <Route path="/login" element={<Navigate to="/buyer/login" replace />} />
+              <Route path="/register" element={<Navigate to="/buyer/register" replace />} />
               
               {/* Seller Authentication Routes */}
               <Route path="/seller/login" element={<SellerLogin />} />

@@ -98,28 +98,57 @@ const SellerLogin = () => {
       const demoEmail = 'seller@example.com';
       const demoPassword = 'password123';
       
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: demoPassword,
-      });
+      await login(demoEmail, demoPassword);
       
-      if (error) {
-        console.error('Demo login error:', error);
+      // Check if the login was successful and the user has a seller role
+      const { data } = await supabase.auth.getSession();
+      
+      if (data?.session?.user) {
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.session.user.id);
+          
+        if (roleError) {
+          console.error('Role check error:', roleError);
+          toast({
+            title: "Demo login failed",
+            description: "Error checking permissions.",
+            variant: "destructive",
+          });
+          await supabase.auth.signOut();
+          setIsLoading(false);
+          return;
+        }
+          
+        const roles = roleData?.map(r => r.role) || [];
+        
+        if (!roles.includes('seller')) {
+          toast({
+            title: "Access denied",
+            description: "The demo account doesn't have seller permissions. Please contact support.",
+            variant: "destructive",
+          });
+          
+          // Sign out the user since they don't have seller permissions
+          await supabase.auth.signOut();
+          setIsLoading(false);
+          return;
+        }
+        
+        toast({
+          title: "Demo login successful",
+          description: "Welcome to the seller dashboard!",
+        });
+        
+        navigate('/seller/dashboard');
+      } else {
         toast({
           title: "Demo login failed",
-          description: error.message || "Please try again later.",
+          description: "Could not authenticate with demo credentials.",
           variant: "destructive",
         });
-        setIsLoading(false);
-        return;
       }
-      
-      toast({
-        title: "Demo login successful",
-        description: "Welcome to the seller dashboard!",
-      });
-      
-      navigate('/seller/dashboard');
     } catch (err) {
       console.error('Demo login error:', err);
       toast({

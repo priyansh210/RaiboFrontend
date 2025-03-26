@@ -9,7 +9,7 @@ const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { cartItems } = useCart();
+  const { cart: cartItems } = useCart();
   const { isAuthenticated } = useAuth();
 
   const categories = [
@@ -96,7 +96,7 @@ const Navbar: React.FC = () => {
               </Link>
             ) : (
               <Link 
-                to="/login" 
+                to="/buyer/login" 
                 className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
               >
                 <User size={20} />
@@ -119,7 +119,7 @@ const Navbar: React.FC = () => {
           {/* Mobile Menu Button */}
           <button 
             className="md:hidden text-white p-1"
-            onClick={toggleMenu}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
           >
             {isMenuOpen ? (
@@ -185,12 +185,12 @@ const Navbar: React.FC = () => {
                 ) : (
                   <>
                     <li>
-                      <Link to="/login" className="text-charcoal hover:text-terracotta">
+                      <Link to="/buyer/login" className="text-charcoal hover:text-terracotta">
                         Sign In
                       </Link>
                     </li>
                     <li>
-                      <Link to="/register" className="text-charcoal hover:text-terracotta">
+                      <Link to="/buyer/register" className="text-charcoal hover:text-terracotta">
                         Create Account
                       </Link>
                     </li>
