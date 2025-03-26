@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import ProductCard from '../components/ProductCard';
-import { Product, forYouSuggestions, getProductById } from '../data/products';
+import { Product } from '../data/products';
 import { fetchProducts } from '../services/ProductService';
 
 const ForYou = () => {
@@ -32,12 +32,12 @@ const ForYou = () => {
             {
               id: 'fy2',
               title: 'You might also like',
-              products: productsData.slice(4, 7),
+              products: productsData.slice(4, 8),
             },
             {
               id: 'fy3',
               title: 'New arrivals in your favorite styles',
-              products: productsData.filter(p => p.new).slice(0, 4),
+              products: productsData.filter(p => p.category === 'furniture' || p.category === 'decor').slice(0, 4),
             },
           ].filter(suggestion => suggestion.products.length > 0);
           

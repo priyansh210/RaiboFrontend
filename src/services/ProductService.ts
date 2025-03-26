@@ -1,4 +1,3 @@
-
 import { supabase } from '../integrations/supabase/client';
 import { Product, Color } from '../data/products';
 
@@ -232,7 +231,7 @@ export const getSimilarProducts = async (product: Product, limit: number = 4): P
   }
 };
 
-// New function to search products
+// Search products function
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
     const searchTerm = query.toLowerCase();

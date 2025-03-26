@@ -134,7 +134,7 @@ const Cart = () => {
                           <div className="flex items-center">
                             <div className="w-16 h-16 flex-shrink-0 bg-linen overflow-hidden mr-4">
                               <img 
-                                src={item.images && item.images.length > 0 ? item.images[0] : '/placeholder.svg'} 
+                                src={item.images?.[0] || '/placeholder.svg'} 
                                 alt={item.name} 
                                 className="w-full h-full object-cover"
                               />
@@ -164,7 +164,7 @@ const Cart = () => {
                         <div className="col-span-2 md:col-span-1">
                           <div className="flex items-center justify-center">
                             <button 
-                              onClick={() => updateQuantity(item, Math.max(1, item.quantity - 1))}
+                              onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                               className="w-8 h-8 flex items-center justify-center border border-sand hover:border-terracotta text-earth hover:text-terracotta transition-colors"
                               aria-label="Decrease quantity"
                             >
@@ -172,7 +172,7 @@ const Cart = () => {
                             </button>
                             <span className="w-8 text-center mx-1">{item.quantity}</span>
                             <button 
-                              onClick={() => updateQuantity(item, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="w-8 h-8 flex items-center justify-center border border-sand hover:border-terracotta text-earth hover:text-terracotta transition-colors"
                               aria-label="Increase quantity"
                             >
@@ -185,7 +185,7 @@ const Cart = () => {
                           <div className="flex items-center justify-end">
                             <span className="font-medium text-charcoal">${(item.price * item.quantity).toFixed(2)}</span>
                             <button 
-                              onClick={() => removeFromCart(item)}
+                              onClick={() => removeFromCart(item.id)}
                               className="ml-4 text-earth hover:text-terracotta transition-colors"
                               aria-label="Remove item"
                             >

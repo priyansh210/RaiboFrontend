@@ -7,7 +7,7 @@ import { supabase } from '../integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 const SellerLogin = () => {
-  const { login, setUser, user } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,23 +25,38 @@ const SellerLogin = () => {
     setIsLoading(true);
     
     try {
-      const response = await login(email, password);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
       
-      if (response.error) {
-        console.error('Login error:', response.error);
+      if (error) {
+        console.error('Login error:', error);
         toast({
           title: "Login failed",
-          description: response.error.message || "Please check your credentials and try again.",
+          description: error.message || "Please check your credentials and try again.",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
       
       // Check if the user has a seller role
-      const { data: roleData } = await supabase
+      const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', response.data.user.id);
+        .eq('user_id', data.user.id);
+        
+      if (roleError) {
+        console.error('Role check error:', roleError);
+        toast({
+          title: "Login failed",
+          description: "Error checking permissions.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
         
       const roles = roleData?.map(r => r.role) || [];
       
@@ -54,7 +69,7 @@ const SellerLogin = () => {
         
         // Sign out the user since they don't have seller permissions
         await supabase.auth.signOut();
-        setUser(null);
+        setIsLoading(false);
         return;
       }
       
@@ -83,15 +98,19 @@ const SellerLogin = () => {
       const demoEmail = 'seller@example.com';
       const demoPassword = 'password123';
       
-      const response = await login(demoEmail, demoPassword);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      });
       
-      if (response.error) {
-        console.error('Demo login error:', response.error);
+      if (error) {
+        console.error('Demo login error:', error);
         toast({
           title: "Demo login failed",
-          description: response.error.message || "Please try again later.",
+          description: error.message || "Please try again later.",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
       
