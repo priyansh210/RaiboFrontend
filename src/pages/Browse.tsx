@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -6,7 +5,7 @@ import ProductCard from '../components/ProductCard';
 import CategoryFilter from '../components/CategoryFilter';
 import PriceRangeSlider from '../components/PriceRangeSlider';
 import { categories } from '../data/products';
-import { fetchProducts } from '../services/ProductService';
+import { fetchProducts, searchProducts } from '../services/ProductService';
 import { Filter, Grid, List, SlidersHorizontal, X } from 'lucide-react';
 import { Product } from '../data/products';
 
@@ -26,13 +25,29 @@ const Browse = () => {
   useEffect(() => {
     const getProducts = async () => {
       setIsLoading(true);
-      const productsData = await fetchProducts();
-      setProducts(productsData);
-      setIsLoading(false);
+      
+      try {
+        const query = searchParams.get('q');
+        let productsData;
+        
+        if (query) {
+          // Use search function if there's a query
+          productsData = await searchProducts(query);
+        } else {
+          // Otherwise fetch all products
+          productsData = await fetchProducts();
+        }
+        
+        setProducts(productsData);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     getProducts();
-  }, []);
+  }, [searchParams]);
   
   // Filtering products based on category parameter, search query, and active filters
   useEffect(() => {
@@ -45,20 +60,6 @@ const Browse = () => {
       result = result.filter(product => 
         product.category.toLowerCase().includes(category.toLowerCase()) ||
         product.subcategory.toLowerCase().includes(category.toLowerCase())
-      );
-    }
-    
-    // Filter by search query
-    const query = searchParams.get('q');
-    if (query) {
-      const searchTerms = query.toLowerCase().split(' ');
-      result = result.filter(product => 
-        searchTerms.some(term => 
-          product.name.toLowerCase().includes(term) ||
-          product.description.toLowerCase().includes(term) ||
-          product.brand.toLowerCase().includes(term) ||
-          product.category.toLowerCase().includes(term)
-        )
       );
     }
     

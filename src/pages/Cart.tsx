@@ -1,217 +1,230 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import Layout from '../components/Layout';
 import { useCart } from '../context/CartContext';
-import { X, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Product } from '../data/products';
+import { supabase } from '../integrations/supabase/client';
+import { useAuth } from '../context/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 const Cart = () => {
-  const { cartItems, removeFromCart, updateQuantity, cartTotals } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const subtotal = cart.reduce((sum, item) => {
+    return sum + (item.price * item.quantity);
+  }, 0);
+  
+  const shipping = subtotal > 0 ? 10 : 0;
+  const total = subtotal + shipping;
+  
+  const handleCheckout = async () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to continue with checkout.",
+        variant: "destructive",
+      });
+      navigate('/buyer/login', { state: { redirect: '/cart' } });
+      return;
+    }
+    
+    if (cart.length === 0) {
+      toast({
+        title: "Empty Cart",
+        description: "Your cart is empty. Add some products before checking out.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      // Create a new order in the database
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          buyer_id: user.id,
+          total_amount: total,
+          shipping_address: 'Default Address', // In a real app, you'd collect this from the user
+          status: 'pending'
+        })
+        .select()
+        .single();
+      
+      if (orderError) throw orderError;
+      
+      // Add individual items to the order
+      const orderItems = cart.map(item => ({
+        order_id: order.id,
+        product_id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        color: item.selectedColor?.name || null
+      }));
+      
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+      
+      if (itemsError) throw itemsError;
+      
+      // Clear the cart
+      clearCart();
+      
+      toast({
+        title: "Order Placed Successfully",
+        description: "Thank you for your purchase!",
+      });
+      
+      navigate('/checkout/success', { state: { orderId: order.id } });
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Checkout Failed",
+        description: "There was an error processing your order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   return (
     <Layout>
-      <div className="page-transition min-h-screen bg-cream py-10">
+      <div className="min-h-screen bg-cream py-12">
         <div className="container-custom">
-          <h1 className="font-playfair text-3xl md:text-4xl text-charcoal mb-8">
-            Your Cart
-          </h1>
+          <h1 className="font-playfair text-3xl md:text-4xl text-charcoal mb-8">Your Cart</h1>
           
-          {cartItems.length === 0 ? (
-            <div className="bg-white p-8 text-center rounded-sm animate-fade-in">
-              <div className="mx-auto w-16 h-16 rounded-full bg-linen flex items-center justify-center mb-4">
-                <ShoppingBag size={24} className="text-terracotta" />
+          {cart.length === 0 ? (
+            <div className="bg-white p-8 text-center">
+              <div className="flex justify-center mb-4">
+                <ShoppingBag size={64} className="text-earth" />
               </div>
               <h2 className="text-xl font-medium text-charcoal mb-2">Your cart is empty</h2>
-              <p className="text-earth mb-6">
-                Looks like you haven't added any items to your cart yet.
-              </p>
+              <p className="text-earth mb-6">Start adding items to your cart to see them here.</p>
               <Link 
-                to="/browse" 
-                className="inline-flex items-center bg-terracotta hover:bg-umber text-white py-3 px-6 transition-colors"
+                to="/browse/all" 
+                className="inline-block bg-terracotta text-white px-6 py-3 hover:bg-umber transition-colors"
               >
-                <span>Continue Shopping</span>
-                <ArrowRight size={18} className="ml-2" />
+                Start Shopping
               </Link>
             </div>
           ) : (
-            <div className="flex flex-col lg:flex-row gap-8">
-              {/* Cart Items */}
-              <div className="lg:w-2/3">
-                <div className="bg-white rounded-sm overflow-hidden animate-fade-in">
-                  <div className="hidden md:grid grid-cols-[3fr,1fr,1fr,auto] p-4 border-b border-taupe/10 bg-linen">
-                    <div className="text-sm font-medium text-charcoal">Product</div>
-                    <div className="text-sm font-medium text-charcoal text-center">Price</div>
-                    <div className="text-sm font-medium text-charcoal text-center">Quantity</div>
-                    <div className="text-sm font-medium text-charcoal text-right pr-4">Total</div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <div className="bg-white">
+                  <div className="p-4 border-b border-sand">
+                    <div className="grid grid-cols-8 gap-4">
+                      <div className="col-span-4 md:col-span-5 text-earth text-sm md:text-base">Product</div>
+                      <div className="col-span-2 md:col-span-1 text-earth text-sm md:text-base text-center">Quantity</div>
+                      <div className="col-span-2 md:col-span-2 text-earth text-sm md:text-base text-right">Subtotal</div>
+                    </div>
                   </div>
                   
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="border-b border-taupe/10 last:border-0">
-                      <div className="md:grid md:grid-cols-[3fr,1fr,1fr,auto] p-4 items-center">
-                        {/* Product */}
-                        <div className="flex mb-4 md:mb-0">
-                          <div className="w-20 h-20 flex-shrink-0 bg-linen overflow-hidden">
-                            <img 
-                              src={item.images[0]} 
-                              alt={item.name} 
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="ml-4">
-                            <Link 
-                              to={`/product/${item.id}`} 
-                              className="font-medium text-charcoal hover:text-terracotta transition-colors"
-                            >
-                              {item.name}
-                            </Link>
-                            <p className="text-sm text-earth">{item.brand}</p>
-                            <div className="flex items-center mt-1">
-                              <span className="text-sm text-earth mr-2">Color:</span>
-                              <span 
-                                className="w-4 h-4 rounded-full" 
-                                style={{ backgroundColor: item.selectedColor.code }}
-                                title={item.selectedColor.name}
+                  {cart.map((item) => (
+                    <div key={`${item.id}-${item.selectedColor?.name || 'default'}`} className="p-4 border-b border-sand">
+                      <div className="grid grid-cols-8 gap-4 items-center">
+                        <div className="col-span-4 md:col-span-5">
+                          <div className="flex items-center">
+                            <div className="w-16 h-16 flex-shrink-0 bg-linen overflow-hidden mr-4">
+                              <img 
+                                src={item.images && item.images.length > 0 ? item.images[0] : '/placeholder.svg'} 
+                                alt={item.name} 
+                                className="w-full h-full object-cover"
                               />
                             </div>
-                          </div>
-                        </div>
-                        
-                        {/* Price */}
-                        <div className="md:text-center mb-2 md:mb-0">
-                          <div className="flex justify-between md:block">
-                            <span className="text-sm font-medium text-earth md:hidden">Price:</span>
-                            <span className="text-charcoal">${item.price.toFixed(2)}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Quantity */}
-                        <div className="md:text-center mb-2 md:mb-0">
-                          <div className="flex justify-between md:justify-center items-center">
-                            <span className="text-sm font-medium text-earth md:hidden">Quantity:</span>
-                            <div className="flex items-center border border-taupe/30">
-                              <button 
-                                onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                                className="py-1 px-2 text-earth hover:text-terracotta"
-                                aria-label="Decrease quantity"
-                              >
-                                <Minus size={14} />
-                              </button>
-                              <span className="py-1 px-3 text-charcoal border-l border-r border-taupe/30">
-                                {item.quantity}
-                              </span>
-                              <button 
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="py-1 px-2 text-earth hover:text-terracotta"
-                                aria-label="Increase quantity"
-                              >
-                                <Plus size={14} />
-                              </button>
+                            <div>
+                              <h3 className="font-medium text-charcoal">{item.name}</h3>
+                              <div className="flex flex-col md:flex-row md:items-center mt-1 text-sm text-earth">
+                                <span>{item.brand}</span>
+                                {item.selectedColor && (
+                                  <>
+                                    <span className="hidden md:inline mx-2">•</span>
+                                    <div className="flex items-center mt-1 md:mt-0">
+                                      <span>Color:</span>
+                                      <span 
+                                        className="w-4 h-4 rounded-full inline-block ml-1 border border-gray-200" 
+                                        style={{ backgroundColor: item.selectedColor.code }}
+                                      ></span>
+                                      <span className="ml-1">{item.selectedColor.name}</span>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
                         
-                        {/* Total and Remove */}
-                        <div className="flex justify-between items-center md:block md:text-right">
-                          <div className="flex md:hidden justify-between w-full">
-                            <span className="text-sm font-medium text-earth">Total:</span>
-                            <span className="font-medium text-charcoal">
-                              ${(item.price * item.quantity).toFixed(2)}
-                            </span>
+                        <div className="col-span-2 md:col-span-1">
+                          <div className="flex items-center justify-center">
+                            <button 
+                              onClick={() => updateQuantity(item, Math.max(1, item.quantity - 1))}
+                              className="w-8 h-8 flex items-center justify-center border border-sand hover:border-terracotta text-earth hover:text-terracotta transition-colors"
+                              aria-label="Decrease quantity"
+                            >
+                              <Minus size={16} />
+                            </button>
+                            <span className="w-8 text-center mx-1">{item.quantity}</span>
+                            <button 
+                              onClick={() => updateQuantity(item, item.quantity + 1)}
+                              className="w-8 h-8 flex items-center justify-center border border-sand hover:border-terracotta text-earth hover:text-terracotta transition-colors"
+                              aria-label="Increase quantity"
+                            >
+                              <Plus size={16} />
+                            </button>
                           </div>
-                          <div className="hidden md:block font-medium text-charcoal mb-2">
-                            ${(item.price * item.quantity).toFixed(2)}
+                        </div>
+                        
+                        <div className="col-span-2 md:col-span-2 text-right">
+                          <div className="flex items-center justify-end">
+                            <span className="font-medium text-charcoal">${(item.price * item.quantity).toFixed(2)}</span>
+                            <button 
+                              onClick={() => removeFromCart(item)}
+                              className="ml-4 text-earth hover:text-terracotta transition-colors"
+                              aria-label="Remove item"
+                            >
+                              <X size={18} />
+                            </button>
                           </div>
-                          <button 
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-earth hover:text-terracotta transition-colors"
-                            aria-label="Remove item"
-                          >
-                            <X size={18} />
-                          </button>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                
-                {/* Continue Shopping */}
-                <div className="mt-6">
-                  <Link 
-                    to="/browse" 
-                    className="inline-flex items-center text-terracotta hover:text-umber transition-colors"
-                  >
-                    <ArrowRight size={16} className="mr-1 transform rotate-180" />
-                    <span>Continue Shopping</span>
-                  </Link>
-                </div>
               </div>
               
-              {/* Order Summary */}
-              <div className="lg:w-1/3">
-                <div className="bg-white p-6 rounded-sm animate-fade-in">
-                  <h2 className="font-medium text-xl text-charcoal mb-6">Order Summary</h2>
+              <div className="lg:col-span-1">
+                <div className="bg-white p-6">
+                  <h2 className="text-xl font-medium text-charcoal mb-4">Order Summary</h2>
                   
                   <div className="space-y-3 mb-6">
-                    <div className="flex justify-between">
-                      <span className="text-earth">Subtotal</span>
-                      <span className="text-charcoal">${cartTotals.subtotal.toFixed(2)}</span>
+                    <div className="flex justify-between text-earth">
+                      <span>Subtotal</span>
+                      <span>${subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-earth">Shipping</span>
-                      {cartTotals.shipping === 0 ? (
-                        <span className="text-green-600">Free</span>
-                      ) : (
-                        <span className="text-charcoal">${cartTotals.shipping.toFixed(2)}</span>
-                      )}
+                    <div className="flex justify-between text-earth">
+                      <span>Shipping</span>
+                      <span>${shipping.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-earth">Tax</span>
-                      <span className="text-charcoal">${cartTotals.tax.toFixed(2)}</span>
-                    </div>
-                    <div className="border-t border-taupe/10 pt-3 flex justify-between font-medium">
-                      <span className="text-charcoal">Total</span>
-                      <span className="text-charcoal">${cartTotals.total.toFixed(2)}</span>
+                    <div className="pt-3 border-t border-sand flex justify-between font-medium text-charcoal">
+                      <span>Total</span>
+                      <span>${total.toFixed(2)}</span>
                     </div>
                   </div>
                   
-                  {/* Promo Code */}
-                  <div className="mb-6">
-                    <label htmlFor="promo-code" className="block text-sm text-earth mb-2">
-                      Promo Code
-                    </label>
-                    <div className="flex">
-                      <input
-                        id="promo-code"
-                        type="text"
-                        placeholder="Enter code"
-                        className="flex-grow py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                      />
-                      <button className="bg-sand hover:bg-taupe text-charcoal hover:text-white py-2 px-4 transition-colors">
-                        Apply
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {/* Checkout Button */}
-                  <Link 
-                    to="/checkout" 
-                    className="block w-full bg-terracotta hover:bg-umber text-white py-3 px-4 text-center transition-colors"
+                  <button
+                    onClick={handleCheckout}
+                    disabled={isLoading || cart.length === 0}
+                    className="w-full bg-terracotta hover:bg-umber text-white py-3 transition-colors disabled:opacity-50"
                   >
-                    Proceed to Checkout
-                  </Link>
-                  
-                  {/* Additional Info */}
-                  <div className="mt-6 text-xs text-earth space-y-2">
-                    <p>
-                      Free shipping on orders over $1,000
-                    </p>
-                    <p>
-                      30-day return policy for most items
-                    </p>
-                    <p>
-                      Taxes calculated at checkout based on delivery address
-                    </p>
-                  </div>
+                    {isLoading ? 'Processing...' : 'Proceed to Checkout'}
+                  </button>
                 </div>
               </div>
             </div>

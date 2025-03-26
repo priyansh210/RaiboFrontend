@@ -1,6 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import Layout from '../components/Layout';
 import BrandSlider from '../components/BrandSlider';
 import ProductCard from '../components/ProductCard';
@@ -8,7 +9,6 @@ import FeaturedBanner from '../components/FeaturedBanner';
 import { brands } from '../data/products';
 import { fetchProducts } from '../services/ProductService';
 import { Product } from '../data/products';
-import { ArrowRight } from 'lucide-react';
 
 const Index = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -19,7 +19,7 @@ const Index = () => {
       setIsLoading(true);
       try {
         const products = await fetchProducts();
-        // Filter featured products
+        // Filter featured products from the database
         const featured = products.filter(product => product.featured);
         setFeaturedProducts(featured);
       } catch (error) {
@@ -31,160 +31,151 @@ const Index = () => {
     
     loadProducts();
   }, []);
-
-  // Predefined category links
-  const categories = [
-    { name: 'Furniture', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=2070&auto=format&fit=crop', slug: 'furniture' },
-    { name: 'Decor', image: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=1974&auto=format&fit=crop', slug: 'decor' },
-    { name: 'Lighting', image: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?q=80&w=2070&auto=format&fit=crop', slug: 'lighting' },
-    { name: 'Textiles', image: 'https://images.unsplash.com/photo-1620332372374-f108c53d2e03?q=80&w=1974&auto=format&fit=crop', slug: 'textiles' },
-  ];
   
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="min-h-[80vh] bg-cream relative flex items-center">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-charcoal/40 to-transparent z-10"></div>
-          <img 
-            src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2832&auto=format&fit=crop"
-            alt="Modern living room with stylish furniture" 
-            className="w-full h-full object-cover"
-          />
-        </div>
+      <div className="page-transition">
+        {/* Hero Section */}
+        <section className="min-h-[70vh] bg-cream flex items-center">
+          <div className="container-custom grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-16">
+            <div>
+              <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl text-charcoal leading-tight">
+                Elevate your space with artisanal home goods
+              </h1>
+              <p className="text-earth mt-4 text-lg max-w-xl">
+                Discover a curated collection of handcrafted furniture and décor that brings warmth and character to your home.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Link
+                  to="/browse/all"
+                  className="bg-charcoal text-white px-8 py-3 hover:bg-umber transition-colors shadow-sm"
+                >
+                  Browse Collection
+                </Link>
+                <Link
+                  to="/about"
+                  className="bg-transparent text-charcoal border border-charcoal px-8 py-3 hover:bg-sand transition-colors"
+                >
+                  Our Story
+                </Link>
+              </div>
+            </div>
+            <div className="relative">
+              <img
+                src="https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=1587&auto=format&fit=crop"
+                alt="Stylish living room"
+                className="rounded-sm shadow-lg"
+              />
+              <div className="absolute -top-4 -left-4 w-24 h-24 bg-terracotta rounded-sm opacity-40 -z-10"></div>
+              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-olive rounded-sm opacity-20 -z-10"></div>
+            </div>
+          </div>
+        </section>
         
-        <div className="container-custom relative z-20">
-          <div className="max-w-xl">
-            <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl text-white leading-tight mb-4">
-              Curated Home Essentials for Modern Living
-            </h1>
-            <p className="text-white/90 text-lg mb-8">
-              Discover thoughtfully designed furniture and decor that combines beauty with functionality.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link 
-                to="/browse" 
-                className="bg-terracotta hover:bg-umber transition-colors text-white px-8 py-3"
-              >
-                Shop Now
-              </Link>
-              <Link 
-                to="/for-you" 
-                className="bg-transparent border border-white hover:bg-white/10 transition-colors text-white px-8 py-3"
-              >
-                Personalized Recommendations
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Featured Products Section */}
-      <section className="py-20 bg-linen">
-        <div className="container-custom">
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="font-playfair text-3xl text-charcoal">Featured Products</h2>
-            <Link 
-              to="/browse" 
-              className="text-terracotta hover:text-umber transition-colors flex items-center"
-            >
-              View All <ArrowRight size={16} className="ml-2" />
-            </Link>
-          </div>
-          
-          {isLoading ? (
-            <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta mx-auto mb-4"></div>
-              <p className="text-earth">Loading featured products...</p>
-            </div>
-          ) : featuredProducts.length > 0 ? (
-            <div className="product-grid">
-              {featuredProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-white">
-              <p className="text-earth">No featured products available at the moment.</p>
-              <Link 
-                to="/browse" 
-                className="mt-4 inline-block text-terracotta hover:text-umber transition-colors"
-              >
-                Browse all products
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
-      
-      {/* Featured Banner */}
-      <FeaturedBanner />
-      
-      {/* Categories Section */}
-      <section className="py-20 bg-cream">
-        <div className="container-custom">
-          <h2 className="font-playfair text-3xl text-charcoal mb-10 text-center">Shop by Category</h2>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {categories.map((category, index) => (
-              <Link 
-                key={index}
-                to={`/browse/${category.slug}`} 
-                className="group"
-              >
-                <div className="aspect-square relative overflow-hidden">
-                  <div className="absolute inset-0 bg-charcoal/20 group-hover:bg-charcoal/30 transition-colors z-10"></div>
-                  <img 
-                    src={category.image} 
-                    alt={category.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        {/* Featured Categories */}
+        <section className="py-16 bg-white">
+          <div className="container-custom">
+            <h2 className="font-playfair text-3xl text-charcoal text-center mb-12">Explore Our Categories</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Link to="/browse/furniture" className="category-card">
+                <div className="aspect-square bg-linen relative overflow-hidden group">
+                  <img
+                    src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1916&auto=format&fit=crop"
+                    alt="Furniture"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <span className="text-xl font-medium text-white">{category.name}</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/50 to-transparent flex items-end p-6">
+                    <div>
+                      <h3 className="text-white text-xl font-medium">Furniture</h3>
+                      <p className="text-white/80 text-sm mt-1">45 products</p>
+                    </div>
                   </div>
                 </div>
               </Link>
-            ))}
+              
+              <Link to="/browse/decor" className="category-card">
+                <div className="aspect-square bg-linen relative overflow-hidden group">
+                  <img
+                    src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=1740&auto=format&fit=crop"
+                    alt="Decor"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/50 to-transparent flex items-end p-6">
+                    <div>
+                      <h3 className="text-white text-xl font-medium">Decor</h3>
+                      <p className="text-white/80 text-sm mt-1">31 products</p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+              
+              <Link to="/browse/lighting" className="category-card">
+                <div className="aspect-square bg-linen relative overflow-hidden group">
+                  <img
+                    src="https://images.unsplash.com/photo-1540932239986-30128078f3c5?q=80&w=1587&auto=format&fit=crop"
+                    alt="Lighting"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/50 to-transparent flex items-end p-6">
+                    <div>
+                      <h3 className="text-white text-xl font-medium">Lighting</h3>
+                      <p className="text-white/80 text-sm mt-1">18 products</p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
-      
-      {/* Brand Partners Section */}
-      <section className="py-16 bg-white">
-        <div className="container-custom">
-          <h2 className="text-center font-playfair text-2xl text-charcoal mb-12">Our Brand Partners</h2>
-          <BrandSlider brands={brands} />
-        </div>
-      </section>
-      
-      {/* Newsletter Section */}
-      <section className="py-20 bg-olive text-white">
-        <div className="container-custom">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="font-playfair text-3xl mb-4">Join Our Newsletter</h2>
-            <p className="mb-8 text-white/80">Stay updated with the latest product arrivals, special offers and seasonal sales.</p>
-            
-            <form className="flex flex-col sm:flex-row gap-3">
-              <input 
-                type="email" 
-                placeholder="Your email address" 
-                className="flex-grow px-4 py-3 bg-white/10 border border-white/20 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"
-                required
-              />
-              <button 
-                type="submit"
-                className="bg-cream text-olive hover:bg-linen transition-colors px-6 py-3 font-medium"
+        </section>
+        
+        {/* Featured Products */}
+        <section className="py-16 bg-cream">
+          <div className="container-custom">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+              <h2 className="font-playfair text-3xl text-charcoal">Featured Products</h2>
+              <Link 
+                to="/browse/all" 
+                className="group flex items-center mt-2 md:mt-0 text-terracotta"
               >
-                Subscribe
-              </button>
-            </form>
+                View all products 
+                <ArrowRight size={16} className="ml-2 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
             
-            <p className="mt-4 text-sm text-white/60">
-              By subscribing you agree to our Privacy Policy. You can unsubscribe at any time.
-            </p>
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta"></div>
+              </div>
+            ) : featuredProducts.length > 0 ? (
+              <div className="product-grid">
+                {featuredProducts.slice(0, 4).map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-white">
+                <p className="text-earth">No featured products available at the moment.</p>
+              </div>
+            )}
           </div>
-        </div>
-      </section>
+        </section>
+        
+        {/* Featured Banner */}
+        <FeaturedBanner 
+          title="Handcrafted Excellence" 
+          imageSrc="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1932&auto=format&fit=crop" 
+          link="/browse/furniture"
+        />
+        
+        {/* Brand Slider */}
+        <section className="py-16 bg-white">
+          <div className="container-custom">
+            <h2 className="font-playfair text-2xl text-charcoal text-center mb-8">Our Brands</h2>
+            <BrandSlider brands={brands} />
+          </div>
+        </section>
+      </div>
     </Layout>
   );
 };
