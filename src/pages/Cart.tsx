@@ -134,7 +134,7 @@ const Cart = () => {
                           <div className="flex items-center">
                             <div className="w-16 h-16 flex-shrink-0 bg-linen overflow-hidden mr-4">
                               <img 
-                                src={item.images?.[0] || '/placeholder.svg'} 
+                                src={item.image} 
                                 alt={item.name} 
                                 className="w-full h-full object-cover"
                               />
@@ -142,19 +142,15 @@ const Cart = () => {
                             <div>
                               <h3 className="font-medium text-charcoal">{item.name}</h3>
                               <div className="flex flex-col md:flex-row md:items-center mt-1 text-sm text-earth">
-                                <span>{item.brand}</span>
                                 {item.selectedColor && (
-                                  <>
-                                    <span className="hidden md:inline mx-2">•</span>
-                                    <div className="flex items-center mt-1 md:mt-0">
-                                      <span>Color:</span>
-                                      <span 
-                                        className="w-4 h-4 rounded-full inline-block ml-1 border border-gray-200" 
-                                        style={{ backgroundColor: item.selectedColor.code }}
-                                      ></span>
-                                      <span className="ml-1">{item.selectedColor.name}</span>
-                                    </div>
-                                  </>
+                                  <div className="flex items-center mt-1 md:mt-0">
+                                    <span>Color:</span>
+                                    <span 
+                                      className="w-4 h-4 rounded-full inline-block ml-1 border border-gray-200" 
+                                      style={{ backgroundColor: item.selectedColor.code }}
+                                    ></span>
+                                    <span className="ml-1">{item.selectedColor.name}</span>
+                                  </div>
                                 )}
                               </div>
                             </div>
