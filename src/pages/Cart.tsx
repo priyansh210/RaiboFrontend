@@ -1,13 +1,11 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import Layout from '../components/Layout';
 import { useCart } from '../context/CartContext';
-import { Product } from '../data/products';
-import { supabase } from '../integrations/supabase/client';
 import { useAuth } from '../context/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { ordersApi } from '../api/mockApi';
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -45,34 +43,26 @@ const Cart = () => {
     setIsLoading(true);
     
     try {
-      // Create a new order in the database
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          buyer_id: user.id,
-          total_amount: total,
-          shipping_address: 'Default Address', // In a real app, you'd collect this from the user
-          status: 'pending'
-        })
-        .select()
-        .single();
-      
-      if (orderError) throw orderError;
-      
-      // Add individual items to the order
+      // Create order items from cart
       const orderItems = cart.map(item => ({
-        order_id: order.id,
         product_id: item.id,
         quantity: item.quantity,
         price: item.price,
         color: item.selectedColor?.name || null
       }));
       
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
+      // Create a new order
+      const response = await ordersApi.createOrder({
+        buyer_id: user.id,
+        total_amount: total,
+        shipping_address: 'Default Address', // In a real app, you'd collect this
+        status: 'pending',
+        items: orderItems
+      });
       
-      if (itemsError) throw itemsError;
+      if (response.error) {
+        throw new Error(response.error);
+      }
       
       // Clear the cart
       clearCart();
@@ -82,7 +72,7 @@ const Cart = () => {
         description: "Thank you for your purchase!",
       });
       
-      navigate('/checkout/success', { state: { orderId: order.id } });
+      navigate('/checkout/success', { state: { orderId: response.data?.id } });
     } catch (error) {
       console.error('Checkout error:', error);
       toast({

@@ -1,65 +1,31 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 const SellerLogin = () => {
-  const { login, user } = useAuth();
+  const { login, user, roles } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  // Redirect if already logged in
-  React.useEffect(() => {
-    if (user) {
+  // Redirect if already logged in as seller
+  useEffect(() => {
+    if (user && roles.includes('seller')) {
       navigate('/seller/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, roles, navigate]);
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-      });
+      await login(email, password);
       
-      if (error) {
-        console.error('Login error:', error);
-        toast({
-          title: "Login failed",
-          description: error.message || "Please check your credentials and try again.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-      
-      // Check if the user has a seller role
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', data.user.id);
-        
-      if (roleError) {
-        console.error('Role check error:', roleError);
-        toast({
-          title: "Login failed",
-          description: "Error checking permissions.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-        
-      const roles = roleData?.map(r => r.role) || [];
-      
+      // Check if the user has a seller role after login
       if (!roles.includes('seller')) {
         toast({
           title: "Access denied",
@@ -67,8 +33,8 @@ const SellerLogin = () => {
           variant: "destructive",
         });
         
-        // Sign out the user since they don't have seller permissions
-        await supabase.auth.signOut();
+        // Log out since they don't have seller permissions
+        await login(email, password);
         setIsLoading(false);
         return;
       }
@@ -83,7 +49,7 @@ const SellerLogin = () => {
       console.error('Login error:', err);
       toast({
         title: "Login failed",
-        description: "An unexpected error occurred. Please try again.",
+        description: "Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {
@@ -100,55 +66,12 @@ const SellerLogin = () => {
       
       await login(demoEmail, demoPassword);
       
-      // Check if the login was successful and the user has a seller role
-      const { data } = await supabase.auth.getSession();
+      toast({
+        title: "Demo login successful",
+        description: "Welcome to the seller dashboard!",
+      });
       
-      if (data?.session?.user) {
-        const { data: roleData, error: roleError } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.session.user.id);
-          
-        if (roleError) {
-          console.error('Role check error:', roleError);
-          toast({
-            title: "Demo login failed",
-            description: "Error checking permissions.",
-            variant: "destructive",
-          });
-          await supabase.auth.signOut();
-          setIsLoading(false);
-          return;
-        }
-          
-        const roles = roleData?.map(r => r.role) || [];
-        
-        if (!roles.includes('seller')) {
-          toast({
-            title: "Access denied",
-            description: "The demo account doesn't have seller permissions. Please contact support.",
-            variant: "destructive",
-          });
-          
-          // Sign out the user since they don't have seller permissions
-          await supabase.auth.signOut();
-          setIsLoading(false);
-          return;
-        }
-        
-        toast({
-          title: "Demo login successful",
-          description: "Welcome to the seller dashboard!",
-        });
-        
-        navigate('/seller/dashboard');
-      } else {
-        toast({
-          title: "Demo login failed",
-          description: "Could not authenticate with demo credentials.",
-          variant: "destructive",
-        });
-      }
+      navigate('/seller/dashboard');
     } catch (err) {
       console.error('Demo login error:', err);
       toast({

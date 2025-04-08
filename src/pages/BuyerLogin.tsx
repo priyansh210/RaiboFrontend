@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -54,18 +53,6 @@ const BuyerLogin = () => {
     } catch (err) {
       setError((err as Error).message || 'Failed to log in. Please try again.');
     }
-  };
-  
-  const handleGoogleLogin = async () => {
-    try {
-      await googleLogin();
-    } catch (err) {
-      setError((err as Error).message || 'Failed to log in with Google. Please try again.');
-    }
-  };
-  
-  const toggleShowPassword = () => {
-    setShowPassword(!showPassword);
   };
   
   // Demo login

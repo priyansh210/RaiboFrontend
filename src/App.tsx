@@ -18,7 +18,6 @@ import SellerRegister from "./pages/SellerRegister";
 import ForYou from "./pages/ForYou";
 import NotFound from "./pages/NotFound";
 import SellerDashboard from "./pages/SellerDashboard";
-import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -37,9 +36,7 @@ const App = () => (
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-              
-              {/* Authentication Routes */}
-              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/checkout/success" element={<Checkout />} />
               
               {/* Buyer Authentication Routes */}
               <Route path="/buyer/login" element={<BuyerLogin />} />
