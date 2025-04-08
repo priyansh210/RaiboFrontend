@@ -1,49 +1,119 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { supabase } from '../integrations/supabase/client';
+import { STORAGE_KEYS } from '../api/config';
 import { toast } from '@/hooks/use-toast';
-import { authApi } from '../api/mockApi';
-import { AuthUser } from '../api/types';
 
-interface AuthContextType {
-  user: AuthUser | null;
+// Auth user type
+export interface AuthUser {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
   roles: string[];
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  googleLogin: () => Promise<void>;
-  register: (email: string, password: string, role: 'buyer' | 'seller') => Promise<void>;
-  logout: () => Promise<void>;
 }
 
-// Create the context
+// Auth context type
+export interface AuthContextType {
+  user: AuthUser | null;
+  profile: any | null; // Profile data
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  roles: string[];
+  login: (email: string, password: string) => Promise<void>;
+  register: (firstName: string, lastName: string, email: string) => Promise<void>;
+  logout: () => Promise<void>;
+  googleLogin: () => Promise<void>;
+  isBuyer: boolean;
+  isSeller: boolean;
+  isAdmin: boolean;
+}
+
+// Create the auth context
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  roles: [],
+  profile: null,
   isAuthenticated: false,
   isLoading: true,
+  roles: [],
   login: async () => {},
-  googleLogin: async () => {},
   register: async () => {},
   logout: async () => {},
+  googleLogin: async () => {},
+  isBuyer: false,
+  isSeller: false,
+  isAdmin: false
 });
 
-// Hook to use the auth context
-export const useAuth = () => useContext(AuthContext);
-
-// Provider component
+// Auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [roles, setRoles] = useState<string[]>([]);
+  
+  // Get user roles helper
+  const getUserRoles = (user: AuthUser) => {
+    return user.roles || [];
+  };
   
   // Initialize auth state
   useEffect(() => {
     const initAuth = async () => {
       setIsLoading(true);
+      
       try {
-        const response = await authApi.getCurrentUser();
-        if (response.data) {
-          setUser(response.data);
+        // Set up auth state listener
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (event, session) => {
+            const userData = session?.user ? {
+              id: session.user.id,
+              email: session.user.email || '',
+              firstName: session.user.firstName,
+              lastName: session.user.lastName,
+              roles: session.user.roles
+            } : null;
+            
+            setUser(userData);
+            
+            if (userData) {
+              setRoles(getUserRoles(userData));
+              setProfile({
+                first_name: userData.firstName,
+                last_name: userData.lastName,
+                email: userData.email,
+              });
+            } else {
+              setRoles([]);
+              setProfile(null);
+            }
+          }
+        );
+        
+        // Check for existing session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          const userData = {
+            id: session.user.id,
+            email: session.user.email || '',
+            firstName: session.user.firstName,
+            lastName: session.user.lastName,
+            roles: session.user.roles
+          };
+          
+          setUser(userData);
+          setRoles(getUserRoles(userData));
+          setProfile({
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            email: userData.email,
+          });
         }
+        
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (error) {
         console.error('Error initializing auth:', error);
       } finally {
@@ -56,120 +126,114 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Login function
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
     try {
-      const response = await authApi.login({ email, password });
-      
-      if (response.error) {
-        toast({
-          title: "Login Failed",
-          description: response.error,
-          variant: "destructive",
-        });
-        throw new Error(response.error);
-      }
-      
-      if (response.data) {
-        setUser(response.data);
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!",
-        });
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Google login (simulated)
-  const googleLogin = async () => {
-    setIsLoading(true);
-    try {
-      toast({
-        title: "Google Login",
-        description: "This would redirect to Google in a real application",
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
       
-      // Simulate successful login after a delay
-      setTimeout(async () => {
-        await login("buyer@example.com", "password123");
-      }, 1000);
-    } catch (error) {
-      console.error('Google login error:', error);
-      throw error;
+      if (error) throw new Error(error.message);
+      
+      return;
+    } catch (error: any) {
+      console.error('Login error:', error);
+      throw new Error(error.message || 'Failed to login');
     }
   };
   
   // Register function
-  const register = async (email: string, password: string, role: 'buyer' | 'seller') => {
-    setIsLoading(true);
+  const register = async (firstName: string, lastName: string, email: string) => {
     try {
-      const response = await authApi.register({ 
-        email, 
-        password, 
-        role
+      // Create a random password for demo purposes (in a real app, you'd collect this from the user)
+      const password = `Password${Math.floor(Math.random() * 1000)}!`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            role: 'buyer'
+          }
+        }
       });
       
-      if (response.error) {
-        toast({
-          title: "Registration Failed",
-          description: response.error,
-          variant: "destructive",
-        });
-        throw new Error(response.error);
-      }
+      if (error) throw new Error(error.message);
       
-      if (response.data) {
-        setUser(response.data);
-        toast({
-          title: "Registration Successful",
-          description: "Your account has been created!",
-        });
-      }
-    } catch (error) {
+      toast({
+        title: "Account created successfully",
+        description: "You have been automatically logged in.",
+      });
+      
+      return;
+    } catch (error: any) {
       console.error('Registration error:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
+      throw new Error(error.message || 'Failed to register');
     }
   };
   
   // Logout function
   const logout = async () => {
-    setIsLoading(true);
     try {
-      await authApi.logout();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw new Error(error.message);
+      
+      // Reset auth state
       setUser(null);
+      setRoles([]);
+      setProfile(null);
       
       toast({
-        title: "Logged Out",
-        description: "You have been logged out successfully",
+        title: "Logged out successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Logout error:', error);
-    } finally {
-      setIsLoading(false);
+      throw new Error(error.message || 'Failed to logout');
     }
   };
   
-  // Context value
-  const value = {
-    user,
-    roles: user?.roles || [],
-    isAuthenticated: !!user,
-    isLoading,
-    login,
-    googleLogin,
-    register,
-    logout,
+  // Google login function
+  const googleLogin = async () => {
+    try {
+      // In a mock implementation, just create a demo user
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: 'google-user@example.com',
+        password: 'password123'
+      });
+      
+      if (error) throw new Error(error.message);
+      
+      return;
+    } catch (error: any) {
+      console.error('Google login error:', error);
+      throw new Error(error.message || 'Failed to login with Google');
+    }
   };
   
+  const isBuyer = roles.includes('buyer');
+  const isSeller = roles.includes('seller');
+  const isAdmin = roles.includes('admin');
+  
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{
+      user,
+      profile,
+      isAuthenticated: !!user,
+      isLoading,
+      roles,
+      login,
+      register,
+      logout,
+      googleLogin,
+      isBuyer,
+      isSeller,
+      isAdmin
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+// Hook to use auth context
+export const useAuth = () => useContext(AuthContext);

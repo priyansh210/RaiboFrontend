@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
@@ -10,6 +11,8 @@ const SellerLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
   
   // Redirect if already logged in as seller
   useEffect(() => {
@@ -34,7 +37,6 @@ const SellerLogin = () => {
         });
         
         // Log out since they don't have seller permissions
-        await login(email, password);
         setIsLoading(false);
         return;
       }
@@ -47,6 +49,7 @@ const SellerLogin = () => {
       navigate('/seller/dashboard');
     } catch (err) {
       console.error('Login error:', err);
+      setError((err as Error).message || 'Please check your credentials and try again.');
       toast({
         title: "Login failed",
         description: "Please check your credentials and try again.",
@@ -74,6 +77,7 @@ const SellerLogin = () => {
       navigate('/seller/dashboard');
     } catch (err) {
       console.error('Demo login error:', err);
+      setError((err as Error).message || 'An unexpected error occurred. Please try again later.');
       toast({
         title: "Demo login failed",
         description: "An unexpected error occurred. Please try again later.",
@@ -84,6 +88,10 @@ const SellerLogin = () => {
     }
   };
   
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+  
   return (
     <div className="min-h-screen bg-cream py-16 px-4 flex items-center justify-center">
       <div className="bg-white p-8 rounded-sm shadow-sm max-w-md w-full">
@@ -91,6 +99,12 @@ const SellerLogin = () => {
           <h1 className="font-playfair text-2xl text-charcoal mb-2">Seller Login</h1>
           <p className="text-earth text-sm">Sign in to access your seller dashboard</p>
         </div>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-sm flex items-center">
+            <span>{error}</span>
+          </div>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -119,7 +133,7 @@ const SellerLogin = () => {
               </div>
               <input
                 id="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-sand focus:border-terracotta focus:outline-none"

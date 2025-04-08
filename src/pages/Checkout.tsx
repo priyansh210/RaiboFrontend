@@ -5,12 +5,11 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import { toast } from '@/hooks/use-toast';
-import { Button } from "@/components/ui/button"
-import { supabase } from '../integrations/supabase/client';
+import { Button } from "@/components/ui/button";
 
 const Checkout = () => {
   const { cart, cartItems, total, clearCart } = useCart();
-  const { user, profile, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -26,18 +25,9 @@ const Checkout = () => {
     if (!isAuthenticated) {
       navigate('/buyer/login', { state: { from: '/checkout' } });
     }
-    
-    // Pre-fill with user profile data if available
-    if (profile) {
-      setShippingAddress(profile.address || '');
-      setCity(profile.city || '');
-      setState(profile.state || '');
-      setZipCode(profile.zip || '');
-      setCountry(profile.country || 'USA');
-    }
-  }, [isAuthenticated, navigate, profile]);
+  }, [isAuthenticated, navigate]);
 
-  const fullName = profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : '';
+  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
 
   const handleSubmit = async () => {
     if (cartItems.length === 0) {
@@ -64,41 +54,15 @@ const Checkout = () => {
     const formattedAddress = `${shippingAddress}, ${city}, ${state} ${zipCode}, ${country}`;
 
     try {
-      // Create order in Supabase
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          buyer_id: user?.id,
-          total_amount: total,
-          shipping_address: formattedAddress,
-          status: 'pending'
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Create order items
-      const orderItems = cartItems.map(item => ({
-        order_id: order.id,
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-        color: item.selectedColor?.name || null
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
-      toast({
-        title: "Order confirmed!",
-        description: "Thank you! Your order has been successfully placed.",
-      });
-      clearCart();
-      navigate('/');
+      // Simulate order creation
+      setTimeout(() => {
+        toast({
+          title: "Order confirmed!",
+          description: "Thank you! Your order has been successfully placed.",
+        });
+        clearCart();
+        navigate('/');
+      }, 1500);
     } catch (error: any) {
       console.error("Checkout error:", error);
       setErrorMessage('Failed to process your order. Please try again.');
@@ -107,7 +71,6 @@ const Checkout = () => {
         description: errorMessage || 'Failed to process your order. Please try again.',
         variant: "destructive",
       });
-    } finally {
       setIsSubmitting(false);
     }
   };

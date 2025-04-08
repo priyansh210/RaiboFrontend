@@ -1,72 +1,60 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
-const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-});
 
 const BuyerLogin = () => {
-  const { login, googleLogin, isAuthenticated, isLoading, roles } = useAuth();
+  const { login, isLoading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
   // Get the redirect URL from the location state or default to home
   const from = (location.state as any)?.from || '/';
   
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
+  // If already logged in, redirect to home
   useEffect(() => {
-    // If already authenticated and has buyer role, redirect to home
-    if (isAuthenticated && roles.includes('buyer')) {
-      navigate(from, { replace: true });
+    if (isAuthenticated) {
+      navigate('/', { replace: true });
     }
-    // If authenticated but is a seller, redirect to seller dashboard
-    else if (isAuthenticated && roles.includes('seller')) {
-      navigate('/seller/dashboard', { replace: true });
-    }
-  }, [isAuthenticated, roles, navigate, from]);
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  }, [isAuthenticated, navigate]);
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError('');
     
     try {
-      await login(values.email, values.password);
-      // The redirect will happen in useEffect when auth state changes
+      await login(email, password);
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in.",
+      });
+      navigate(from, { replace: true });
     } catch (err) {
       setError((err as Error).message || 'Failed to log in. Please try again.');
     }
   };
   
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+  
   // Demo login
   const handleDemoLogin = async () => {
-    form.setValue("email", "buyer@example.com");
-    form.setValue("password", "password123");
-    
     try {
-      await login("buyer@example.com", "password123");
+      await login('buyer@example.com', 'password123');
       toast({
         title: "Demo Login Successful",
-        description: "You've been logged in with demo buyer credentials.",
+        description: "You've been logged in with demo credentials.",
       });
-      // The redirect will happen in useEffect when auth state changes
+      navigate(from, { replace: true });
     } catch (err) {
       setError((err as Error).message || 'Failed to log in. Please try again.');
     }
@@ -86,74 +74,64 @@ const BuyerLogin = () => {
               </div>
             )}
             
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-earth">Email address</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="email" 
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm text-earth mb-1">
+                  Email address
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
+                  required
                 />
-                
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm text-earth">Password</FormLabel>
-                      <div className="relative">
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type={showPassword ? 'text' : 'password'} 
-                            className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
-                          />
-                        </FormControl>
-                        <button
-                          type="button"
-                          onClick={toggleShowPassword}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-earth"
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        >
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="flex justify-between items-center">
-                  <label className="flex items-center text-sm text-earth">
-                    <input type="checkbox" className="mr-2" />
-                    <span>Remember me</span>
-                  </label>
-                  
-                  <Link to="/forgot-password" className="text-sm text-terracotta hover:underline">
-                    Forgot password?
-                  </Link>
+              </div>
+              
+              <div>
+                <label htmlFor="password" className="block text-sm text-earth mb-1">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleShowPassword}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-earth"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <label className="flex items-center text-sm text-earth">
+                  <input type="checkbox" className="mr-2" />
+                  <span>Remember me</span>
+                </label>
                 
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-terracotta hover:bg-umber text-white py-2 transition-colors disabled:bg-taupe"
-                >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
-                </button>
-              </form>
-            </Form>
+                <Link to="/forgot-password" className="text-sm text-terracotta hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-terracotta hover:bg-umber text-white py-2 transition-colors disabled:bg-taupe"
+              >
+                {isLoading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
             
             <div className="mt-6">
               <div className="relative flex items-center justify-center">
@@ -163,27 +141,12 @@ const BuyerLogin = () => {
                 </span>
               </div>
               
-              <div className="mt-4 space-y-2">
-                <button
-                  onClick={handleGoogleLogin}
-                  className="w-full py-2 border border-gray-300 flex justify-center items-center space-x-2 hover:bg-gray-50 transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 186.69 190.5">
-                    <g transform="translate(1184.583 765.171)">
-                      <path d="M-1089.333-687.239v36.888h51.262c-2.251 11.863-9.006 21.908-19.137 28.662l30.913 23.986c18.011-16.625 28.402-41.044 28.402-70.052 0-6.754-.606-13.249-1.732-19.483z" fill="#4285f4"/>
-                      <path d="M-1142.714-651.791l-6.972 5.337-24.679 19.223h0c15.673 31.086 47.796 52.561 85.03 52.561 25.717 0 47.278-8.486 63.038-23.033l-30.913-23.986c-8.486 5.715-19.31 9.179-32.125 9.179-24.765 0-45.806-16.712-53.34-39.226z" fill="#34a853"/>
-                      <path d="M-1174.365-712.61c-6.494 12.815-10.217 27.276-10.217 42.689s3.723 29.874 10.217 42.689c0 .086 31.693-24.592 31.693-24.592-1.905-5.715-3.031-11.776-3.031-18.098s1.126-12.383 3.031-18.098z" fill="#fbbc05"/>
-                      <path d="M-1089.333-727.244c14.028 0 26.497 4.849 36.455 14.201l27.276-27.276c-16.539-15.413-38.013-24.852-63.731-24.852-37.234 0-69.359 21.388-85.032 52.561l31.692 24.592c7.533-22.514 28.575-39.226 53.34-39.226z" fill="#ea4335"/>
-                    </g>
-                  </svg>
-                  <span>Sign in with Google</span>
-                </button>
-                
+              <div className="mt-4">
                 <button
                   onClick={handleDemoLogin}
                   className="w-full py-2 border border-charcoal text-charcoal hover:bg-linen transition-colors"
                 >
-                  Demo Buyer Account
+                  Demo Account
                 </button>
               </div>
             </div>
@@ -194,11 +157,11 @@ const BuyerLogin = () => {
                 Create one
               </Link>
             </div>
-
+            
             <div className="mt-4 text-center text-sm text-earth">
               Are you a seller?{' '}
               <Link to="/seller/login" className="text-terracotta hover:underline">
-                Login as Seller
+                Seller Login
               </Link>
             </div>
           </div>
