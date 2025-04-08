@@ -1,16 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const location = useLocation();
   const { cart: cartItems } = useCart();
   const { isAuthenticated } = useAuth();
+  const isMobile = useIsMobile();
 
   const categories = [
     { name: 'FURNITURE', path: '/browse/furniture' },
@@ -48,6 +51,10 @@ const Navbar: React.FC = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const toggleCategories = () => {
+    setIsCategoriesOpen(!isCategoriesOpen);
+  };
+
   return (
     <header 
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -55,18 +62,18 @@ const Navbar: React.FC = () => {
       }`}
     >
       <div className="container-custom">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link 
             to="/" 
-            className={`font-playfair text-3xl font-bold tracking-wider ${
+            className={`font-playfair text-2xl md:text-3xl font-bold tracking-wider ${
               isScrolled ? 'text-terracotta' : 'text-white'
             } transition-colors`}
           >
             RAIBO
           </Link>
 
-          {/* Search Bar */}
+          {/* Search Bar for desktop */}
           <div className="hidden md:flex relative flex-grow max-w-md mx-4">
             <input
               type="text"
@@ -87,21 +94,34 @@ const Navbar: React.FC = () => {
               For You
             </Link>
             
-            {isAuthenticated ? (
-              <Link 
-                to="/account" 
-                className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+            <div className="relative group">
+              <button 
+                className={`flex items-center ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
               >
-                <User size={20} />
-              </Link>
-            ) : (
-              <Link 
-                to="/buyer/login" 
-                className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
-              >
-                <User size={20} />
-              </Link>
-            )}
+                Account <ChevronDown size={16} className="ml-1" />
+              </button>
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-sm shadow-lg overflow-hidden z-20 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300">
+                {isAuthenticated ? (
+                  <div className="py-1">
+                    <Link to="/account" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">My Account</Link>
+                    <Link to="/orders" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Orders</Link>
+                    <Link to="/wishlist" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Wishlist</Link>
+                    <div className="border-t border-taupe/20"></div>
+                    <button className="block w-full text-left px-4 py-2 text-sm text-charcoal hover:bg-linen">Sign Out</button>
+                  </div>
+                ) : (
+                  <div className="py-1">
+                    <Link to="/buyer/login" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Buyer Login</Link>
+                    <Link to="/buyer/register" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Buyer Register</Link>
+                    <div className="border-t border-taupe/20"></div>
+                    <Link to="/seller/login" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Seller Login</Link>
+                    <Link to="/seller/register" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Seller Register</Link>
+                    <div className="border-t border-taupe/20"></div>
+                    <Link to="/seller/dashboard" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Seller Dashboard</Link>
+                  </div>
+                )}
+              </div>
+            </div>
             
             <Link 
               to="/cart" 
@@ -117,21 +137,34 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-white p-1"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? (
-              <X size={24} color={isScrolled ? '#373737' : 'white'} />
-            ) : (
-              <Menu size={24} color={isScrolled ? '#373737' : 'white'} />
-            )}
-          </button>
+          <div className="md:hidden flex items-center">
+            <Link 
+              to="/cart" 
+              className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors relative mr-4`}
+            >
+              <ShoppingCart size={20} />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-umber text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartItems.length}
+                </span>
+              )}
+            </Link>
+            <button 
+              className="text-white p-1"
+              onClick={toggleMenu}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? (
+                <X size={24} color={isScrolled ? '#373737' : 'white'} />
+              ) : (
+                <Menu size={24} color={isScrolled ? '#373737' : 'white'} />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Categories Navigation */}
+      {/* Categories Navigation for desktop */}
       <nav className={`bg-linen hidden md:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'}`}>
         <div className="container-custom">
           <ul className="flex items-center justify-between flex-wrap">
@@ -155,7 +188,7 @@ const Navbar: React.FC = () => {
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="pt-24 px-6">
+        <div className="pt-20 px-6 pb-6 h-full overflow-y-auto">
           <div className="mb-6">
             <input
               type="text"
@@ -186,12 +219,27 @@ const Navbar: React.FC = () => {
                   <>
                     <li>
                       <Link to="/buyer/login" className="text-charcoal hover:text-terracotta">
-                        Sign In
+                        Buyer Sign In
                       </Link>
                     </li>
                     <li>
                       <Link to="/buyer/register" className="text-charcoal hover:text-terracotta">
-                        Create Account
+                        Buyer Register
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/seller/login" className="text-charcoal hover:text-terracotta">
+                        Seller Sign In
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/seller/register" className="text-charcoal hover:text-terracotta">
+                        Seller Register
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/seller/dashboard" className="text-charcoal hover:text-terracotta">
+                        Seller Dashboard
                       </Link>
                     </li>
                   </>
@@ -206,19 +254,34 @@ const Navbar: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-gray-500">Categories</h3>
-              <ul className="space-y-3">
-                {categories.map((category) => (
-                  <li key={category.name}>
-                    <Link 
-                      to={category.path} 
-                      className="text-charcoal hover:text-terracotta"
-                    >
-                      {category.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-semibold text-gray-500">Categories</h3>
+                <button 
+                  onClick={toggleCategories}
+                  className="text-charcoal p-1"
+                >
+                  {isCategoriesOpen ? (
+                    <ChevronDown size={18} className="transform rotate-180" />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
+                </button>
+              </div>
+              
+              {isCategoriesOpen && (
+                <ul className="space-y-3">
+                  {categories.map((category) => (
+                    <li key={category.name}>
+                      <Link 
+                        to={category.path} 
+                        className="text-charcoal hover:text-terracotta"
+                      >
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>
