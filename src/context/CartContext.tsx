@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Product } from '../data/products';
-import { supabase } from '../integrations/supabase/client';
 
 // Define CartItem type
 export interface CartItem {
