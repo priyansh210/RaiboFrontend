@@ -8,9 +8,10 @@ import { toast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
   product: Product;
+  badge?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const { addToCart } = useCart();
@@ -45,6 +46,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
+          
+          {badge && (
+            <div className="absolute top-3 left-3">
+              <span className="bg-terracotta text-white text-xs px-2 py-1 uppercase tracking-wider">
+                {badge}
+              </span>
+            </div>
+          )}
           
           {/* Color options */}
           <div className="absolute bottom-4 left-4 flex space-x-1">
