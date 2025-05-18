@@ -18,6 +18,7 @@ import SellerRegister from "./pages/SellerRegister";
 import ForYou from "./pages/ForYou";
 import NotFound from "./pages/NotFound";
 import SellerDashboard from "./pages/SellerDashboard";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/checkout/success" element={<Checkout />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               
               {/* Buyer Authentication Routes */}
               <Route path="/buyer/login" element={<BuyerLogin />} />
