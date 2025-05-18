@@ -176,6 +176,28 @@ const Search = () => {
   const isProductSelected = (product: Product) => {
     return selectedProducts.some(p => p.id === product.id);
   };
+
+  // Define filter categories for the UI
+  const filterCategories = [
+    {
+      name: "Categories",
+      options: categories.map(category => ({
+        id: category.toLowerCase(),
+        name: category,
+        count: Math.floor(Math.random() * 20) + 5 // Random count for demo
+      }))
+    },
+    {
+      name: "Materials",
+      options: [
+        { id: "wood", name: "Wood", count: 24 },
+        { id: "leather", name: "Leather", count: 18 },
+        { id: "metal", name: "Metal", count: 12 },
+        { id: "plastic", name: "Plastic", count: 8 },
+        { id: "fabric", name: "Fabric", count: 15 }
+      ]
+    }
+  ];
   
   return (
     <Layout>
