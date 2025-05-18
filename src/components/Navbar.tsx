@@ -1,19 +1,43 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { toast } from '@/hooks/use-toast';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { cart: cartItems } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, logout, isSeller } = useAuth();
   const isMobile = useIsMobile();
+
+  // Get user initials for avatar
+  const getUserInitials = (): string => {
+    if (!user) return '';
+    
+    const firstName = user.firstName || '';
+    const lastName = user.lastName || '';
+    
+    const firstInitial = firstName.charAt(0);
+    const lastInitial = lastName.charAt(0);
+    
+    return (firstInitial + lastInitial).toUpperCase();
+  };
 
   const categories = [
     { name: 'FURNITURE', path: '/browse/furniture' },
@@ -55,6 +79,34 @@ const Navbar: React.FC = () => {
     setIsCategoriesOpen(!isCategoriesOpen);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout failed",
+        description: "There was an issue logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const redirectToAccountPage = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else if (isSeller) {
+      navigate('/seller/dashboard');
+    } else {
+      navigate('/account');
+    }
+  };
+
   return (
     <header 
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -94,34 +146,70 @@ const Navbar: React.FC = () => {
               For You
             </Link>
             
-            <div className="relative group">
-              <button 
-                className={`flex items-center ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
-              >
-                Account <ChevronDown size={16} className="ml-1" />
-              </button>
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-sm shadow-lg overflow-hidden z-20 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300">
+            {/* Account Dropdown with Avatar for authenticated users */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
                 {isAuthenticated ? (
-                  <div className="py-1">
-                    <Link to="/account" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">My Account</Link>
-                    <Link to="/orders" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Orders</Link>
-                    <Link to="/wishlist" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Wishlist</Link>
-                    <div className="border-t border-taupe/20"></div>
-                    <button className="block w-full text-left px-4 py-2 text-sm text-charcoal hover:bg-linen">Sign Out</button>
-                  </div>
+                  <Avatar className="h-8 w-8 cursor-pointer">
+                    <AvatarFallback className="bg-terracotta text-white">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
                 ) : (
-                  <div className="py-1">
-                    <Link to="/buyer/login" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Buyer Login</Link>
-                    <Link to="/buyer/register" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Buyer Register</Link>
-                    <div className="border-t border-taupe/20"></div>
-                    <Link to="/seller/login" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Seller Login</Link>
-                    <Link to="/seller/register" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Seller Register</Link>
-                    <div className="border-t border-taupe/20"></div>
-                    <Link to="/seller/dashboard" className="block px-4 py-2 text-sm text-charcoal hover:bg-linen">Seller Dashboard</Link>
-                  </div>
+                  <button 
+                    className={`flex items-center ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                  >
+                    Account <ChevronDown size={16} className="ml-1" />
+                  </button>
                 )}
-              </div>
-            </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 mt-1 z-50 bg-white">
+                {isAuthenticated ? (
+                  <>
+                    <DropdownMenuItem className="cursor-default font-medium">
+                      {user?.firstName || ''} {user?.lastName || ''}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {isSeller ? (
+                      <DropdownMenuItem asChild>
+                        <Link to="/seller/dashboard" className="cursor-pointer w-full">Seller Dashboard</Link>
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem asChild>
+                        <Link to="/account" className="cursor-pointer w-full">My Account</Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="cursor-pointer w-full">Orders</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/wishlist" className="cursor-pointer w-full">Wishlist</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                      <LogOut size={16} className="mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/login" className="cursor-pointer w-full">Sign In</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/buyer/register" className="cursor-pointer w-full">Register</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/seller/login" className="cursor-pointer w-full">Seller Login</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/seller/register" className="cursor-pointer w-full">Seller Register</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             <Link 
               to="/cart" 
@@ -203,28 +291,52 @@ const Navbar: React.FC = () => {
               <ul className="space-y-3">
                 {isAuthenticated ? (
                   <>
-                    <li>
-                      <Link to="/account" className="text-charcoal hover:text-terracotta flex items-center">
-                        <User size={18} className="mr-2" />
-                        My Account
-                      </Link>
+                    <li className="flex items-center space-x-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-terracotta text-white">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-charcoal">{user?.firstName} {user?.lastName}</span>
                     </li>
+                    {isSeller ? (
+                      <li>
+                        <Link to="/seller/dashboard" className="text-charcoal hover:text-terracotta">
+                          Seller Dashboard
+                        </Link>
+                      </li>
+                    ) : (
+                      <li>
+                        <Link to="/account" className="text-charcoal hover:text-terracotta">
+                          My Account
+                        </Link>
+                      </li>
+                    )}
                     <li>
                       <Link to="/for-you" className="text-charcoal hover:text-terracotta">
                         For You
                       </Link>
                     </li>
+                    <li>
+                      <button 
+                        onClick={handleLogout}
+                        className="text-charcoal hover:text-terracotta flex items-center"
+                      >
+                        <LogOut size={16} className="mr-2" />
+                        Sign Out
+                      </button>
+                    </li>
                   </>
                 ) : (
                   <>
                     <li>
-                      <Link to="/buyer/login" className="text-charcoal hover:text-terracotta">
-                        Buyer Sign In
+                      <Link to="/login" className="text-charcoal hover:text-terracotta">
+                        Sign In
                       </Link>
                     </li>
                     <li>
                       <Link to="/buyer/register" className="text-charcoal hover:text-terracotta">
-                        Buyer Register
+                        Register
                       </Link>
                     </li>
                     <li>
@@ -235,11 +347,6 @@ const Navbar: React.FC = () => {
                     <li>
                       <Link to="/seller/register" className="text-charcoal hover:text-terracotta">
                         Seller Register
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/seller/dashboard" className="text-charcoal hover:text-terracotta">
-                        Seller Dashboard
                       </Link>
                     </li>
                   </>

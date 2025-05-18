@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +20,8 @@ import ForYou from "./pages/ForYou";
 import NotFound from "./pages/NotFound";
 import SellerDashboard from "./pages/SellerDashboard";
 import AuthCallback from "./pages/AuthCallback";
+import Account from "./pages/Account";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -39,9 +42,10 @@ const App = () => (
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/checkout/success" element={<Checkout />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/account" element={<Account />} />
               
               {/* Unified Login Route */}
-              <Route path="/login" element={<AccountLogin />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Navigate to="/buyer/register" replace />} />
               
               {/* Buyer Authentication Routes - keep for backward compatibility */}
