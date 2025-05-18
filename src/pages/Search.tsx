@@ -11,6 +11,7 @@ import { Slider } from '@/components/ui/slider';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { categories } from '../data/products';
+import CategoryFilter from '../components/CategoryFilter';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -177,7 +178,7 @@ const Search = () => {
     return selectedProducts.some(p => p.id === product.id);
   };
 
-  // Define filter categories for the UI
+  // Define filter categories for the UI - Fixed type errors by properly structuring the data
   const filterCategories = [
     {
       name: "Categories",
@@ -198,6 +199,14 @@ const Search = () => {
       ]
     }
   ];
+  
+  // Handle filter changes from the CategoryFilter component
+  const handleFilterChange = (group: string, selectedOptions: string[]) => {
+    if (group === "Categories") {
+      setSelectedCategories(selectedOptions);
+    }
+    // Handle other filter groups as needed
+  };
   
   return (
     <Layout>
