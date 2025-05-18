@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,7 @@ import Browse from "./pages/Browse";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import AccountLogin from "./pages/AccountLogin";
 import BuyerLogin from "./pages/BuyerLogin";
 import SellerLogin from "./pages/SellerLogin";
 import BuyerRegister from "./pages/BuyerRegister";
@@ -40,13 +40,13 @@ const App = () => (
               <Route path="/checkout/success" element={<Checkout />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               
-              {/* Buyer Authentication Routes */}
+              {/* Unified Login Route */}
+              <Route path="/login" element={<AccountLogin />} />
+              <Route path="/register" element={<Navigate to="/buyer/register" replace />} />
+              
+              {/* Buyer Authentication Routes - keep for backward compatibility */}
               <Route path="/buyer/login" element={<BuyerLogin />} />
               <Route path="/buyer/register" element={<BuyerRegister />} />
-              
-              {/* Redirect old login routes to the buyer login */}
-              <Route path="/login" element={<Navigate to="/buyer/login" replace />} />
-              <Route path="/register" element={<Navigate to="/buyer/register" replace />} />
               
               {/* Seller Authentication Routes */}
               <Route path="/seller/login" element={<SellerLogin />} />
