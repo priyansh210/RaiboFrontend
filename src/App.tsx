@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +21,8 @@ import SellerDashboard from "./pages/SellerDashboard";
 import AuthCallback from "./pages/AuthCallback";
 import Account from "./pages/Account";
 import Login from "./pages/Login";
+import Search from "./pages/Search";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -43,10 +44,11 @@ const App = () => (
               <Route path="/checkout/success" element={<Checkout />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/account" element={<Account />} />
+              <Route path="/search" element={<Search />} />
               
-              {/* Unified Login Route */}
+              {/* Auth Routes */}
               <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Navigate to="/buyer/register" replace />} />
+              <Route path="/register" element={<Register />} />
               
               {/* Buyer Authentication Routes - keep for backward compatibility */}
               <Route path="/buyer/login" element={<BuyerLogin />} />
