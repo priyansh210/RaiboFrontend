@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -139,12 +139,49 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link 
-              to="/for-you" 
-              className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
-            >
-              For You
-            </Link>
+            {/* Seller Navigation */}
+            {isSeller ? (
+              <>
+                <Link 
+                  to="/seller/dashboard" 
+                  className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                >
+                  <BarChart3 size={16} />
+                  <span>Dashboard</span>
+                </Link>
+                
+                <Link 
+                  to="/seller/products" 
+                  className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                >
+                  <Package size={16} />
+                  <span>Products</span>
+                </Link>
+                
+                <Link 
+                  to="/seller/payments" 
+                  className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                >
+                  <CreditCard size={16} />
+                  <span>Payments</span>
+                </Link>
+                
+                <Link 
+                  to="/seller/logistics" 
+                  className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                >
+                  <Truck size={16} />
+                  <span>Logistics</span>
+                </Link>
+              </>
+            ) : (
+              <Link 
+                to="/for-you" 
+                className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+              >
+                For You
+              </Link>
+            )}
             
             {/* Account Dropdown with Avatar for authenticated users */}
             <DropdownMenu>
@@ -171,9 +208,20 @@ const Navbar: React.FC = () => {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {isSeller ? (
-                      <DropdownMenuItem asChild>
-                        <Link to="/seller/dashboard" className="cursor-pointer w-full">Seller Dashboard</Link>
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/seller/dashboard" className="cursor-pointer w-full">Dashboard</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/seller/products" className="cursor-pointer w-full">Products</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/seller/payments" className="cursor-pointer w-full">Payments</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/seller/logistics" className="cursor-pointer w-full">Logistics</Link>
+                        </DropdownMenuItem>
+                      </>
                     ) : (
                       <DropdownMenuItem asChild>
                         <Link to="/account" className="cursor-pointer w-full">My Account</Link>
@@ -211,32 +259,37 @@ const Navbar: React.FC = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            <Link 
-              to="/cart" 
-              className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors relative`}
-            >
-              <ShoppingCart size={20} />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-umber text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartItems.length}
-                </span>
-              )}
-            </Link>
+            {/* Cart Icon - only show for non-sellers */}
+            {!isSeller && (
+              <Link 
+                to="/cart" 
+                className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors relative`}
+              >
+                <ShoppingCart size={20} />
+                {cartItems.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-umber text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {cartItems.length}
+                  </span>
+                )}
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            <Link 
-              to="/cart" 
-              className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors relative mr-4`}
-            >
-              <ShoppingCart size={20} />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-umber text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartItems.length}
-                </span>
-              )}
-            </Link>
+            {!isSeller && (
+              <Link 
+                to="/cart" 
+                className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors relative mr-4`}
+              >
+                <ShoppingCart size={20} />
+                {cartItems.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-umber text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {cartItems.length}
+                  </span>
+                )}
+              </Link>
+            )}
             <button 
               className="text-white p-1"
               onClick={toggleMenu}
@@ -252,23 +305,25 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Categories Navigation for desktop */}
-      <nav className={`bg-linen hidden md:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'}`}>
-        <div className="container-custom">
-          <ul className="flex items-center justify-between flex-wrap">
-            {categories.map((category) => (
-              <li key={category.name}>
-                <Link 
-                  to={category.path} 
-                  className="text-charcoal text-xs hover:text-terracotta transition-colors"
-                >
-                  {category.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </nav>
+      {/* Categories Navigation for desktop - only show for non-sellers */}
+      {!isSeller && (
+        <nav className={`bg-linen hidden md:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'}`}>
+          <div className="container-custom">
+            <ul className="flex items-center justify-between flex-wrap">
+              {categories.map((category) => (
+                <li key={category.name}>
+                  <Link 
+                    to={category.path} 
+                    className="text-charcoal text-xs hover:text-terracotta transition-colors"
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+      )}
 
       {/* Mobile Menu */}
       <div 
@@ -300,23 +355,46 @@ const Navbar: React.FC = () => {
                       <span className="text-charcoal">{user?.firstName} {user?.lastName}</span>
                     </li>
                     {isSeller ? (
-                      <li>
-                        <Link to="/seller/dashboard" className="text-charcoal hover:text-terracotta">
-                          Seller Dashboard
-                        </Link>
-                      </li>
+                      <>
+                        <li>
+                          <Link to="/seller/dashboard" className="text-charcoal hover:text-terracotta flex items-center">
+                            <BarChart3 size={16} className="mr-2" />
+                            Dashboard
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/seller/products" className="text-charcoal hover:text-terracotta flex items-center">
+                            <Package size={16} className="mr-2" />
+                            Products
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/seller/payments" className="text-charcoal hover:text-terracotta flex items-center">
+                            <CreditCard size={16} className="mr-2" />
+                            Payments
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/seller/logistics" className="text-charcoal hover:text-terracotta flex items-center">
+                            <Truck size={16} className="mr-2" />
+                            Logistics
+                          </Link>
+                        </li>
+                      </>
                     ) : (
-                      <li>
-                        <Link to="/account" className="text-charcoal hover:text-terracotta">
-                          My Account
-                        </Link>
-                      </li>
+                      <>
+                        <li>
+                          <Link to="/account" className="text-charcoal hover:text-terracotta">
+                            My Account
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/for-you" className="text-charcoal hover:text-terracotta">
+                            For You
+                          </Link>
+                        </li>
+                      </>
                     )}
-                    <li>
-                      <Link to="/for-you" className="text-charcoal hover:text-terracotta">
-                        For You
-                      </Link>
-                    </li>
                     <li>
                       <button 
                         onClick={handleLogout}
@@ -351,45 +429,49 @@ const Navbar: React.FC = () => {
                     </li>
                   </>
                 )}
-                <li>
-                  <Link to="/cart" className="text-charcoal hover:text-terracotta flex items-center">
-                    <ShoppingCart size={18} className="mr-2" />
-                    Cart ({cartItems.length})
-                  </Link>
-                </li>
+                {!isSeller && (
+                  <li>
+                    <Link to="/cart" className="text-charcoal hover:text-terracotta flex items-center">
+                      <ShoppingCart size={18} className="mr-2" />
+                      Cart ({cartItems.length})
+                    </Link>
+                  </li>
+                )}
               </ul>
             </div>
             
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-semibold text-gray-500">Categories</h3>
-                <button 
-                  onClick={toggleCategories}
-                  className="text-charcoal p-1"
-                >
-                  {isCategoriesOpen ? (
-                    <ChevronDown size={18} className="transform rotate-180" />
-                  ) : (
-                    <ChevronDown size={18} />
-                  )}
-                </button>
+            {!isSeller && (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-semibold text-gray-500">Categories</h3>
+                  <button 
+                    onClick={toggleCategories}
+                    className="text-charcoal p-1"
+                  >
+                    {isCategoriesOpen ? (
+                      <ChevronDown size={18} className="transform rotate-180" />
+                    ) : (
+                      <ChevronDown size={18} />
+                    )}
+                  </button>
+                </div>
+                
+                {isCategoriesOpen && (
+                  <ul className="space-y-3">
+                    {categories.map((category) => (
+                      <li key={category.name}>
+                        <Link 
+                          to={category.path} 
+                          className="text-charcoal hover:text-terracotta"
+                        >
+                          {category.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              
-              {isCategoriesOpen && (
-                <ul className="space-y-3">
-                  {categories.map((category) => (
-                    <li key={category.name}>
-                      <Link 
-                        to={category.path} 
-                        className="text-charcoal hover:text-terracotta"
-                      >
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
