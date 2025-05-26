@@ -1,6 +1,6 @@
 
 import React from 'react';
-import BuyerNavbar from './BuyerNavbar';
+import Navbar from './Navbar';
 import Footer from './Footer';
 
 interface LayoutProps {
@@ -10,7 +10,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
-      <BuyerNavbar />
+      <Navbar />
       <main className="flex-grow">
         {children}
       </main>

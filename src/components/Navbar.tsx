@@ -101,7 +101,12 @@ const Navbar: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      if (isSeller) {
+        // For sellers, search could be for their products/orders
+        console.log('Seller search:', searchQuery);
+      } else {
+        navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      }
     }
   };
 
@@ -133,28 +138,26 @@ const Navbar: React.FC = () => {
             RAIBO
           </Link>
 
-          {/* Search Bar for desktop - only show for non-sellers */}
-          {!isSeller && (
-            <form onSubmit={handleSearch} className="hidden md:flex relative flex-grow max-w-md mx-4">
-              <input
-                type="text"
-                placeholder="Search for furniture..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full rounded-md border-none pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-terracotta/50 ${
-                  isScrolled ? 'bg-white' : 'bg-terracotta/90 text-white placeholder-white/80'
-                }`}
-              />
-              <button 
-                type="submit"
-                className={`absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-terracotta transition-colors ${
-                  isScrolled ? 'text-gray-500' : 'text-white/80'
-                }`}
-              >
-                <Search size={18} />
-              </button>
-            </form>
-          )}
+          {/* Search Bar for desktop */}
+          <form onSubmit={handleSearch} className="hidden md:flex relative flex-grow max-w-md mx-4">
+            <input
+              type="text"
+              placeholder={isSeller ? "Search products, orders..." : "Search for furniture..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`w-full rounded-md border-none pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-terracotta/50 ${
+                isScrolled ? 'bg-white text-charcoal placeholder-gray-500' : 'bg-terracotta/90 text-white placeholder-white/80'
+              }`}
+            />
+            <button 
+              type="submit"
+              className={`absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-terracotta transition-colors ${
+                isScrolled ? 'text-gray-500' : 'text-white/80'
+              }`}
+            >
+              <Search size={18} />
+            </button>
+          </form>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
@@ -351,26 +354,24 @@ const Navbar: React.FC = () => {
         }`}
       >
         <div className="pt-20 px-6 pb-6 h-full overflow-y-auto">
-          {/* Mobile Search Bar - only show for non-sellers */}
-          {!isSeller && (
-            <form onSubmit={handleSearch} className="mb-6">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search for furniture..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-md border border-gray-200 bg-white pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-terracotta/50"
-                />
-                <button 
-                  type="submit"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-terracotta"
-                >
-                  <Search size={18} />
-                </button>
-              </div>
-            </form>
-          )}
+          {/* Mobile Search Bar */}
+          <form onSubmit={handleSearch} className="mb-6">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder={isSeller ? "Search products, orders..." : "Search for furniture..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-md border border-gray-200 bg-white pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+              />
+              <button 
+                type="submit"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-terracotta"
+              >
+                <Search size={18} />
+              </button>
+            </div>
+          </form>
           
           <div className="space-y-6">
             <div className="space-y-2">
