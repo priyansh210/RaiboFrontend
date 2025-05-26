@@ -4,6 +4,7 @@ import { Filter } from 'lucide-react';
 import PriceRangeSlider from '../PriceRangeSlider';
 import ColorPicker from '../ColorPicker';
 import CategoryFilters from './CategoryFilters';
+import { Color } from '../../data/products';
 
 interface SearchFiltersProps {
   isOpen: boolean;
@@ -11,8 +12,8 @@ interface SearchFiltersProps {
   searchTerm: string;
   priceRange: [number, number];
   onPriceChange: (range: [number, number]) => void;
-  selectedColors: string[];
-  onColorChange: (colors: string[]) => void;
+  selectedColors: Color[];
+  onColorChange: (colors: Color[]) => void;
 }
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({
@@ -43,6 +44,17 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
     }
   ];
 
+  const availableColors: Color[] = [
+    { name: 'Black', code: '#000000' },
+    { name: 'White', code: '#FFFFFF' },
+    { name: 'Gray', code: '#808080' },
+    { name: 'Brown', code: '#8B4513' },
+    { name: 'Beige', code: '#F5F5DC' },
+    { name: 'Blue', code: '#0000FF' },
+    { name: 'Green', code: '#008000' },
+    { name: 'Red', code: '#FF0000' }
+  ];
+
   return (
     <>
       {/* Mobile Filter Toggle */}
@@ -67,7 +79,7 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         <div className="space-y-6">
           <PriceRangeSlider
             value={priceRange}
-            onValueChange={onPriceChange}
+            onChange={onPriceChange}
             min={0}
             max={2000}
           />
@@ -75,8 +87,9 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
           <div>
             <h3 className="font-medium text-charcoal mb-3">Color</h3>
             <ColorPicker
-              selectedColor={selectedColors[0] || ''}
-              onColorChange={(color) => onColorChange([color])}
+              colors={availableColors}
+              selectedColor={selectedColors[0] || availableColors[0]}
+              onChange={(color) => onColorChange([color])}
             />
           </div>
           

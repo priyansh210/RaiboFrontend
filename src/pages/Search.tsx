@@ -5,19 +5,22 @@ import Layout from '../components/Layout';
 import ProductCard from '../components/ProductCard';
 import SearchFilters from '../components/search/SearchFilters';
 import { products } from '../data/products';
+import { Color } from '../data/products';
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
-  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<Color[]>([]);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.brand.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
     const matchesColor = selectedColors.length === 0 || 
-                        (product.colors && selectedColors.some(color => product.colors.includes(color)));
+                        (product.colors && selectedColors.some(selectedColor => 
+                          product.colors.some(productColor => productColor.code === selectedColor.code)
+                        ));
     
     return matchesSearch && matchesPrice && matchesColor;
   });
