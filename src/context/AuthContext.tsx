@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { authApi } from '../api/mockApi';
 import { STORAGE_KEYS } from '../api/config';
@@ -178,26 +177,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-  // Logout function
-  const logout = async () => {
-    try {
-      const { error } = await authApi.logout();
-      if (error) throw new Error(error);
-      
-      // Reset auth state
-      setUser(null);
-      setRoles([]);
-      setProfile(null);
-      
-      toast({
-        title: "Logged out successfully",
-      });
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      throw new Error(error.message || 'Failed to logout');
-    }
-  };
-  
   // Google login function
   const googleLogin = async () => {
     try {
@@ -222,6 +201,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       console.error('Google login error:', error);
       throw new Error(error.message || 'Failed to login with Google');
+    }
+  };
+  
+  const logout = async () => {
+    try {
+      const { error } = await authApi.logout();
+      if (error) throw new Error(error);
+      
+      // Reset auth state
+      setUser(null);
+      setRoles([]);
+      setProfile(null);
+      
+      toast({
+        title: "Logged out successfully",
+      });
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      throw new Error(error.message || 'Failed to logout');
     }
   };
   
