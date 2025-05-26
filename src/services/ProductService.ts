@@ -1,6 +1,6 @@
 
 import { ApiProduct } from '../api/types';
-import { productsApi } from '../api/mockApi';
+import { apiService } from './ApiService';
 import { Product, Color } from '../data/products';
 
 // Convert API product to frontend Product type
@@ -30,14 +30,14 @@ const apiProductToProduct = (apiProduct: ApiProduct): Product => {
 
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await productsApi.getProducts();
+    const response = await apiService.getProducts();
     
-    if (response.error) {
-      console.error('Error fetching products:', response.error);
+    if (!response || !Array.isArray(response)) {
+      console.error('Invalid products response:', response);
       return [];
     }
     
-    return (response.data || []).map(apiProductToProduct);
+    return response.map(apiProductToProduct);
   } catch (error) {
     console.error('Failed to fetch products:', error);
     return [];
@@ -46,14 +46,14 @@ export const fetchProducts = async (): Promise<Product[]> => {
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {
   try {
-    const response = await productsApi.getProductById(id);
+    const response = await apiService.getProductById(id);
     
-    if (response.error || !response.data) {
-      console.error('Error fetching product by ID:', response.error);
+    if (!response) {
+      console.error('Product not found:', id);
       return undefined;
     }
     
-    return apiProductToProduct(response.data);
+    return apiProductToProduct(response);
   } catch (error) {
     console.error('Failed to fetch product by ID:', error);
     return undefined;
@@ -62,14 +62,14 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
 
 export const getSimilarProducts = async (product: Product, limit: number = 4): Promise<Product[]> => {
   try {
-    const response = await productsApi.getSimilarProducts(product.id, limit);
+    // For now, we'll fetch all products and filter by category
+    // In a real implementation, the backend would have a dedicated endpoint
+    const allProducts = await fetchProducts();
+    const similarProducts = allProducts
+      .filter(p => p.id !== product.id && p.category === product.category)
+      .slice(0, limit);
     
-    if (response.error) {
-      console.error('Error fetching similar products:', response.error);
-      return [];
-    }
-    
-    return (response.data || []).map(apiProductToProduct);
+    return similarProducts;
   } catch (error) {
     console.error('Failed to fetch similar products:', error);
     return [];
@@ -78,14 +78,14 @@ export const getSimilarProducts = async (product: Product, limit: number = 4): P
 
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
-    const response = await productsApi.searchProducts(query);
+    const response = await apiService.searchProducts(query);
     
-    if (response.error) {
-      console.error('Error searching products:', response.error);
+    if (!response || !Array.isArray(response)) {
+      console.error('Invalid search response:', response);
       return [];
     }
     
-    return (response.data || []).map(apiProductToProduct);
+    return response.map(apiProductToProduct);
   } catch (error) {
     console.error('Failed to search products:', error);
     return [];

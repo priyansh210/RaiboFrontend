@@ -1,20 +1,107 @@
 
 /**
- * API configuration settings
+ * API configuration settings for RAIBO furniture shop
  */
 
-// Base API URL - could be replaced with a real API endpoint in production
-export const API_BASE_URL = 'https://api.example.com';
+// Base API URL - Update this when your backend URL changes
+export const API_BASE_URL = 'https://your-backend-domain.com';
+
+// API endpoints
+export const API_ENDPOINTS = {
+  // Authentication
+  AUTH: {
+    REGISTER: '/api/v1/auth/register',
+    LOGIN: '/api/v1/auth/login',
+    REFRESH: '/api/v1/auth/refresh',
+    GOOGLE_LOGIN: '/api/login/google',
+  },
+  
+  // Products
+  PRODUCTS: {
+    CREATE: '/api/v1/product',
+    GET_ALL: '/api/v1/products', // Assumed endpoint for getting all products
+    GET_BY_ID: '/api/v1/product', // Will append /:id
+    SEARCH: '/api/v1/products/search', // Assumed endpoint for search
+  },
+  
+  // Cart
+  CART: {
+    GET: '/api/v1/cart/',
+    ADD: '/cart', // Will append /:buyer_id/add
+    REMOVE: '/cart', // Will append /:buyer_id/remove
+    UPDATE: '/cart', // Will append /:buyer_id/update
+    DELETE: '/cart', // Will append /:buyer_id
+  },
+  
+  // Orders
+  ORDERS: {
+    CREATE: '/api/v1/order/',
+    GET_BY_ID: '/api/v1/order', // Will append /:id
+  },
+  
+  // Payment Methods
+  PAYMENT_METHODS: {
+    CREATE: '/api/v1/payment-methods',
+    GET_ALL: '/api/v1/payment-methods',
+    GET_BY_ID: '/api/v1/payment-methods', // Will append /:id
+    UPDATE: '/api/v1/payment-methods/update', // Will append /:id
+    DELETE: '/api/v1/payment-methods', // Will append /:id
+  },
+  
+  // Address
+  ADDRESS: {
+    CREATE: '/api/v1/address',
+    GET_ALL: '/api/v1/address',
+    GET_BY_ID: '/api/v1/address', // Will append /:id
+    UPDATE: '/api/v1/address', // Will append /:id
+    DELETE: '/api/v1/address', // Will append /:id
+  },
+  
+  // Images
+  IMAGES: {
+    UPLOAD: '/api/v1/image/upload',
+    GET_BY_ID: '/api/v1/image', // Will append /:imageId
+    DELETE: '/api/v1/image/delete', // Will append /:imageId
+  },
+  
+  // Categories
+  CATEGORIES: {
+    CREATE: '/api/v1/category',
+    GET_ALL: '/api/v1/categories', // Assumed endpoint
+  },
+  
+  // Companies
+  COMPANIES: {
+    CREATE: '/api/v1/company',
+    GET_ALL: '/api/v1/company',
+    GET_BY_ID: '/api/v1/company', // Will append /:id
+    UPDATE: '/api/v1/company', // Will append /:id
+    DELETE: '/api/v1/company', // Will append /:id
+  },
+};
 
 // Local storage keys
 export const STORAGE_KEYS = {
-  AUTH_TOKEN: 'auth_token',
-  USER: 'user',
-  CART: 'cart',
+  AUTH_TOKEN: 'raibo_auth_token',
+  USER: 'raibo_user',
+  CART: 'raibo_cart',
 };
 
 // API request timeouts
-export const REQUEST_TIMEOUT = 10000; // 10 seconds
+export const REQUEST_TIMEOUT = 15000; // 15 seconds
 
-// Simulate network latency for mock APIs (in milliseconds)
-export const SIMULATED_DELAY = import.meta.env.PROD ? 0 : 500;
+// Common headers
+export const getAuthHeaders = () => {
+  const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+  };
+};
+
+export const getFormDataHeaders = () => {
+  const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+  return {
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+  };
+};

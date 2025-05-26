@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -11,7 +10,6 @@ import { Slider } from '@/components/ui/slider';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { categories } from '../data/products';
-import CategoryFilter from '../components/CategoryFilter';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -62,18 +60,14 @@ const Search = () => {
   
   // Voice search
   const handleVoiceSearch = () => {
-    // Check if browser supports speech recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      // This is a mock implementation since actual speech recognition requires browser permissions
       setIsListening(true);
       
-      // Simulate listening and then getting a result
       toast({
         title: "Listening...",
         description: "Please speak your search query.",
       });
       
-      // Simulate recognition after 3 seconds
       setTimeout(() => {
         setIsListening(false);
         const mockQuery = "modern sofa";
@@ -105,7 +99,6 @@ const Search = () => {
     const file = e.target.files?.[0];
     
     if (file) {
-      // Simulate image processing
       setIsLoading(true);
       
       toast({
@@ -113,9 +106,7 @@ const Search = () => {
         description: "Your image is being analyzed for similar products.",
       });
       
-      // Simulate API call delay
       setTimeout(async () => {
-        // Mock result - in reality, this would be an API call
         const mockQuery = "wooden furniture";
         setSearchQuery(mockQuery);
         const results = await searchProducts(mockQuery);
@@ -144,14 +135,12 @@ const Search = () => {
   const applyFilters = () => {
     let filtered = [...products];
     
-    // Apply category filter
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(product => 
         selectedCategories.includes(product.category.toLowerCase())
       );
     }
     
-    // Apply price filter
     filtered = filtered.filter(product => 
       product.price >= priceRange[0] && product.price <= priceRange[1]
     );
@@ -176,36 +165,6 @@ const Search = () => {
   
   const isProductSelected = (product: Product) => {
     return selectedProducts.some(p => p.id === product.id);
-  };
-
-  // Define filter categories for the UI - Fixed type errors by properly structuring the data
-  const filterCategories = [
-    {
-      name: "Categories",
-      options: categories.map(category => ({
-        id: category.toLowerCase(),
-        name: category,
-        count: Math.floor(Math.random() * 20) + 5 // Random count for demo
-      }))
-    },
-    {
-      name: "Materials",
-      options: [
-        { id: "wood", name: "Wood", count: 24 },
-        { id: "leather", name: "Leather", count: 18 },
-        { id: "metal", name: "Metal", count: 12 },
-        { id: "plastic", name: "Plastic", count: 8 },
-        { id: "fabric", name: "Fabric", count: 15 }
-      ]
-    }
-  ];
-  
-  // Handle filter changes from the CategoryFilter component
-  const handleFilterChange = (group: string, selectedOptions: string[]) => {
-    if (group === "Categories") {
-      setSelectedCategories(selectedOptions);
-    }
-    // Handle other filter groups as needed
   };
   
   return (
