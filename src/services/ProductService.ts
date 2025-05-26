@@ -53,7 +53,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
       return undefined;
     }
     
-    return apiProductToProduct(response);
+    return apiProductToProduct(response as ApiProduct);
   } catch (error) {
     console.error('Failed to fetch product by ID:', error);
     return undefined;

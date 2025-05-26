@@ -90,6 +90,9 @@ export const STORAGE_KEYS = {
 // API request timeouts
 export const REQUEST_TIMEOUT = 15000; // 15 seconds
 
+// Simulated delay for mock API
+export const SIMULATED_DELAY = 1000; // 1 second
+
 // Common headers
 export const getAuthHeaders = () => {
   const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);

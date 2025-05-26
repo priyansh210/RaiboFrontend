@@ -15,8 +15,11 @@ class ApiService {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+    
     const config: RequestInit = {
-      timeout: REQUEST_TIMEOUT,
+      signal: controller.signal,
       ...options,
       headers: {
         ...getAuthHeaders(),
@@ -26,6 +29,7 @@ class ApiService {
 
     try {
       const response = await fetch(url, config);
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -34,6 +38,7 @@ class ApiService {
       const data = await response.json();
       return data;
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('API request failed:', error);
       throw error;
     }
