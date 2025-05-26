@@ -66,8 +66,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
         
         <div className="space-y-6">
           <PriceRangeSlider
-            range={priceRange}
-            onChange={onPriceChange}
+            value={priceRange}
+            onValueChange={onPriceChange}
             min={0}
             max={2000}
           />
@@ -75,8 +75,8 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
           <div>
             <h3 className="font-medium text-charcoal mb-3">Color</h3>
             <ColorPicker
-              selectedColors={selectedColors}
-              onColorChange={onColorChange}
+              selectedColor={selectedColors[0] || ''}
+              onColorChange={(color) => onColorChange([color])}
             />
           </div>
           

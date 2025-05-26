@@ -16,7 +16,8 @@ const Search = () => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.brand.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
-    const matchesColor = selectedColors.length === 0 || selectedColors.includes(product.color);
+    const matchesColor = selectedColors.length === 0 || 
+                        (product.colors && selectedColors.some(color => product.colors.includes(color)));
     
     return matchesSearch && matchesPrice && matchesColor;
   });
