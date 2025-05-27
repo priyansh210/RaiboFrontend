@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 
 import {
   DropdownMenu,
@@ -111,6 +112,14 @@ const Navbar: React.FC = () => {
           toast({
             title: "Search results",
             description: "Sign in to save your search history and get personalized recommendations.",
+            action: (
+              <ToastAction 
+                altText="Sign In" 
+                onClick={() => navigate('/login')}
+              >
+                Sign In
+              </ToastAction>
+            ),
           });
         }
       }
@@ -213,10 +222,14 @@ const Navbar: React.FC = () => {
                     toast({
                       title: "Sign in for personalized recommendations",
                       description: "Create an account to get recommendations tailored just for you.",
-                      action: {
-                        label: "Sign In",
-                        onClick: () => navigate('/login')
-                      }
+                      action: (
+                        <ToastAction 
+                          altText="Sign In" 
+                          onClick={() => navigate('/login')}
+                        >
+                          Sign In
+                        </ToastAction>
+                      ),
                     });
                   }
                 }}

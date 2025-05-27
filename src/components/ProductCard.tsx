@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { Product } from '../data/products';
 import { toast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 
 interface ProductCardProps {
   product: Product;
@@ -53,10 +54,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
       toast({
         title: "Sign in required",
         description: "Please sign in to add items to your wishlist.",
-        action: {
-          label: "Sign In",
-          onClick: () => navigate('/login')
-        }
+        action: (
+          <ToastAction 
+            altText="Sign In" 
+            onClick={() => navigate('/login')}
+          >
+            Sign In
+          </ToastAction>
+        ),
       });
     } else {
       toast({
