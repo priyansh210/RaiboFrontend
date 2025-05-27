@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { Product } from '../data/products';
 import { toast } from '@/hooks/use-toast';
 
@@ -15,22 +16,54 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const { addToCart } = useCart();
+  const { isAuthenticated, isGuest } = useAuth();
+  const navigate = useNavigate();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
+    // Allow guests to add to cart but show different message
     addToCart({
       ...product,
       selectedColor,
       quantity: 1,
     });
     
-    toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
-      duration: 3000,
-    });
+    if (isGuest) {
+      toast({
+        title: "Added to cart",
+        description: "Sign in to save your cart and access order history.",
+        duration: 4000,
+      });
+    } else {
+      toast({
+        title: "Added to cart",
+        description: `${product.name} has been added to your cart.`,
+        duration: 3000,
+      });
+    }
+  };
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isGuest) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to add items to your wishlist.",
+        action: {
+          label: "Sign In",
+          onClick: () => navigate('/login')
+        }
+      });
+    } else {
+      toast({
+        title: "Added to wishlist",
+        description: `${product.name} has been added to your wishlist.`,
+      });
+    }
   };
 
   return (
@@ -80,6 +113,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
             }`}
           >
             <button 
+              onClick={handleWishlistClick}
               aria-label="Add to wishlist"
               className="bg-white/90 hover:bg-white text-charcoal p-2 rounded-full shadow-sm transition-all"
             >

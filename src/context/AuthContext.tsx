@@ -13,6 +13,33 @@ export interface AuthUser {
   roles: string[];
 }
 
+// API Response types
+interface LoginResponse {
+  access_token: string;
+  user: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    first_name?: string;
+    last_name?: string;
+    roles?: string[];
+  };
+}
+
+interface RegisterResponse {
+  access_token: string;
+  user: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    first_name?: string;
+    last_name?: string;
+    roles?: string[];
+  };
+}
+
 // Auth context type
 export interface AuthContextType {
   user: AuthUser | null;
@@ -27,6 +54,7 @@ export interface AuthContextType {
   isBuyer: boolean;
   isSeller: boolean;
   isAdmin: boolean;
+  isGuest: boolean;
 }
 
 // Create the auth context
@@ -42,7 +70,8 @@ const AuthContext = createContext<AuthContextType>({
   googleLogin: async () => {},
   isBuyer: false,
   isSeller: false,
-  isAdmin: false
+  isAdmin: false,
+  isGuest: true
 });
 
 // Auth provider component
@@ -122,7 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Login function
   const login = async (email: string, password: string) => {
     try {
-      const response = await apiService.login({ email, password });
+      const response = await apiService.login({ email, password }) as LoginResponse;
       
       if (!response) throw new Error('No response from server');
       
@@ -133,7 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Create user object from response
       const userData: AuthUser = {
-        id: response.user?.id || response.id || email,
+        id: response.user?.id || email,
         email: response.user?.email || email,
         firstName: response.user?.firstName || response.user?.first_name,
         lastName: response.user?.lastName || response.user?.last_name,
@@ -169,7 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         phone: '',
         email,
         password
-      });
+      }) as RegisterResponse;
       
       if (!response) throw new Error('No response from server');
       
@@ -180,7 +209,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Create user object from response
       const userData: AuthUser = {
-        id: response.user?.id || response.id || email,
+        id: response.user?.id || email,
         email: response.user?.email || email,
         firstName: firstName,
         lastName: lastName,
@@ -243,6 +272,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isBuyer = roles.includes('buyer');
   const isSeller = roles.includes('seller');
   const isAdmin = roles.includes('admin');
+  const isGuest = !user; // Guest user when not logged in
   
   return (
     <AuthContext.Provider value={{
@@ -257,7 +287,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       googleLogin,
       isBuyer,
       isSeller,
-      isAdmin
+      isAdmin,
+      isGuest
     }}>
       {children}
     </AuthContext.Provider>

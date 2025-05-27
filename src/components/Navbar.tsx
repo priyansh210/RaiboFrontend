@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3 } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -24,7 +23,7 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { cart: cartItems } = useCart();
-  const { isAuthenticated, user, logout, isSeller } = useAuth();
+  const { isAuthenticated, user, logout, isSeller, isGuest } = useAuth();
   const isMobile = useIsMobile();
 
   // Get user initials for avatar
@@ -106,6 +105,14 @@ const Navbar: React.FC = () => {
         console.log('Seller search:', searchQuery);
       } else {
         navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+        
+        // Show different message for guests vs authenticated users
+        if (isGuest) {
+          toast({
+            title: "Search results",
+            description: "Sign in to save your search history and get personalized recommendations.",
+          });
+        }
       }
     }
   };
@@ -200,6 +207,19 @@ const Navbar: React.FC = () => {
               <Link 
                 to="/for-you" 
                 className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                onClick={(e) => {
+                  if (isGuest) {
+                    e.preventDefault();
+                    toast({
+                      title: "Sign in for personalized recommendations",
+                      description: "Create an account to get recommendations tailored just for you.",
+                      action: {
+                        label: "Sign In",
+                        onClick: () => navigate('/login')
+                      }
+                    });
+                  }
+                }}
               >
                 For You
               </Link>
@@ -218,6 +238,7 @@ const Navbar: React.FC = () => {
                   <button 
                     className={`flex items-center ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
                   >
+                    <User size={16} className="mr-1" />
                     Account <ChevronDown size={16} className="ml-1" />
                   </button>
                 )}
@@ -267,7 +288,7 @@ const Navbar: React.FC = () => {
                       <Link to="/login" className="cursor-pointer w-full">Sign In</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/buyer/register" className="cursor-pointer w-full">Register</Link>
+                      <Link to="/register" className="cursor-pointer w-full">Register</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
@@ -281,11 +302,20 @@ const Navbar: React.FC = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* Cart Icon - only show for non-sellers */}
+            {/* Cart Icon - show for everyone but with different behavior */}
             {!isSeller && (
               <Link 
                 to="/cart" 
                 className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors relative`}
+                onClick={(e) => {
+                  if (isGuest && cartItems.length === 0) {
+                    e.preventDefault();
+                    toast({
+                      title: "Your cart is empty",
+                      description: "Browse our products to add items to your cart.",
+                    });
+                  }
+                }}
               >
                 <ShoppingCart size={20} />
                 {cartItems.length > 0 && (
@@ -446,7 +476,7 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/buyer/register" className="text-charcoal hover:text-terracotta">
+                      <Link to="/register" className="text-charcoal hover:text-terracotta">
                         Register
                       </Link>
                     </li>
