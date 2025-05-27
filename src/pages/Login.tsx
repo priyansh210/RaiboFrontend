@@ -75,7 +75,7 @@ const Login = () => {
   
   return (
     <Layout>
-      <div className="min-h-screen bg-cream py-10 pt-32">
+      <div className="min-h-screen bg-cream py-10">
         <div className="container-custom max-w-md">
           <div className="bg-white p-8 rounded-sm shadow-sm">
             <h1 className="font-playfair text-2xl text-center text-charcoal mb-6">Sign In</h1>

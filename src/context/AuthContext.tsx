@@ -1,5 +1,6 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { authApi } from '../api/mockApi';
+import { apiService } from '../services/ApiService';
 import { STORAGE_KEYS } from '../api/config';
 import { toast } from '@/hooks/use-toast';
 
@@ -64,8 +65,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         // Check for existing user in localStorage
         const userJson = localStorage.getItem(STORAGE_KEYS.USER);
+        const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
         
-        if (userJson) {
+        if (userJson && token) {
           try {
             const userData = JSON.parse(userJson) as AuthUser;
             setUser(userData);
@@ -120,17 +122,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Login function
   const login = async (email: string, password: string) => {
     try {
-      const { data, error, status } = await authApi.login({ email, password });
+      const response = await apiService.login({ email, password });
       
-      if (error) throw new Error(error);
-      if (!data) throw new Error('No user data returned');
+      if (!response) throw new Error('No response from server');
       
-      setUser(data);
-      setRoles(getUserRoles(data));
+      // Store the auth token
+      if (response.access_token) {
+        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
+      }
+      
+      // Create user object from response
+      const userData: AuthUser = {
+        id: response.user?.id || response.id || email,
+        email: response.user?.email || email,
+        firstName: response.user?.firstName || response.user?.first_name,
+        lastName: response.user?.lastName || response.user?.last_name,
+        roles: response.user?.roles || ['buyer']
+      };
+      
+      // Store user data
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+      
+      setUser(userData);
+      setRoles(getUserRoles(userData));
       setProfile({
-        first_name: data.firstName,
-        last_name: data.lastName,
-        email: data.email,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        email: userData.email,
       });
       
       return;
@@ -143,26 +161,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Register function
   const register = async (firstName: string, lastName: string, email: string) => {
     try {
-      // Create a random password for demo purposes (in a real app, you'd collect this from the user)
-      const password = `Password${Math.floor(Math.random() * 1000)}!`;
+      // Generate a temporary password for registration
+      const password = `TempPass${Math.floor(Math.random() * 1000)}!`;
       
-      const { data, error, status } = await authApi.register({
+      const response = await apiService.register({
+        fullname: `${firstName} ${lastName}`,
+        phone: '',
         email,
-        password,
-        firstName,
-        lastName,
-        role: 'buyer'
+        password
       });
       
-      if (error) throw new Error(error);
-      if (!data) throw new Error('No user data returned');
+      if (!response) throw new Error('No response from server');
       
-      setUser(data);
-      setRoles(getUserRoles(data));
+      // Store the auth token
+      if (response.access_token) {
+        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
+      }
+      
+      // Create user object from response
+      const userData: AuthUser = {
+        id: response.user?.id || response.id || email,
+        email: response.user?.email || email,
+        firstName: firstName,
+        lastName: lastName,
+        roles: response.user?.roles || ['buyer']
+      };
+      
+      // Store user data
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+      
+      setUser(userData);
+      setRoles(getUserRoles(userData));
       setProfile({
-        first_name: data.firstName,
-        last_name: data.lastName,
-        email: data.email,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        email: userData.email,
       });
       
       toast({
@@ -180,24 +213,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Google login function
   const googleLogin = async () => {
     try {
-      // In a mock implementation, just create a demo user
-      const { data, error, status } = await authApi.login({
-        email: 'google-user@example.com',
-        password: 'password123'
-      });
-      
-      if (error) throw new Error(error);
-      if (!data) throw new Error('No user data returned');
-      
-      setUser(data);
-      setRoles(getUserRoles(data));
-      setProfile({
-        first_name: data.firstName,
-        last_name: data.lastName,
-        email: data.email,
-      });
-      
-      return;
+      // This will be handled by the GoogleAuthService
+      throw new Error('Use GoogleAuthService for Google login');
     } catch (error: any) {
       console.error('Google login error:', error);
       throw new Error(error.message || 'Failed to login with Google');
@@ -206,10 +223,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   const logout = async () => {
     try {
-      const { error } = await authApi.logout();
-      if (error) throw new Error(error);
+      // Clear auth state
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
       
-      // Reset auth state
       setUser(null);
       setRoles([]);
       setProfile(null);
