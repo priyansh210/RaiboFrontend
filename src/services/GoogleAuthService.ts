@@ -1,4 +1,6 @@
 
+import { API_BASE_URL, API_ENDPOINTS } from '../api/config';
+
 declare global {
   interface Window {
     google: any;
@@ -35,21 +37,31 @@ export class GoogleAuthService {
     });
   }
 
-  public async signInWithGoogle(): Promise<{ name: string; email: string; picture?: string }> {
+  public async signInWithGoogle(): Promise<{ access_token: string; user: any }> {
     if (!window.google) {
       throw new Error('Google Sign-In not initialized');
     }
 
     return new Promise((resolve, reject) => {
-      window.googleAuthCallback = (response: any) => {
+      window.googleAuthCallback = async (response: any) => {
         try {
-          // Decode the JWT token to get user info
-          const payload = this.parseJwt(response.credential);
-          resolve({
-            name: payload.name,
-            email: payload.email,
-            picture: payload.picture
+          // Send the credential to the backend
+          const backendResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.GOOGLE_LOGIN}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              credential: response.credential
+            })
           });
+
+          if (!backendResponse.ok) {
+            throw new Error('Failed to authenticate with backend');
+          }
+
+          const authData = await backendResponse.json();
+          resolve(authData);
         } catch (error) {
           reject(error);
         }
@@ -62,18 +74,6 @@ export class GoogleAuthService {
 
       window.google.accounts.id.prompt();
     });
-  }
-
-  private parseJwt(token: string) {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
   }
 
   public static setClientId(clientId: string) {

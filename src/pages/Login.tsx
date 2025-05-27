@@ -6,6 +6,7 @@ import Layout from '../components/Layout';
 import { toast } from '@/hooks/use-toast';
 import LoginForm from '../components/auth/LoginForm';
 import { googleAuthService } from '../services/GoogleAuthService';
+import { STORAGE_KEYS } from '../api/config';
 
 const Login = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
@@ -49,26 +50,24 @@ const Login = () => {
   
   const handleGoogleLogin = async () => {
     try {
-      const googleUser = await googleAuthService.signInWithGoogle();
+      const authData = await googleAuthService.signInWithGoogle();
       
-      // Use the Google user info to login/register
-      const [firstName, ...lastNameParts] = googleUser.name.split(' ');
-      const lastName = lastNameParts.join(' ');
+      // Store the auth data returned from backend
+      if (authData.access_token) {
+        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authData.access_token);
+      }
       
-      try {
-        // Try to login first
-        await login(googleUser.email, 'google-oauth');
-      } catch {
-        // If login fails, register the user
-        const { register } = useAuth();
-        await register(firstName, lastName, googleUser.email);
+      if (authData.user) {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(authData.user));
       }
       
       toast({
         title: "Google login successful",
         description: "Welcome to RAIBO!",
       });
-      navigate(redirectPath, { replace: true });
+      
+      // Refresh the page to update auth context
+      window.location.href = redirectPath;
     } catch (err) {
       setError((err as Error).message || 'Failed to login with Google. Please try again.');
     }
@@ -76,7 +75,7 @@ const Login = () => {
   
   return (
     <Layout>
-      <div className="min-h-screen bg-cream py-10">
+      <div className="min-h-screen bg-cream py-10 pt-32">
         <div className="container-custom max-w-md">
           <div className="bg-white p-8 rounded-sm shadow-sm">
             <h1 className="font-playfair text-2xl text-center text-charcoal mb-6">Sign In</h1>
