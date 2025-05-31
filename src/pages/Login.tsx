@@ -36,20 +36,25 @@ const Login = () => {
       return;
     }
     
+    console.log('Attempting login with:', { email, backendUrl: 'http://ec2-15-207-55-211.ap-south-1.compute.amazonaws.com:3000' });
+    
     try {
       await login(email, password);
+      console.log('Login successful');
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
       navigate(redirectPath, { replace: true });
     } catch (err) {
+      console.error('Login error:', err);
       setError((err as Error).message || 'Failed to login. Please check your credentials and try again.');
     }
   };
   
   const handleGoogleLogin = async () => {
     try {
+      console.log('Attempting Google login');
       const authData = await googleAuthService.signInWithGoogle();
       
       // Store the auth data returned from backend
@@ -69,6 +74,7 @@ const Login = () => {
       // Refresh the page to update auth context
       window.location.href = redirectPath;
     } catch (err) {
+      console.error('Google login error:', err);
       setError((err as Error).message || 'Failed to login with Google. Please try again.');
     }
   };

@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { apiService } from '../services/ApiService';
 import { STORAGE_KEYS } from '../api/config';
@@ -150,14 +149,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Login function
   const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    console.log('AuthContext: Starting login process');
+    
     try {
       const response = await apiService.login({ email, password }) as LoginResponse;
+      console.log('AuthContext: Login response received:', response);
       
       if (!response) throw new Error('No response from server');
       
       // Store the auth token
       if (response.access_token) {
         localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
+        console.log('AuthContext: Token stored');
       }
       
       // Create user object from response
@@ -168,6 +172,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lastName: response.user?.lastName || response.user?.last_name,
         roles: response.user?.roles || ['buyer']
       };
+      
+      console.log('AuthContext: User data created:', userData);
       
       // Store user data
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
@@ -180,15 +186,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: userData.email,
       });
       
+      console.log('AuthContext: Login completed successfully');
       return;
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('AuthContext: Login error:', error);
       throw new Error(error.message || 'Failed to login');
+    } finally {
+      setIsLoading(false);
     }
   };
   
   // Register function
   const register = async (firstName: string, lastName: string, email: string) => {
+    setIsLoading(true);
+    console.log('AuthContext: Starting registration process');
+    
     try {
       // Generate a temporary password for registration
       const password = `TempPass${Math.floor(Math.random() * 1000)}!`;
@@ -200,11 +212,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password
       }) as RegisterResponse;
       
+      console.log('AuthContext: Registration response received:', response);
+      
       if (!response) throw new Error('No response from server');
       
       // Store the auth token
       if (response.access_token) {
         localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
+        console.log('AuthContext: Token stored after registration');
       }
       
       // Create user object from response
@@ -215,6 +230,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lastName: lastName,
         roles: response.user?.roles || ['buyer']
       };
+      
+      console.log('AuthContext: User data created after registration:', userData);
       
       // Store user data
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
@@ -232,10 +249,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "You have been automatically logged in.",
       });
       
+      console.log('AuthContext: Registration completed successfully');
       return;
     } catch (error: any) {
-      console.error('Registration error:', error);
+      console.error('AuthContext: Registration error:', error);
       throw new Error(error.message || 'Failed to register');
+    } finally {
+      setIsLoading(false);
     }
   };
   

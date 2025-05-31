@@ -1,9 +1,10 @@
+
 /**
  * API configuration settings for RAIBO furniture shop
  */
 
-// Base API URL - Update this when your backend URL changes
-export const API_BASE_URL = 'https://your-backend-domain.com';
+// Base API URL - Updated to use your hosted backend
+export const API_BASE_URL = 'http://ec2-15-207-55-211.ap-south-1.compute.amazonaws.com:3000';
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -18,9 +19,9 @@ export const API_ENDPOINTS = {
   // Products
   PRODUCTS: {
     CREATE: '/api/v1/product',
-    GET_ALL: '/api/v1/products', // Assumed endpoint for getting all products
+    GET_ALL: '/api/v1/products',
     GET_BY_ID: '/api/v1/product', // Will append /:id
-    SEARCH: '/api/v1/products/search', // Assumed endpoint for search
+    SEARCH: '/api/v1/products/search',
   },
   
   // Cart
@@ -66,7 +67,7 @@ export const API_ENDPOINTS = {
   // Categories
   CATEGORIES: {
     CREATE: '/api/v1/category',
-    GET_ALL: '/api/v1/categories', // Assumed endpoint
+    GET_ALL: '/api/v1/categories',
   },
   
   // Companies

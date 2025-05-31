@@ -6,6 +6,7 @@ class ApiService {
 
   constructor() {
     this.baseURL = API_BASE_URL;
+    console.log('ApiService initialized with baseURL:', this.baseURL);
   }
 
   // Generic request method
@@ -14,6 +15,7 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    console.log('Making API request to:', url);
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
@@ -28,18 +30,35 @@ class ApiService {
     };
 
     try {
+      console.log('Request config:', config);
       const response = await fetch(url, config);
       clearTimeout(timeoutId);
       
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('API error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
       
       const data = await response.json();
+      console.log('Response data:', data);
       return data;
     } catch (error) {
       clearTimeout(timeoutId);
       console.error('API request failed:', error);
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error('Request timeout - please try again');
+        }
+        if (error.message.includes('fetch')) {
+          throw new Error('Unable to connect to server. Please check your internet connection.');
+        }
+      }
+      
       throw error;
     }
   }
@@ -51,6 +70,7 @@ class ApiService {
     email: string;
     password: string;
   }) {
+    console.log('Registering user:', { ...userData, password: '[HIDDEN]' });
     return this.request(API_ENDPOINTS.AUTH.REGISTER, {
       method: 'POST',
       body: JSON.stringify(userData),
@@ -58,6 +78,7 @@ class ApiService {
   }
 
   async login(credentials: { email: string; password: string }) {
+    console.log('Logging in user:', { email: credentials.email, password: '[HIDDEN]' });
     return this.request(API_ENDPOINTS.AUTH.LOGIN, {
       method: 'POST',
       body: JSON.stringify(credentials),
