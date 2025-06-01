@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Product } from '../data/products';
+import { Product } from '../models/internal/Product';
 import { toast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 
@@ -24,7 +24,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Allow guests to add to cart but show different message
     addToCart({
       ...product,
       selectedColor,

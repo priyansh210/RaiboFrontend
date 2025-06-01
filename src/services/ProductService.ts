@@ -1,32 +1,8 @@
 
-import { ApiProduct } from '../api/types';
+import { Product } from '../models/internal/Product';
+import { ExternalProductResponse } from '../models/external/ProductModels';
+import { ProductMapper } from '../mappers/ProductMapper';
 import { apiService } from './ApiService';
-import { Product, Color } from '../data/products';
-
-// Convert API product to frontend Product type
-const apiProductToProduct = (apiProduct: ApiProduct): Product => {
-  return {
-    id: apiProduct.id,
-    name: apiProduct.name,
-    brand: apiProduct.brand,
-    price: apiProduct.price,
-    description: apiProduct.description,
-    category: apiProduct.category,
-    subcategory: apiProduct.subcategory || '',
-    images: apiProduct.images,
-    colors: apiProduct.colors,
-    material: apiProduct.material,
-    dimensions: apiProduct.dimensions,
-    weight: apiProduct.weight,
-    ratings: apiProduct.ratings,
-    stock: apiProduct.stock,
-    featured: apiProduct.featured,
-    bestSeller: apiProduct.bestSeller,
-    new: apiProduct.new,
-    deliveryInfo: apiProduct.deliveryInfo,
-    additionalInfo: apiProduct.additionalInfo || []
-  };
-};
 
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
@@ -37,7 +13,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
       return [];
     }
     
-    return response.map(apiProductToProduct);
+    return ProductMapper.mapProductsArrayFromExternal(response as ExternalProductResponse[]);
   } catch (error) {
     console.error('Failed to fetch products:', error);
     return [];
@@ -53,7 +29,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
       return undefined;
     }
     
-    return apiProductToProduct(response as ApiProduct);
+    return ProductMapper.mapExternalToProduct(response as ExternalProductResponse);
   } catch (error) {
     console.error('Failed to fetch product by ID:', error);
     return undefined;
@@ -62,8 +38,6 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
 
 export const getSimilarProducts = async (product: Product, limit: number = 4): Promise<Product[]> => {
   try {
-    // For now, we'll fetch all products and filter by category
-    // In a real implementation, the backend would have a dedicated endpoint
     const allProducts = await fetchProducts();
     const similarProducts = allProducts
       .filter(p => p.id !== product.id && p.category === product.category)
@@ -85,7 +59,7 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
       return [];
     }
     
-    return response.map(apiProductToProduct);
+    return ProductMapper.mapProductsArrayFromExternal(response as ExternalProductResponse[]);
   } catch (error) {
     console.error('Failed to search products:', error);
     return [];

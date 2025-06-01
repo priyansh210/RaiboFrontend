@@ -1,48 +1,16 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { apiService } from '../services/ApiService';
 import { STORAGE_KEYS } from '../api/config';
 import { toast } from '@/hooks/use-toast';
-
-// Auth user type
-export interface AuthUser {
-  id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  roles: string[];
-}
-
-// API Response types
-interface LoginResponse {
-  access_token: string;
-  user: {
-    id: string;
-    email: string;
-    firstName?: string;
-    lastName?: string;
-    first_name?: string;
-    last_name?: string;
-    roles?: string[];
-  };
-}
-
-interface RegisterResponse {
-  access_token: string;
-  user: {
-    id: string;
-    email: string;
-    firstName?: string;
-    lastName?: string;
-    first_name?: string;
-    last_name?: string;
-    roles?: string[];
-  };
-}
+import { User, UserProfile, UserRoles } from '../models/internal/User';
+import { ExternalLoginResponse, ExternalRegisterResponse } from '../models/external/AuthModels';
+import { AuthMapper } from '../mappers/AuthMapper';
 
 // Auth context type
 export interface AuthContextType {
-  user: AuthUser | null;
-  profile: any | null; // Profile data
+  user: User | null;
+  profile: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   roles: string[];
@@ -75,13 +43,13 @@ const AuthContext = createContext<AuthContextType>({
 
 // Auth provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [roles, setRoles] = useState<string[]>([]);
   
   // Get user roles helper
-  const getUserRoles = (user: AuthUser) => {
+  const getUserRoles = (user: User) => {
     return user.roles || [];
   };
   
@@ -91,46 +59,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       
       try {
-        // Check for existing user in localStorage
         const userJson = localStorage.getItem(STORAGE_KEYS.USER);
         const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
         
         if (userJson && token) {
           try {
-            const userData = JSON.parse(userJson) as AuthUser;
+            const userData = JSON.parse(userJson) as User;
             setUser(userData);
             setRoles(getUserRoles(userData));
-            setProfile({
-              first_name: userData.firstName,
-              last_name: userData.lastName,
-              email: userData.email,
-            });
+            setProfile(AuthMapper.mapUserToProfile(userData));
           } catch (error) {
             console.error('Error parsing user data:', error);
-            // Clear invalid data
             localStorage.removeItem(STORAGE_KEYS.USER);
             localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
           }
         }
         
-        // Set up auth state change listener
         window.addEventListener('storage', (event) => {
           if (event.key === STORAGE_KEYS.USER) {
             if (event.newValue) {
               try {
-                const userData = JSON.parse(event.newValue) as AuthUser;
+                const userData = JSON.parse(event.newValue) as User;
                 setUser(userData);
                 setRoles(getUserRoles(userData));
-                setProfile({
-                  first_name: userData.firstName,
-                  last_name: userData.lastName,
-                  email: userData.email,
-                });
+                setProfile(AuthMapper.mapUserToProfile(userData));
               } catch (error) {
                 console.error('Error parsing user data from storage event:', error);
               }
             } else {
-              // User logged out
               setUser(null);
               setRoles([]);
               setProfile(null);
@@ -153,38 +109,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('AuthContext: Starting login process');
     
     try {
-      const response = await apiService.login({ email, password }) as LoginResponse;
+      const response = await apiService.login({ email, password }) as ExternalLoginResponse;
       console.log('AuthContext: Login response received:', response);
       
       if (!response) throw new Error('No response from server');
       
-      // Store the auth token
       if (response.access_token) {
         localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
         console.log('AuthContext: Token stored');
       }
       
-      // Create user object from response
-      const userData: AuthUser = {
-        id: response.user?.id || email,
-        email: response.user?.email || email,
-        firstName: response.user?.firstName || response.user?.first_name,
-        lastName: response.user?.lastName || response.user?.last_name,
-        roles: response.user?.roles || ['buyer']
-      };
-      
+      const userData = AuthMapper.mapExternalLoginToUser(response);
       console.log('AuthContext: User data created:', userData);
       
-      // Store user data
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
       
       setUser(userData);
       setRoles(getUserRoles(userData));
-      setProfile({
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        email: userData.email,
-      });
+      setProfile(AuthMapper.mapUserToProfile(userData));
       
       console.log('AuthContext: Login completed successfully');
       return;
@@ -202,7 +144,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('AuthContext: Starting registration process');
     
     try {
-      // Generate a temporary password for registration
       const password = `TempPass${Math.floor(Math.random() * 1000)}!`;
       
       const response = await apiService.register({
@@ -210,39 +151,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         phone: '',
         email,
         password
-      }) as RegisterResponse;
+      }) as ExternalRegisterResponse;
       
       console.log('AuthContext: Registration response received:', response);
       
       if (!response) throw new Error('No response from server');
       
-      // Store the auth token
       if (response.access_token) {
         localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
         console.log('AuthContext: Token stored after registration');
       }
       
-      // Create user object from response
-      const userData: AuthUser = {
-        id: response.user?.id || email,
-        email: response.user?.email || email,
-        firstName: firstName,
-        lastName: lastName,
-        roles: response.user?.roles || ['buyer']
-      };
+      const userData = AuthMapper.mapExternalRegisterToUser(response);
+      userData.firstName = firstName;
+      userData.lastName = lastName;
       
       console.log('AuthContext: User data created after registration:', userData);
       
-      // Store user data
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
       
       setUser(userData);
       setRoles(getUserRoles(userData));
-      setProfile({
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        email: userData.email,
-      });
+      setProfile(AuthMapper.mapUserToProfile(userData));
       
       toast({
         title: "Account created successfully",
@@ -262,7 +192,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Google login function
   const googleLogin = async () => {
     try {
-      // This will be handled by the GoogleAuthService
       throw new Error('Use GoogleAuthService for Google login');
     } catch (error: any) {
       console.error('Google login error:', error);
@@ -272,7 +201,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   const logout = async () => {
     try {
-      // Clear auth state
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER);
       
@@ -289,10 +217,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-  const isBuyer = roles.includes('buyer');
-  const isSeller = roles.includes('seller');
-  const isAdmin = roles.includes('admin');
-  const isGuest = !user; // Guest user when not logged in
+  const isBuyer = roles.includes(UserRoles.BUYER);
+  const isSeller = roles.includes(UserRoles.SELLER);
+  const isAdmin = roles.includes(UserRoles.ADMIN);
+  const isGuest = !user;
   
   return (
     <AuthContext.Provider value={{

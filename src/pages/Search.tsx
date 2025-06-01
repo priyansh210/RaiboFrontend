@@ -5,13 +5,13 @@ import Layout from '../components/Layout';
 import ProductCard from '../components/ProductCard';
 import SearchFilters from '../components/search/SearchFilters';
 import { products } from '../data/products';
-import { Color } from '../data/products';
+import { ProductColor } from '../models/internal/Product';
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
-  const [selectedColors, setSelectedColors] = useState<Color[]>([]);
+  const [selectedColors, setSelectedColors] = useState<ProductColor[]>([]);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

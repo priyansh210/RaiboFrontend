@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingUp, Star, Search } from 'lucide-react';
@@ -7,7 +8,7 @@ import ProductCard from '../components/ProductCard';
 import FeaturedBanner from '../components/FeaturedBanner';
 import { brands } from '../data/products';
 import { fetchProducts } from '../services/ProductService';
-import { Product } from '../data/products';
+import { Product } from '../models/internal/Product';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
