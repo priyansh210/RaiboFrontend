@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { apiService } from '../services/ApiService';
 import { STORAGE_KEYS } from '../api/config';
@@ -15,7 +14,7 @@ export interface AuthContextType {
   isLoading: boolean;
   roles: string[];
   login: (email: string, password: string) => Promise<void>;
-  register: (firstName: string, lastName: string, email: string) => Promise<void>;
+  register: (firstName: string, lastName: string, email: string, phone?: string) => Promise<void>;
   logout: () => Promise<void>;
   googleLogin: () => Promise<void>;
   isBuyer: boolean;
@@ -139,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   
   // Register function
-  const register = async (firstName: string, lastName: string, email: string) => {
+  const register = async (firstName: string, lastName: string, email: string, phone?: string) => {
     setIsLoading(true);
     console.log('AuthContext: Starting registration process');
     
@@ -148,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const response = await apiService.register({
         fullname: `${firstName} ${lastName}`,
-        phone: '',
+        phone: phone || '',
         email,
         password
       }) as ExternalRegisterResponse;
@@ -165,6 +164,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userData = AuthMapper.mapExternalRegisterToUser(response);
       userData.firstName = firstName;
       userData.lastName = lastName;
+      userData.phone = phone;
       
       console.log('AuthContext: User data created after registration:', userData);
       

@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import { Eye, EyeOff, AlertCircle, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const BuyerRegister = () => {
   const { register, isAuthenticated, isLoading } = useAuth();
@@ -13,11 +13,24 @@ const BuyerRegister = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [countryCode, setCountryCode] = useState('+1');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [error, setError] = useState('');
+  
+  const countryCodes = [
+    { code: '+1', name: 'US/Canada' },
+    { code: '+91', name: 'India' },
+    { code: '+44', name: 'UK' },
+    { code: '+86', name: 'China' },
+    { code: '+49', name: 'Germany' },
+    { code: '+33', name: 'France' },
+    { code: '+81', name: 'Japan' },
+    { code: '+61', name: 'Australia' }
+  ];
   
   // If already logged in, redirect to home
   useEffect(() => {
@@ -27,7 +40,7 @@ const BuyerRegister = () => {
   }, [isAuthenticated, navigate]);
   
   const validateForm = () => {
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    if (!firstName || !lastName || !email || !phoneNumber || !password || !confirmPassword) {
       setError('All fields are required');
       return false;
     }
@@ -57,7 +70,8 @@ const BuyerRegister = () => {
     if (!validateForm()) return;
     
     try {
-      await register(firstName, lastName, email);
+      const fullPhone = `${countryCode}${phoneNumber}`;
+      await register(firstName, lastName, email, fullPhone);
       navigate('/', { replace: true });
     } catch (err) {
       setError((err as Error).message || 'Failed to create account. Please try again.');
@@ -150,6 +164,35 @@ const BuyerRegister = () => {
                   className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm text-earth mb-1">
+                  Phone Number
+                </label>
+                <div className="flex gap-2">
+                  <Select value={countryCode} onValueChange={setCountryCode}>
+                    <SelectTrigger className="w-32 py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50 bg-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-taupe/30 shadow-lg">
+                      {countryCodes.map((country) => (
+                        <SelectItem key={country.code} value={country.code}>
+                          {country.code} {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <input
+                    id="phoneNumber"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="Enter phone number"
+                    className="flex-1 py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
+                    required
+                  />
+                </div>
               </div>
               
               <div>
