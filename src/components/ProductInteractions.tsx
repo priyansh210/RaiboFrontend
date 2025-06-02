@@ -1,0 +1,76 @@
+
+import React from 'react';
+import { Heart, Share2, MessageCircle, Star } from 'lucide-react';
+import { ProductInteraction } from '../models/internal/Product';
+import { useIsMobile } from '../hooks/use-mobile';
+
+interface ProductInteractionsProps {
+  productId: string;
+  interactions: ProductInteraction;
+  ratings: { average: number; count: number };
+  onLike: (productId: string) => void;
+  onShare: (productId: string) => void;
+  onComment?: (productId: string) => void;
+  showCommentPreview?: boolean;
+}
+
+const ProductInteractions: React.FC<ProductInteractionsProps> = ({
+  productId,
+  interactions,
+  ratings,
+  onLike,
+  onShare,
+  onComment,
+  showCommentPreview = false,
+}) => {
+  const isMobile = useIsMobile();
+
+  return (
+    <div className="p-3 border-t border-gray-100">
+      <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+        <div className="flex items-center space-x-3 md:space-x-4">
+          <button
+            onClick={() => onLike(productId)}
+            className={`flex items-center space-x-1 transition-colors ${
+              interactions.userHasLiked ? 'text-red-500' : 'hover:text-red-500'
+            }`}
+          >
+            <Heart size={isMobile ? 14 : 16} fill={interactions.userHasLiked ? 'currentColor' : 'none'} />
+            <span className="text-xs md:text-sm">{interactions.likes}</span>
+          </button>
+          
+          <button
+            onClick={() => onShare(productId)}
+            className="flex items-center space-x-1 hover:text-blue-500 transition-colors"
+          >
+            <Share2 size={isMobile ? 14 : 16} />
+            <span className="text-xs md:text-sm">{interactions.shares}</span>
+          </button>
+          
+          <button
+            onClick={() => onComment?.(productId)}
+            className="flex items-center space-x-1 hover:text-green-500 transition-colors"
+          >
+            <MessageCircle size={isMobile ? 14 : 16} />
+            <span className="text-xs md:text-sm">{interactions.comments.length}</span>
+          </button>
+        </div>
+        
+        <div className="flex items-center space-x-1">
+          <Star size={isMobile ? 12 : 14} className="text-yellow-400 fill-current" />
+          <span className="text-xs md:text-sm">{ratings.average}</span>
+        </div>
+      </div>
+      
+      {/* Latest comment preview */}
+      {showCommentPreview && interactions.comments.length > 0 && (
+        <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded mt-2">
+          <div className="font-medium">{interactions.comments[0].userName}</div>
+          <div className="truncate">{interactions.comments[0].comment}</div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProductInteractions;

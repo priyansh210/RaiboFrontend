@@ -22,6 +22,25 @@ export interface ProductRatings {
   count: number;
 }
 
+export interface ProductReview {
+  id: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: Date;
+  likes: number;
+  userHasLiked: boolean;
+}
+
+export interface ProductInteraction {
+  likes: number;
+  shares: number;
+  comments: ProductReview[];
+  userHasLiked: boolean;
+  userHasShared: boolean;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -41,7 +60,8 @@ export interface Product {
   bestSeller: boolean;
   new: boolean;
   deliveryInfo: string;
-  additionalInfo: string[];
+  additionalInfo?: string[];
+  interactions?: ProductInteraction;
   sellerId?: string;
   createdAt?: Date;
   updatedAt?: Date;
