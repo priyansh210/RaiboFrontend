@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Layout from '../components/Layout';
-import ProductCard from '../components/ProductCard';
+import ProductInteractions from '../components/ProductInteractions';
 import { Product } from '../models/internal/Product';
 import { fetchProducts } from '../services/ProductService';
-import { Heart, TrendingUp, ArrowUp, Share2, MessageCircle, Star } from 'lucide-react';
+import { Heart, TrendingUp, ArrowUp } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '../hooks/use-mobile';
+import { Link } from 'react-router-dom';
 
 // Dummy interaction data
 const generateDummyInteractions = (productId: string) => ({
@@ -39,7 +41,6 @@ const generateDummyInteractions = (productId: string) => ({
 
 const ForYou = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
   const [displayProducts, setDisplayProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -47,7 +48,7 @@ const ForYou = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const observer = useRef<IntersectionObserver | null>(null);
-  const productsPerPage = 6;
+  const productsPerPage = 10;
   const isMobile = useIsMobile();
 
   // Fetch initial products
@@ -64,12 +65,6 @@ const ForYou = () => {
         }));
 
         setProducts(productsWithInteractions);
-
-        // Set trending products
-        const trending = productsWithInteractions.slice(0, 4); // Adjust logic for trending products if needed
-        setTrendingProducts(trending);
-
-        // Set initial display products
         setDisplayProducts(productsWithInteractions.slice(0, productsPerPage));
       } catch (error) {
         console.error('Error loading products:', error);
@@ -139,7 +134,10 @@ const ForYou = () => {
     });
   };
 
-  const handleShare = (product: Product) => {
+  const handleShare = (productId: string) => {
+    const product = displayProducts.find(p => p.id === productId);
+    if (!product) return;
+
     if (navigator.share) {
       navigator.share({
         title: product.name,
@@ -155,7 +153,7 @@ const ForYou = () => {
     }
 
     setDisplayProducts(prev => prev.map(p => {
-      if (p.id === product.id && p.interactions) {
+      if (p.id === productId && p.interactions) {
         return {
           ...p,
           interactions: {
@@ -189,84 +187,101 @@ const ForYou = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-cream py-6 md:py-12">
-        <div className="container mx-auto px-4 md:px-6 max-w-7xl">
-          <h1 className="font-playfair text-2xl md:text-4xl text-charcoal mb-6 md:mb-8 text-center md:text-left">
-            For You
-          </h1>
-
-          {/* Trending Now Section */}
-          <div className="mb-8 md:mb-12">
-            <div className="flex items-center justify-center md:justify-start mb-4 md:mb-6">
-              <TrendingUp size={isMobile ? 20 : 24} className="text-terracotta mr-2" />
-              <h2 className="text-lg md:text-xl font-medium text-charcoal">Trending Now</h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {trendingProducts.map((product) => (
-                <ProductCard key={`trending-${product.id}`} product={product} />
-              ))}
-            </div>
+      <div className="min-h-screen bg-gray-50 py-4 md:py-8">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="flex items-center justify-center mb-6 md:mb-8">
+            <Heart size={isMobile ? 20 : 24} className="text-terracotta mr-2" />
+            <h1 className="font-playfair text-2xl md:text-4xl text-charcoal">For You</h1>
           </div>
 
-          {/* Personalized Recommendations */}
-          <div>
-            <div className="flex items-center justify-center md:justify-start mb-4 md:mb-6">
-              <Heart size={isMobile ? 20 : 24} className="text-terracotta mr-2" />
-              <h2 className="text-lg md:text-xl font-medium text-charcoal">Personalized for You</h2>
+          {isLoading && displayProducts.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta"></div>
             </div>
-
-            {isLoading && displayProducts.length === 0 ? (
-              <div className="bg-white p-6 md:p-8 text-center rounded-lg">
-                <div className="animate-spin rounded-full h-8 md:h-12 w-8 md:w-12 border-t-2 border-b-2 border-terracotta mx-auto mb-4"></div>
-                <p className="text-earth text-sm md:text-base">Loading your personalized recommendations...</p>
-              </div>
-            ) : displayProducts.length === 0 ? (
-              <div className="bg-white p-6 md:p-8 text-center rounded-lg">
-                <p className="text-lg md:text-xl text-charcoal mb-2">No recommendations yet</p>
-                <p className="text-earth text-sm md:text-base mb-4">Browse our products to get personalized recommendations</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          ) : displayProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-lg text-charcoal mb-2">No products found</p>
+              <p className="text-earth">Check back later for new recommendations</p>
+            </div>
+          ) : (
+            <>
+              {/* Pinterest-style masonry grid */}
+              <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
                 {displayProducts.map((product, index) => {
                   const isLast = displayProducts.length === index + 1;
+                  const imageHeight = Math.floor(Math.random() * 200) + 200; // Random height for masonry effect
 
                   return (
                     <div 
-                      key={`rec-${product.id}`}
+                      key={product.id}
                       ref={isLast ? lastProductElementRef : null}
-                      className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                      className="break-inside-avoid bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-4"
                     >
-                      <ProductCard product={product} />
+                      <Link to={`/product/${product.id}`} className="block">
+                        <div className="relative overflow-hidden">
+                          <img 
+                            src={product.images?.[0] || 'https://picsum.photos/300/400'} 
+                            alt={product.name}
+                            className="w-full object-cover transition-transform duration-500 hover:scale-105"
+                            style={{ height: `${imageHeight}px` }}
+                          />
+                          
+                          {/* Overlay with product info */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute bottom-4 left-4 right-4 text-white">
+                              <h3 className="font-medium text-lg mb-1 line-clamp-2">{product.name}</h3>
+                              <p className="text-sm opacity-90">{product.company.name}</p>
+                              <div className="flex items-center justify-between mt-2">
+                                <span className="text-xl font-bold">${product.price}</span>
+                                {product.discount > 0 && (
+                                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                    -{product.discount}%
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+
+                      {/* Product interactions */}
+                      <ProductInteractions
+                        productId={product.id}
+                        interactions={product.interactions!}
+                        ratings={{ average: product.averageRating, count: product.totalRatings }}
+                        onLike={handleLike}
+                        onShare={handleShare}
+                        showCommentPreview={true}
+                      />
                     </div>
                   );
                 })}
               </div>
-            )}
 
-            {isLoading && displayProducts.length > 0 && (
-              <div className="text-center py-6 md:py-8">
-                <div className="animate-spin rounded-full h-6 md:h-8 w-6 md:w-8 border-t-2 border-b-2 border-terracotta mx-auto"></div>
-                <p className="text-earth mt-2 text-sm md:text-base">Loading more...</p>
-              </div>
-            )}
+              {isLoading && displayProducts.length > 0 && (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-terracotta mx-auto"></div>
+                  <p className="text-earth mt-2">Loading more...</p>
+                </div>
+              )}
 
-            {!hasMore && displayProducts.length > 0 && (
-              <div className="text-center py-6 md:py-8">
-                <p className="text-earth text-sm md:text-base">You've reached the end of your recommendations</p>
-              </div>
-            )}
-          </div>
+              {!hasMore && displayProducts.length > 0 && (
+                <div className="text-center py-8">
+                  <p className="text-earth">You've reached the end!</p>
+                </div>
+              )}
+            </>
+          )}
 
           {/* Scroll to top button */}
           <button
             onClick={scrollToTop}
-            className={`fixed bottom-4 md:bottom-6 right-4 md:right-6 bg-terracotta text-white rounded-full p-2 md:p-3 shadow-lg transition-all duration-300 z-50 ${
+            className={`fixed bottom-6 right-6 bg-terracotta text-white rounded-full p-3 shadow-lg transition-all duration-300 z-50 ${
               showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
             }`}
             aria-label="Scroll to top"
           >
-            <ArrowUp size={isMobile ? 16 : 20} />
+            <ArrowUp size={20} />
           </button>
         </div>
       </div>
