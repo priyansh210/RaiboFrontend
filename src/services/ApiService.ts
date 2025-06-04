@@ -93,11 +93,13 @@ class ApiService {
 
   // Product methods
   async getProducts() {
-    return this.request(API_ENDPOINTS.PRODUCTS.GET_ALL);
+    const response = await this.request<{ message: string; products: any[] }>(API_ENDPOINTS.PRODUCTS.GET_ALL);
+    return response.products;
   }
 
   async getProductById(id: string) {
-    return this.request(`${API_ENDPOINTS.PRODUCTS.GET_BY_ID}/${id}`);
+    const response = await this.request<{ message: string; product: any }>(`${API_ENDPOINTS.PRODUCTS.GET_BY_ID}/${id}`);
+    return response.product;
   }
 
   async searchProducts(query: string) {

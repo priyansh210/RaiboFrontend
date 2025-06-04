@@ -4,7 +4,7 @@
  */
 
 // Base API URL - Updated to use your hosted backend
-export const API_BASE_URL = 'http://ec2-15-207-55-211.ap-south-1.compute.amazonaws.com:3000';
+export const API_BASE_URL = 'http://127.0.0.1:3000';
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -19,7 +19,7 @@ export const API_ENDPOINTS = {
   // Products
   PRODUCTS: {
     CREATE: '/api/v1/product',
-    GET_ALL: '/api/v1/products',
+    GET_ALL: '/api/v1/product',
     GET_BY_ID: '/api/v1/product', // Will append /:id
     SEARCH: '/api/v1/products/search',
   },

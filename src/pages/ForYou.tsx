@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Layout from '../components/Layout';
 import ProductCard from '../components/ProductCard';
@@ -46,30 +45,30 @@ const ForYou = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  
+
   const observer = useRef<IntersectionObserver | null>(null);
   const productsPerPage = 6;
   const isMobile = useIsMobile();
-  
+
   // Fetch initial products
   useEffect(() => {
     const loadProducts = async () => {
       setIsLoading(true);
       try {
         const productsData = await fetchProducts();
-        
+
         // Add dummy interactions to products
         const productsWithInteractions = productsData.map(product => ({
           ...product,
           interactions: generateDummyInteractions(product.id),
         }));
-        
+
         setProducts(productsWithInteractions);
-        
+
         // Set trending products
-        const trending = productsWithInteractions.filter(p => p.featured || p.bestSeller).slice(0, 4);
+        const trending = productsWithInteractions.slice(0, 4); // Adjust logic for trending products if needed
         setTrendingProducts(trending);
-        
+
         // Set initial display products
         setDisplayProducts(productsWithInteractions.slice(0, productsPerPage));
       } catch (error) {
@@ -78,45 +77,45 @@ const ForYou = () => {
         setIsLoading(false);
       }
     };
-    
+
     loadProducts();
   }, []);
-  
+
   // Infinite scroll implementation
   const lastProductElementRef = useCallback((node: HTMLDivElement | null) => {
     if (isLoading) return;
-    
+
     if (observer.current) observer.current.disconnect();
-    
+
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
         loadMoreProducts();
       }
     });
-    
+
     if (node) observer.current.observe(node);
   }, [isLoading, hasMore]);
-  
+
   // Load more products function
   const loadMoreProducts = () => {
     if (!hasMore || isLoading) return;
-    
+
     setIsLoading(true);
-    
+
     setTimeout(() => {
       const nextPageProducts = products.slice(page * productsPerPage, (page + 1) * productsPerPage);
-      
+
       if (nextPageProducts.length === 0) {
         setHasMore(false);
       } else {
         setDisplayProducts(prev => [...prev, ...nextPageProducts]);
         setPage(prev => prev + 1);
       }
-      
+
       setIsLoading(false);
     }, 800);
   };
-  
+
   // Handle product interactions
   const handleLike = (productId: string) => {
     setDisplayProducts(prev => prev.map(product => {
@@ -133,18 +132,18 @@ const ForYou = () => {
       }
       return product;
     }));
-    
+
     toast({
       title: "Product liked!",
       description: "Added to your favorites.",
     });
   };
-  
+
   const handleShare = (product: Product) => {
     if (navigator.share) {
       navigator.share({
         title: product.name,
-        text: `Check out this ${product.name} by ${product.brand}`,
+        text: `Check out this ${product.name} by ${product.company.name}`,
         url: `/product/${product.id}`,
       });
     } else {
@@ -154,7 +153,7 @@ const ForYou = () => {
         description: "Product link copied to clipboard.",
       });
     }
-    
+
     setDisplayProducts(prev => prev.map(p => {
       if (p.id === product.id && p.interactions) {
         return {
@@ -169,7 +168,7 @@ const ForYou = () => {
       return p;
     }));
   };
-  
+
   // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({
@@ -177,17 +176,17 @@ const ForYou = () => {
       behavior: 'smooth'
     });
   };
-  
+
   // Show/hide scroll to top button
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 500);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
+
   return (
     <Layout>
       <div className="min-h-screen bg-cream py-6 md:py-12">
@@ -195,65 +194,28 @@ const ForYou = () => {
           <h1 className="font-playfair text-2xl md:text-4xl text-charcoal mb-6 md:mb-8 text-center md:text-left">
             For You
           </h1>
-          
+
           {/* Trending Now Section */}
           <div className="mb-8 md:mb-12">
             <div className="flex items-center justify-center md:justify-start mb-4 md:mb-6">
               <TrendingUp size={isMobile ? 20 : 24} className="text-terracotta mr-2" />
               <h2 className="text-lg md:text-xl font-medium text-charcoal">Trending Now</h2>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {trendingProducts.map((product) => (
-                <div key={`trending-${product.id}`} className="bg-white rounded-lg overflow-hidden shadow-sm">
-                  <ProductCard product={product} />
-                  
-                  {/* Product Interactions */}
-                  <div className="p-3 border-t border-gray-100">
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <div className="flex items-center space-x-4">
-                        <button
-                          onClick={() => handleLike(product.id)}
-                          className={`flex items-center space-x-1 transition-colors ${
-                            product.interactions?.userHasLiked ? 'text-red-500' : 'hover:text-red-500'
-                          }`}
-                        >
-                          <Heart size={16} fill={product.interactions?.userHasLiked ? 'currentColor' : 'none'} />
-                          <span>{product.interactions?.likes || 0}</span>
-                        </button>
-                        
-                        <button
-                          onClick={() => handleShare(product)}
-                          className="flex items-center space-x-1 hover:text-blue-500 transition-colors"
-                        >
-                          <Share2 size={16} />
-                          <span>{product.interactions?.shares || 0}</span>
-                        </button>
-                        
-                        <div className="flex items-center space-x-1">
-                          <MessageCircle size={16} />
-                          <span>{product.interactions?.comments?.length || 0}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center space-x-1">
-                        <Star size={14} className="text-yellow-400 fill-current" />
-                        <span>{product.ratings.average}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <ProductCard key={`trending-${product.id}`} product={product} />
               ))}
             </div>
           </div>
-          
+
           {/* Personalized Recommendations */}
           <div>
             <div className="flex items-center justify-center md:justify-start mb-4 md:mb-6">
               <Heart size={isMobile ? 20 : 24} className="text-terracotta mr-2" />
               <h2 className="text-lg md:text-xl font-medium text-charcoal">Personalized for You</h2>
             </div>
-            
+
             {isLoading && displayProducts.length === 0 ? (
               <div className="bg-white p-6 md:p-8 text-center rounded-lg">
                 <div className="animate-spin rounded-full h-8 md:h-12 w-8 md:w-12 border-t-2 border-b-2 border-terracotta mx-auto mb-4"></div>
@@ -268,7 +230,7 @@ const ForYou = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {displayProducts.map((product, index) => {
                   const isLast = displayProducts.length === index + 1;
-                  
+
                   return (
                     <div 
                       key={`rec-${product.id}`}
@@ -276,69 +238,26 @@ const ForYou = () => {
                       className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                     >
                       <ProductCard product={product} />
-                      
-                      {/* Product Interactions */}
-                      <div className="p-3 border-t border-gray-100">
-                        <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                          <div className="flex items-center space-x-4">
-                            <button
-                              onClick={() => handleLike(product.id)}
-                              className={`flex items-center space-x-1 transition-colors ${
-                                product.interactions?.userHasLiked ? 'text-red-500' : 'hover:text-red-500'
-                              }`}
-                            >
-                              <Heart size={16} fill={product.interactions?.userHasLiked ? 'currentColor' : 'none'} />
-                              <span>{product.interactions?.likes || 0}</span>
-                            </button>
-                            
-                            <button
-                              onClick={() => handleShare(product)}
-                              className="flex items-center space-x-1 hover:text-blue-500 transition-colors"
-                            >
-                              <Share2 size={16} />
-                              <span>{product.interactions?.shares || 0}</span>
-                            </button>
-                            
-                            <div className="flex items-center space-x-1">
-                              <MessageCircle size={16} />
-                              <span>{product.interactions?.comments?.length || 0}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center space-x-1">
-                            <Star size={14} className="text-yellow-400 fill-current" />
-                            <span>{product.ratings.average}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Latest comment preview */}
-                        {product.interactions?.comments && product.interactions.comments.length > 0 && (
-                          <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                            <div className="font-medium">{product.interactions.comments[0].userName}</div>
-                            <div className="truncate">{product.interactions.comments[0].comment}</div>
-                          </div>
-                        )}
-                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
-            
+
             {isLoading && displayProducts.length > 0 && (
               <div className="text-center py-6 md:py-8">
                 <div className="animate-spin rounded-full h-6 md:h-8 w-6 md:w-8 border-t-2 border-b-2 border-terracotta mx-auto"></div>
                 <p className="text-earth mt-2 text-sm md:text-base">Loading more...</p>
               </div>
             )}
-            
+
             {!hasMore && displayProducts.length > 0 && (
               <div className="text-center py-6 md:py-8">
                 <p className="text-earth text-sm md:text-base">You've reached the end of your recommendations</p>
               </div>
             )}
           </div>
-          
+
           {/* Scroll to top button */}
           <button
             onClick={scrollToTop}

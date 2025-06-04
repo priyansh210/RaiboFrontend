@@ -1,5 +1,8 @@
+export interface UserPreferences {
+  preferredColors: ProductColor[]; // Array of preferred colors
+  preferredQuantity: number; // Default quantity for the user
+}
 
-// Internal Product model
 export interface ProductColor {
   name: string;
   code: string;
@@ -44,27 +47,27 @@ export interface ProductInteraction {
 export interface Product {
   id: string;
   name: string;
-  brand: string;
-  price: number;
   description: string;
-  category: string;
-  subcategory: string;
+  price: number;
+  quantity: number;
+  category: {
+    id: string;
+    name: string;
+  };
+  company: {
+    id: string;
+    name: string;
+    email: string;
+    address: string;
+  };
   images: string[];
-  colors: ProductColor[];
-  material: string;
-  dimensions: ProductDimensions;
-  weight: ProductWeight;
-  ratings: ProductRatings;
-  stock: number;
-  featured: boolean;
-  bestSeller: boolean;
-  new: boolean;
-  deliveryInfo: string;
-  additionalInfo?: string[];
-  interactions?: ProductInteraction;
-  sellerId?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  discount: number;
+  discountValidUntil?: Date | null;
+  averageRating: number;
+  totalRatings: number;
+  version: number;
+  interactions: ProductInteraction;
+  userPreferences?: UserPreferences; // Added UserPreferences field
 }
 
 export interface ProductCategory {

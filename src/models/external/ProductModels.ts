@@ -1,42 +1,27 @@
-
-// External models for API responses - Products
 export interface ExternalProductResponse {
-  id: string;
+  _id: string;
   name: string;
-  brand: string;
-  price: number;
   description: string;
-  category: string;
-  subcategory?: string;
-  images: string[];
-  colors: {
+  price: number;
+  quantity: number;
+  category_id: {
+    _id: string;
     name: string;
-    code: string;
-  }[];
-  material: string;
-  dimensions: {
-    width: number;
-    height: number;
-    depth: number;
-    unit: string;
+    __v: number;
   };
-  weight: {
-    value: number;
-    unit: string;
+  company_id: {
+    _id: string;
+    name: string;
+    email: string;
+    address: string;
+    __v: number;
   };
-  ratings: {
-    average: number;
-    count: number;
-  };
-  stock: number;
-  featured: boolean;
-  bestSeller?: boolean;
-  new?: boolean;
-  deliveryInfo: string;
-  additionalInfo?: string[];
-  seller_id?: string;
-  created_at?: string;
-  updated_at?: string;
+  images: string[];
+  discount: number;
+  discount_valid_until: string | null;
+  average_rating: number;
+  total_ratings: number;
+  __v: number;
 }
 
 export interface ExternalProductsListResponse {
