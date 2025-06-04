@@ -1,3 +1,4 @@
+
 import { ExternalProductResponse } from '../models/external/ProductModels';
 import { Product } from '../models/internal/Product';
 
@@ -31,6 +32,14 @@ export class ProductMapper {
       version: external.__v || 0,
       interactions: this.generateDefaultInteractions(external._id),
       userPreferences: this.generateDefaultUserPreferences(),
+      // Add dummy values for display properties
+      featured: Math.random() > 0.8, // 20% chance of being featured
+      new: Math.random() > 0.7, // 30% chance of being new
+      bestSeller: Math.random() > 0.8, // 20% chance of being bestseller
+      // Legacy compatibility
+      brand: external.company_id.name,
+      colors: this.generateDefaultUserPreferences().preferredColors,
+      subcategory: external.category_id.name,
     };
   }
 
@@ -40,8 +49,8 @@ export class ProductMapper {
 
   private static generateDefaultInteractions(productId: string) {
     return {
-      likes: 0,
-      shares: 0,
+      likes: Math.floor(Math.random() * 500) + 10,
+      shares: Math.floor(Math.random() * 100) + 5,
       comments: [],
       userHasLiked: false,
       userHasShared: false,
@@ -49,8 +58,15 @@ export class ProductMapper {
   }
 
   private static generateDefaultUserPreferences() {
+    const colors = [
+      { name: 'Natural', code: '#F5E6D3' },
+      { name: 'Charcoal', code: '#2C2C2C' },
+      { name: 'White', code: '#FFFFFF' },
+      { name: 'Brown', code: '#8B4513' },
+    ];
+    
     return {
-      preferredColors: [{ name: 'Default', code: '#000000' }],
+      preferredColors: colors.slice(0, Math.floor(Math.random() * 3) + 1),
       preferredQuantity: 1,
     };
   }

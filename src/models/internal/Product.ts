@@ -1,3 +1,4 @@
+
 export interface UserPreferences {
   preferredColors: ProductColor[]; // Array of preferred colors
   preferredQuantity: number; // Default quantity for the user
@@ -67,7 +68,15 @@ export interface Product {
   totalRatings: number;
   version: number;
   interactions: ProductInteraction;
-  userPreferences?: UserPreferences; // Added UserPreferences field
+  userPreferences?: UserPreferences;
+  // Additional properties for product filtering and display
+  featured?: boolean;
+  new?: boolean;
+  bestSeller?: boolean;
+  // Legacy compatibility properties
+  brand?: string;
+  colors?: ProductColor[];
+  subcategory?: string;
 }
 
 export interface ProductCategory {

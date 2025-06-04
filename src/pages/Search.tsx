@@ -4,22 +4,41 @@ import { Search as SearchIcon } from 'lucide-react';
 import Layout from '../components/Layout';
 import ProductCard from '../components/ProductCard';
 import SearchFilters from '../components/search/SearchFilters';
-import { products } from '../data/products';
-import { ProductColor } from '../models/internal/Product';
+import { fetchProducts } from '../services/ProductService';
+import { Product, ProductColor } from '../models/internal/Product';
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
   const [selectedColors, setSelectedColors] = useState<ProductColor[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load products when component mounts
+  React.useEffect(() => {
+    const loadProducts = async () => {
+      setIsLoading(true);
+      try {
+        const productsData = await fetchProducts();
+        setProducts(productsData);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadProducts();
+  }, []);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.brand.toLowerCase().includes(searchTerm.toLowerCase());
+                         (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         product.company.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1];
     const matchesColor = selectedColors.length === 0 || 
                         (product.colors && selectedColors.some(selectedColor => 
-                          product.colors.some(productColor => productColor.code === selectedColor.code)
+                          product.colors!.some(productColor => productColor.code === selectedColor.code)
                         ));
     
     return matchesSearch && matchesPrice && matchesColor;
@@ -65,13 +84,19 @@ const Search = () => {
                 <p className="text-earth mt-1">{filteredProducts.length} products found</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              {isLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              )}
 
-              {filteredProducts.length === 0 && (
+              {!isLoading && filteredProducts.length === 0 && (
                 <div className="text-center py-12">
                   <p className="text-earth">No products found matching your criteria.</p>
                 </div>

@@ -7,7 +7,7 @@ import PriceRangeSlider from '../components/PriceRangeSlider';
 import { categories } from '../data/products';
 import { fetchProducts, searchProducts } from '../services/ProductService';
 import { Filter, Grid, List, SlidersHorizontal, X } from 'lucide-react';
-import { Product } from '../data/products';
+import { Product } from '../models/internal/Product';
 
 const Browse = () => {
   const { category } = useParams();
@@ -58,8 +58,8 @@ const Browse = () => {
     // Filter by URL category parameter
     if (category && category !== 'all') {
       result = result.filter(product => 
-        product.category.toLowerCase().includes(category.toLowerCase()) ||
-        product.subcategory.toLowerCase().includes(category.toLowerCase())
+        product.category.name.toLowerCase().includes(category.toLowerCase()) ||
+        (product.subcategory && product.subcategory.toLowerCase().includes(category.toLowerCase()))
       );
     }
     
@@ -72,8 +72,8 @@ const Browse = () => {
           if (selectedOptions.length > 0) {
             result = result.filter(product => 
               selectedOptions.some(option => 
-                product.category.toLowerCase().includes(option) ||
-                product.subcategory.toLowerCase().includes(option)
+                product.category.name.toLowerCase().includes(option) ||
+                (product.subcategory && product.subcategory.toLowerCase().includes(option))
               )
             );
           }
@@ -82,7 +82,8 @@ const Browse = () => {
           if (selectedOptions.length > 0) {
             result = result.filter(product => 
               selectedOptions.some(option => 
-                product.brand.toLowerCase().includes(option)
+                (product.brand && product.brand.toLowerCase().includes(option)) ||
+                product.company.name.toLowerCase().includes(option)
               )
             );
           }
@@ -101,7 +102,7 @@ const Browse = () => {
         case 'Color':
           if (selectedOptions.length > 0) {
             result = result.filter(product => 
-              product.colors.some(color => 
+              product.colors && product.colors.some(color => 
                 selectedOptions.some(option => 
                   color.name.toLowerCase().includes(option)
                 )
