@@ -22,7 +22,6 @@ import AuthCallback from "./pages/AuthCallback";
 import Account from "./pages/Account";
 import Login from "./pages/Login";
 import Search from "./pages/Search";
-import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +47,6 @@ const App = () => (
               
               {/* Auth Routes */}
               <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
               
               {/* Buyer Authentication Routes - keep for backward compatibility */}
               <Route path="/buyer/login" element={<BuyerLogin />} />

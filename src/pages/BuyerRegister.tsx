@@ -71,7 +71,7 @@ const BuyerRegister = () => {
     
     try {
       const fullPhone = `${countryCode}${phoneNumber}`;
-      await register(firstName, lastName, email, fullPhone);
+      await register(firstName, lastName, email, fullPhone, password, 'buyer', '', null);
       navigate('/', { replace: true });
     } catch (err) {
       setError((err as Error).message || 'Failed to create account. Please try again.');

@@ -16,10 +16,10 @@ class ApiService {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     console.log('Making API request to:', url);
-    
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-    
+
     const config: RequestInit = {
       signal: controller.signal,
       ...options,
@@ -33,23 +33,23 @@ class ApiService {
       console.log('Request config:', config);
       const response = await fetch(url, config);
       clearTimeout(timeoutId);
-      
+
       console.log('Response status:', response.status);
       console.log('Response headers:', response.headers);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('API error response:', errorText);
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
-      
+
       const data = await response.json();
       console.log('Response data:', data);
       return data;
     } catch (error) {
       clearTimeout(timeoutId);
       console.error('API request failed:', error);
-      
+
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           throw new Error('Request timeout - please try again');
@@ -58,7 +58,7 @@ class ApiService {
           throw new Error('Unable to connect to server. Please check your internet connection.');
         }
       }
-      
+
       throw error;
     }
   }
@@ -69,11 +69,26 @@ class ApiService {
     phone: string;
     email: string;
     password: string;
+    role: string;
+    companyName: string;
+    taxId?: string;
   }) {
-    console.log('Registering user:', { ...userData, password: '[HIDDEN]' });
+    const { fullname, phone: mobileNumber, email, password, role, companyName, taxId } = userData;
+
+    const requestBody = {
+      fullname,
+      email,
+      password,
+      phone: mobileNumber,
+      role,
+      companyId: companyName, // Map companyName to companyId
+      taxId, // Include taxId if required by the backend
+    };
+
+    console.log('Registering user:', { ...requestBody, password: '[HIDDEN]' });
     return this.request(API_ENDPOINTS.AUTH.REGISTER, {
       method: 'POST',
-      body: JSON.stringify(userData),
+      body: JSON.stringify(requestBody),
     });
   }
 

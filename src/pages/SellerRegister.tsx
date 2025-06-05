@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +14,9 @@ const formSchema = z.object({
   first_name: z.string().min(2, { message: "First name must be at least 2 characters" }),
   last_name: z.string().min(2, { message: "Last name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
+  mobile_number: z
+    .string()
+    .regex(/^\d{10}$/, { message: "Mobile number must be 10 digits" }),
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters" })
@@ -23,10 +25,21 @@ const formSchema = z.object({
     .regex(/[0-9]/, { message: "Password must contain at least one number" })
     .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" }),
   confirm_password: z.string(),
-  terms: z.boolean().refine(val => val === true, { message: "You must accept the terms and conditions" }),
+  terms: z.boolean().refine(val => val === true, {
+    message: "You must accept the terms and conditions",
+  }),
   company_name: z.string().min(2, { message: "Company name must be at least 2 characters" }),
   tax_id: z.string().min(2, { message: "Tax ID must be at least 2 characters" }),
+}).superRefine((values, ctx) => {
+  if (values.confirm_password !== values.password) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['confirm_password'],
+      message: "Passwords do not match",
+    });
+  }
 });
+
 
 const SellerRegister = () => {
   const { register, isAuthenticated, isLoading, roles } = useAuth();
@@ -40,6 +53,7 @@ const SellerRegister = () => {
       first_name: "",
       last_name: "",
       email: "",
+      mobile_number: "",
       password: "",
       confirm_password: "",
       terms: false,
@@ -49,12 +63,9 @@ const SellerRegister = () => {
   });
 
   useEffect(() => {
-    // If already authenticated and has seller role, redirect to seller dashboard
     if (isAuthenticated && roles.includes('seller')) {
       navigate('/seller/dashboard', { replace: true });
-    }
-    // If authenticated but is only a buyer, show error message
-    else if (isAuthenticated && !roles.includes('seller')) {
+    } else if (isAuthenticated && !roles.includes('seller')) {
       setError('You are already registered as a buyer. Please contact support to become a seller.');
     }
   }, [isAuthenticated, roles, navigate]);
@@ -63,55 +74,32 @@ const SellerRegister = () => {
     setError('');
     
     try {
-      await register(values.first_name, values.last_name, values.email);
+      await register(
+        values.first_name,
+        values.last_name,
+        values.email,
+        values.mobile_number, // Pass mobile number
+        values.password,
+        values.company_name,
+        values.tax_id
+      );
       
-      // In a real implementation, we would also submit the seller-specific info
+      toast({
+        title: "Registration Successful",
+        description: "Your seller account has been created successfully.",
+        duration: 3000,
+      });
+      
       navigate('/seller/dashboard', { replace: true });
     } catch (err) {
       setError((err as Error).message || 'Failed to create account. Please try again.');
     }
   };
-  
+
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
-  
-  // Handle Google login for seller
-  const handleDemoLogin = async () => {
-    try {
-      // Create a mock seller login in our frontend-only implementation
-      navigate('/seller/dashboard', { replace: true });
-    } catch (err) {
-      setError((err as Error).message || 'Failed to sign up with Google. Please try again.');
-    }
-  };
-  
-  // Password strength indicators
-  const password = form.watch('password');
-  const hasMinLength = password.length >= 8;
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-  
-  const passwordStrength = 
-    hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar
-      ? 'Strong'
-      : hasMinLength && (hasUpperCase || hasLowerCase) && (hasNumber || hasSpecialChar)
-        ? 'Medium'
-        : password.length > 0
-          ? 'Weak'
-          : '';
-  
-  const getPasswordStrengthColor = () => {
-    switch (passwordStrength) {
-      case 'Strong': return 'text-green-600';
-      case 'Medium': return 'text-orange-500';
-      case 'Weak': return 'text-red-600';
-      default: return '';
-    }
-  };
-  
+
   return (
     <Layout>
       <div className="page-transition min-h-screen bg-cream py-10">
@@ -136,10 +124,7 @@ const SellerRegister = () => {
                       <FormItem>
                         <FormLabel className="text-sm text-earth">First Name</FormLabel>
                         <FormControl>
-                          <Input 
-                            {...field} 
-                            className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
-                          />
+                          <Input {...field} className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -153,17 +138,33 @@ const SellerRegister = () => {
                       <FormItem>
                         <FormLabel className="text-sm text-earth">Last Name</FormLabel>
                         <FormControl>
-                          <Input 
-                            {...field} 
-                            className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
-                          />
+                          <Input {...field} className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-                
+
+                <FormField
+                  control={form.control}
+                  name="mobile_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm text-earth">Mobile Number</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type="tel" 
+                          placeholder="Enter your 10-digit mobile number"
+                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="company_name"
@@ -171,10 +172,7 @@ const SellerRegister = () => {
                     <FormItem>
                       <FormLabel className="text-sm text-earth">Business Name</FormLabel>
                       <FormControl>
-                        <Input 
-                          {...field} 
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
-                        />
+                        <Input {...field} className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -188,10 +186,7 @@ const SellerRegister = () => {
                     <FormItem>
                       <FormLabel className="text-sm text-earth">Tax ID / Business Registration Number</FormLabel>
                       <FormControl>
-                        <Input 
-                          {...field} 
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
-                        />
+                        <Input {...field} className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -203,13 +198,9 @@ const SellerRegister = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm text-earth">Email address</FormLabel>
+                      <FormLabel className="text-sm text-earth">Email Address</FormLabel>
                       <FormControl>
-                        <Input 
-                          {...field} 
-                          type="email" 
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" 
-                        />
+                        <Input {...field} type="email" className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -239,51 +230,6 @@ const SellerRegister = () => {
                           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                       </div>
-                      
-                      {password && (
-                        <div className="mt-2">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs text-earth">Password strength:</span>
-                            <span className={`text-xs font-medium ${getPasswordStrengthColor()}`}>
-                              {passwordStrength}
-                            </span>
-                          </div>
-                          <div className="space-y-1">
-                            <div className="flex items-center text-xs">
-                              <span className={`mr-1 ${hasMinLength ? 'text-green-600' : 'text-earth'}`}>
-                                {hasMinLength ? <Check size={12} /> : '•'}
-                              </span>
-                              <span className={hasMinLength ? 'text-green-600' : 'text-earth'}>
-                                At least 8 characters
-                              </span>
-                            </div>
-                            <div className="flex items-center text-xs">
-                              <span className={`mr-1 ${hasUpperCase && hasLowerCase ? 'text-green-600' : 'text-earth'}`}>
-                                {hasUpperCase && hasLowerCase ? <Check size={12} /> : '•'}
-                              </span>
-                              <span className={hasUpperCase && hasLowerCase ? 'text-green-600' : 'text-earth'}>
-                                Upper and lowercase letters
-                              </span>
-                            </div>
-                            <div className="flex items-center text-xs">
-                              <span className={`mr-1 ${hasNumber ? 'text-green-600' : 'text-earth'}`}>
-                                {hasNumber ? <Check size={12} /> : '•'}
-                              </span>
-                              <span className={hasNumber ? 'text-green-600' : 'text-earth'}>
-                                At least one number
-                              </span>
-                            </div>
-                            <div className="flex items-center text-xs">
-                              <span className={`mr-1 ${hasSpecialChar ? 'text-green-600' : 'text-earth'}`}>
-                                {hasSpecialChar ? <Check size={12} /> : '•'}
-                              </span>
-                              <span className={hasSpecialChar ? 'text-green-600' : 'text-earth'}>
-                                At least one special character
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -339,38 +285,6 @@ const SellerRegister = () => {
                 </button>
               </form>
             </Form>
-            
-            <div className="mt-6">
-              <div className="relative flex items-center justify-center">
-                <div className="border-t border-taupe/20 absolute w-full"></div>
-                <span className="bg-white px-2 text-sm text-earth relative">
-                  Or continue with
-                </span>
-              </div>
-              
-              <div className="mt-4">
-                <button
-                  onClick={handleDemoLogin}
-                  className="w-full py-2 border border-gray-300 flex justify-center items-center space-x-2 hover:bg-gray-50 transition-colors"
-                >
-                  <span>Demo Seller Account</span>
-                </button>
-              </div>
-            </div>
-            
-            <div className="mt-6 text-center text-sm text-earth">
-              Already have a seller account?{' '}
-              <Link to="/seller/login" className="text-terracotta hover:underline">
-                Sign in
-              </Link>
-            </div>
-
-            <div className="mt-4 text-center text-sm text-earth">
-              Want to shop on RAIBO?{' '}
-              <Link to="/buyer/register" className="text-terracotta hover:underline">
-                Register as a buyer
-              </Link>
-            </div>
           </div>
         </div>
       </div>
