@@ -132,16 +132,6 @@
   font-family: 'Playfair Display', serif;
 }
 
-/* Animations */
-@keyframes slide-right {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
 /* Page Transition */
 .page-transition {
   @apply opacity-0 animate-fade-in;

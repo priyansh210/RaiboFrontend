@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User } from 'lucide-react';
@@ -378,25 +377,22 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Categories Navigation for desktop - only show for non-sellers with moving animation */}
+      {/* Categories Navigation for desktop - only show for non-sellers */}
       {!isSeller && (
-        <nav className={`bg-linen hidden lg:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'} overflow-hidden`}>
+        <nav className={`bg-linen hidden lg:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'}`}>
           <div className="container-custom">
-            <div className="relative">
-              <ul className="flex items-center animate-[slide-right_30s_linear_infinite] space-x-8 whitespace-nowrap">
-                {/* Duplicate categories for seamless infinite scroll */}
-                {[...categories, ...categories].map((category, index) => (
-                  <li key={`${category.name}-${index}`} className="flex-shrink-0">
-                    <Link 
-                      to={category.path} 
-                      className="text-charcoal text-xs hover:text-terracotta transition-colors"
-                    >
-                      {category.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <ul className="flex items-center justify-center space-x-8">
+              {categories.map((category) => (
+                <li key={category.name}>
+                  <Link 
+                    to={category.path} 
+                    className="text-charcoal text-xs hover:text-terracotta transition-colors"
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </nav>
       )}
