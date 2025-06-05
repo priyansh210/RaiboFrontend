@@ -302,14 +302,21 @@ const Navbar: React.FC = () => {
                       <Link to="/login" className="cursor-pointer w-full">Sign In</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/register" className="cursor-pointer w-full">Register</Link>
+                      <Link to="/buyer/register" className="cursor-pointer w-full">Register</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link to="/seller/login" className="cursor-pointer w-full">Seller Login</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/seller/register" className="cursor-pointer w-full">Seller Register</Link>
+                      <div className="text-sm text-gray-500 px-2 py-1">
+                        <div className="text-xs text-gray-400 mb-1">Selling on RAIBO?</div>
+                        <div className="flex flex-col space-y-1">
+                          <Link to="/seller/login" className="text-terracotta hover:underline text-xs">
+                            Seller Login
+                          </Link>
+                          <Link to="/seller/register" className="text-terracotta hover:underline text-xs">
+                            Seller Register
+                          </Link>
+                        </div>
+                      </div>
                     </DropdownMenuItem>
                   </>
                 )}
@@ -373,7 +380,7 @@ const Navbar: React.FC = () => {
 
       {/* Categories Navigation for desktop - only show for non-sellers with moving animation */}
       {!isSeller && (
-        <nav className={`bg-linen hidden md:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'} overflow-hidden`}>
+        <nav className={`bg-linen hidden lg:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'} overflow-hidden`}>
           <div className="container-custom">
             <div className="relative">
               <ul className="flex items-center animate-[slide-right_30s_linear_infinite] space-x-8 whitespace-nowrap">
@@ -493,19 +500,24 @@ const Navbar: React.FC = () => {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/register" className="text-charcoal hover:text-terracotta">
+                      <Link to="/buyer/register" className="text-charcoal hover:text-terracotta">
                         Register
                       </Link>
                     </li>
-                    <li>
-                      <Link to="/seller/login" className="text-charcoal hover:text-terracotta">
-                        Seller Sign In
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/seller/register" className="text-charcoal hover:text-terracotta">
-                        Seller Register
-                      </Link>
+                    <li className="border-t pt-3">
+                      <div className="text-sm text-gray-500 mb-2">Selling on RAIBO?</div>
+                      <div className="space-y-2 pl-2">
+                        <div>
+                          <Link to="/seller/login" className="text-terracotta hover:underline text-sm">
+                            Seller Sign In
+                          </Link>
+                        </div>
+                        <div>
+                          <Link to="/seller/register" className="text-terracotta hover:underline text-sm">
+                            Seller Register
+                          </Link>
+                        </div>
+                      </div>
                     </li>
                   </>
                 )}

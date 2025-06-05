@@ -142,20 +142,6 @@
   }
 }
 
-/* Category Animation */
-@keyframes slide-categories {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-.slide-animation {
-  animation: slide-categories 20s linear infinite;
-}
-
 /* Page Transition */
 .page-transition {
   @apply opacity-0 animate-fade-in;
