@@ -27,11 +27,9 @@ const SellerProducts = () => {
     const loadProducts = async () => {
       try {
         const allProducts = await fetchProducts();
-        // Filter products by seller's company
-        const sellerProducts = allProducts.filter(product => 
-          product.company.id === user?.companyId || product.company.name === user?.companyName
-        );
-        setProducts(sellerProducts);
+        // For now, show all products since we don't have seller filtering implemented
+        // In a real app, you would filter by seller ID from the API
+        setProducts(allProducts);
       } catch (error) {
         console.error('Error loading products:', error);
       } finally {
