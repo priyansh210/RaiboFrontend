@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingUp, Star, Search, Store } from 'lucide-react';
@@ -203,8 +204,8 @@ const Index = () => {
             <h2 className="font-playfair text-3xl text-charcoal text-center mb-12">Explore Our Categories</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Link to="/browse/furniture" className="category-card">
-                <div className="aspect-square bg-linen relative overflow-hidden group">
+              <Link to="/browse/furniture" className="category-card group">
+                <div className="aspect-square bg-linen relative overflow-hidden">
                   <img
                     src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1916&auto=format&fit=crop"
                     alt="Furniture"
@@ -219,8 +220,8 @@ const Index = () => {
                 </div>
               </Link>
               
-              <Link to="/browse/decor" className="category-card">
-                <div className="aspect-square bg-linen relative overflow-hidden group">
+              <Link to="/browse/decor" className="category-card group">
+                <div className="aspect-square bg-linen relative overflow-hidden">
                   <img
                     src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=1740&auto=format&fit=crop"
                     alt="Decor"
@@ -235,8 +236,8 @@ const Index = () => {
                 </div>
               </Link>
               
-              <Link to="/browse/lighting" className="category-card">
-                <div className="aspect-square bg-linen relative overflow-hidden group">
+              <Link to="/browse/lighting" className="category-card group">
+                <div className="aspect-square bg-linen relative overflow-hidden">
                   <img
                     src="https://images.unsplash.com/photo-1540932239986-30128078f3c5?q=80&w=1587&auto=format&fit=crop"
                     alt="Lighting"
