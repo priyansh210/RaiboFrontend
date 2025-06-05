@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User } from 'lucide-react';
@@ -23,7 +24,7 @@ const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
-  const { cart: cartItems } = useCart();
+  const { cartItems } = useCart();
   const { isAuthenticated, user, logout, isSeller, isGuest } = useAuth();
   const isMobile = useIsMobile();
 
@@ -370,22 +371,25 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Categories Navigation for desktop - only show for non-sellers */}
+      {/* Categories Navigation for desktop - only show for non-sellers with moving animation */}
       {!isSeller && (
-        <nav className={`bg-linen hidden md:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'}`}>
+        <nav className={`bg-linen hidden md:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'} overflow-hidden`}>
           <div className="container-custom">
-            <ul className="flex items-center justify-between flex-wrap">
-              {categories.map((category) => (
-                <li key={category.name}>
-                  <Link 
-                    to={category.path} 
-                    className="text-charcoal text-xs hover:text-terracotta transition-colors"
-                  >
-                    {category.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <div className="relative">
+              <ul className="flex items-center animate-[slide-right_30s_linear_infinite] space-x-8 whitespace-nowrap">
+                {/* Duplicate categories for seamless infinite scroll */}
+                {[...categories, ...categories].map((category, index) => (
+                  <li key={`${category.name}-${index}`} className="flex-shrink-0">
+                    <Link 
+                      to={category.path} 
+                      className="text-charcoal text-xs hover:text-terracotta transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </nav>
       )}

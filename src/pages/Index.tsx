@@ -56,17 +56,14 @@ const Index = () => {
   return (
     <Layout>
       <div className="page-transition">
-        {/* Hero Section - Buyer Focused */}
+        {/* Hero Section */}
         <section className="min-h-[70vh] bg-cream flex items-center">
           <div className="container-custom grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-16">
             <div>
               <div className="mb-6">
-                <h1 className="font-playfair text-5xl md:text-7xl text-charcoal leading-tight mb-2">
+                <h1 className="font-playfair text-5xl md:text-7xl text-charcoal leading-tight mb-4">
                   RAIBO
                 </h1>
-                <p className="text-terracotta text-lg font-medium uppercase tracking-wider">
-                  Buyer Marketplace
-                </p>
               </div>
               
               <h2 className="font-playfair text-3xl md:text-4xl text-charcoal leading-tight mb-4">

@@ -33,14 +33,14 @@ interface CartContextProps {
 // Load cart from localStorage
 export const loadCart = (): CartItem[] => {
   if (typeof window === 'undefined') return [];
-  const savedCart = localStorage.getItem('cart');
+  const savedCart = localStorage.getItem('raibo_cart');
   return savedCart ? JSON.parse(savedCart) : [];
 };
 
 // Save cart to localStorage
 export const saveCart = (cart: CartItem[]): void => {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('cart', JSON.stringify(cart));
+  localStorage.setItem('raibo_cart', JSON.stringify(cart));
 };
 
 // Calculate cart totals
@@ -120,6 +120,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         return [...prevItems, newItem];
       }
+    });
+    
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
     });
   };
 

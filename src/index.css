@@ -1,72 +1,63 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 30 30% 98%;
-    --foreground: 20 10% 5%;
-
-    --card: 30 30% 98%;
-    --card-foreground: 20 10% 5%;
-
-    --popover: 30 30% 98%;
-    --popover-foreground: 20 10% 5%;
-
-    --primary: 16 59% 58%;
-    --primary-foreground: 30 30% 98%;
-
-    --secondary: 32 25% 94%;
-    --secondary-foreground: 20 10% 5%;
-
-    --muted: 30 10% 92%;
-    --muted-foreground: 20 10% 40%;
-
-    --accent: 32 25% 94%;
-    --accent-foreground: 20 10% 5%;
-
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 9% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 30 30% 98%;
-
-    --border: 20 10% 90%;
-    --input: 20 10% 90%;
-    --ring: 16 59% 58%;
-
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 20 10% 10%;
-    --foreground: 30 10% 98%;
-
-    --card: 20 10% 10%;
-    --card-foreground: 30 10% 98%;
-
-    --popover: 20 10% 10%;
-    --popover-foreground: 30 10% 98%;
-
-    --primary: 16 59% 58%;
-    --primary-foreground: 30 10% 98%;
-
-    --secondary: 20 10% 20%;
-    --secondary-foreground: 30 10% 98%;
-
-    --muted: 20 10% 20%;
-    --muted-foreground: 30 10% 70%;
-
-    --accent: 20 10% 20%;
-    --accent-foreground: 30 10% 98%;
-
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 9% 9%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 30 10% 98%;
-
-    --border: 20 10% 20%;
-    --input: 20 10% 20%;
-    --ring: 16 59% 58%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
@@ -75,56 +66,152 @@
     @apply border-border;
   }
   
-  html {
-    scroll-behavior: smooth;
-  }
-  
   body {
-    @apply bg-background text-foreground font-outfit;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-playfair font-medium tracking-wide;
+    font-family: 'Playfair Display', serif;
   }
 }
 
-@layer components {
+/* Custom Color Variables */
+:root {
+  --terracotta: #B5651D;
+  --cream: #F8F5F0;
+  --charcoal: #373737;
+  --earth: #8B6F47;
+  --linen: #FAF7F2;
+  --sand: #E8DDD4;
+  --umber: #9B4D1F;
+  --taupe: #C7B299;
+  --olive: #6B7C32;
+}
+
+/* Custom Tailwind Classes */
+@layer utilities {
+  .bg-terracotta { background-color: var(--terracotta); }
+  .bg-cream { background-color: var(--cream); }
+  .bg-charcoal { background-color: var(--charcoal); }
+  .bg-earth { background-color: var(--earth); }
+  .bg-linen { background-color: var(--linen); }
+  .bg-sand { background-color: var(--sand); }
+  .bg-umber { background-color: var(--umber); }
+  .bg-taupe { background-color: var(--taupe); }
+  .bg-olive { background-color: var(--olive); }
+  
+  .text-terracotta { color: var(--terracotta); }
+  .text-cream { color: var(--cream); }
+  .text-charcoal { color: var(--charcoal); }
+  .text-earth { color: var(--earth); }
+  .text-linen { color: var(--linen); }
+  .text-sand { color: var(--sand); }
+  .text-umber { color: var(--umber); }
+  .text-taupe { color: var(--taupe); }
+  .text-olive { color: var(--olive); }
+  
+  .border-terracotta { border-color: var(--terracotta); }
+  .border-cream { border-color: var(--cream); }
+  .border-charcoal { border-color: var(--charcoal); }
+  .border-earth { border-color: var(--earth); }
+  .border-linen { border-color: var(--linen); }
+  .border-sand { border-color: var(--sand); }
+  .border-umber { border-color: var(--umber); }
+  .border-taupe { border-color: var(--taupe); }
+  .border-olive { border-color: var(--olive); }
+}
+
+/* Container */
+.container-custom {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Typography */
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Animations */
+@keyframes slide-right {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Page Transition */
+.page-transition {
+  @apply opacity-0 animate-fade-in;
+}
+
+/* Product Grid */
+.product-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+}
+
+/* Category Card */
+.category-card {
+  @apply block relative overflow-hidden group cursor-pointer;
+}
+
+.category-card:hover img {
+  @apply scale-105;
+}
+
+/* Responsive Design */
+@screen sm {
   .container-custom {
-    @apply w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8;
+    @apply px-6;
   }
-  
-  .btn-primary {
-    @apply bg-terracotta text-white font-medium py-2 px-4 rounded-sm transition-colors hover:bg-umber;
+}
+
+@screen lg {
+  .container-custom {
+    @apply px-8;
   }
-  
-  .btn-secondary {
-    @apply bg-sand text-charcoal font-medium py-2 px-4 rounded-sm transition-colors hover:bg-taupe hover:text-white;
+}
+
+/* Loading Screen */
+.loading-screen {
+  @apply fixed inset-0 bg-cream flex items-center justify-center z-50;
+}
+
+.loading-logo {
+  @apply font-playfair text-6xl md:text-8xl text-terracotta font-bold tracking-wider;
+  animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
   }
-  
-  .card-shadow {
-    @apply shadow-[0_4px_20px_rgba(0,0,0,0.08)];
+  50% {
+    opacity: 1;
+    transform: scale(1);
   }
-  
-  .nav-link {
-    @apply text-charcoal hover:text-terracotta transition-colors tracking-wide uppercase text-sm font-medium;
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
   }
-  
-  .product-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
-  }
-  
-  .animate-enter {
-    @apply opacity-0;
-    animation: fadeIn 0.5s ease forwards;
-  }
-  
-  @keyframes fadeIn {
-    to {
-      opacity: 1;
-    }
-  }
-  
-  .page-transition {
-    @apply animate-fade-in;
-  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-linen;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-taupe rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-earth;
 }
