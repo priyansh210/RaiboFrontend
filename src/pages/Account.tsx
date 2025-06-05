@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -6,8 +5,9 @@ import Layout from '../components/Layout';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { Phone, Mail, MapPin, User, Package, LogOut, Save, AlertCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, User, Package, LogOut, Save, AlertCircle, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { ordersApi } from '../api/mockApi';
 
 // Mock user data to extend the profile
@@ -35,7 +35,7 @@ const mockOrderHistory = [
 ];
 
 const Account = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, isBuyer } = useAuth();
   const navigate = useNavigate();
   
   // Profile state
@@ -55,7 +55,11 @@ const Account = () => {
     if (!isAuthenticated) {
       navigate('/login');
     }
-  }, [isAuthenticated, navigate]);
+    // If user is a seller, redirect to seller dashboard
+    if (user && !isBuyer) {
+      navigate('/seller/dashboard');
+    }
+  }, [isAuthenticated, navigate, user, isBuyer]);
   
   // Get user initials for avatar
   const getUserInitials = (): string => {
@@ -124,6 +128,9 @@ const Account = () => {
                     {user.firstName} {user.lastName}
                   </h1>
                   <p className="text-earth">{user.email}</p>
+                  <span className="inline-block bg-terracotta/10 text-terracotta text-xs px-2 py-1 rounded-sm mt-1">
+                    Buyer Account
+                  </span>
                 </div>
               </div>
               
@@ -135,6 +142,33 @@ const Account = () => {
                 <LogOut size={16} />
                 Sign Out
               </Button>
+            </div>
+
+            {/* Seller Portal Promotion */}
+            <div className="mb-6 p-4 bg-gradient-to-r from-terracotta/5 to-olive/5 rounded-sm border border-terracotta/20">
+              <div className="flex items-start gap-3">
+                <Store size={24} className="text-terracotta flex-shrink-0 mt-1" />
+                <div className="flex-grow">
+                  <h3 className="text-charcoal font-medium mb-1">Interested in selling?</h3>
+                  <p className="text-earth text-sm mb-3">
+                    Turn your passion into profit. Join our marketplace as a seller and reach thousands of buyers.
+                  </p>
+                  <div className="flex gap-2">
+                    <Link
+                      to="/seller/register"
+                      className="bg-terracotta text-white px-4 py-2 text-sm hover:bg-umber transition-colors"
+                    >
+                      Become a Seller
+                    </Link>
+                    <Link
+                      to="/seller/login"
+                      className="border border-terracotta text-terracotta px-4 py-2 text-sm hover:bg-terracotta/10 transition-colors"
+                    >
+                      Seller Login
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <Tabs defaultValue="profile" className="mt-4">

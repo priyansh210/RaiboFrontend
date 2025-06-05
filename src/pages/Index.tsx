@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, TrendingUp, Star, Search } from 'lucide-react';
+import { ArrowRight, TrendingUp, Star, Search, Store } from 'lucide-react';
 import Layout from '../components/Layout';
 import BrandSlider from '../components/BrandSlider';
 import ProductCard from '../components/ProductCard';
@@ -57,15 +56,24 @@ const Index = () => {
   return (
     <Layout>
       <div className="page-transition">
-        {/* Hero Section */}
+        {/* Hero Section - Buyer Focused */}
         <section className="min-h-[70vh] bg-cream flex items-center">
           <div className="container-custom grid grid-cols-1 lg:grid-cols-2 gap-8 items-center py-16">
             <div>
-              <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl text-charcoal leading-tight">
-                Elevate your space with artisanal home goods
-              </h1>
+              <div className="mb-6">
+                <h1 className="font-playfair text-5xl md:text-7xl text-charcoal leading-tight mb-2">
+                  RAIBO
+                </h1>
+                <p className="text-terracotta text-lg font-medium uppercase tracking-wider">
+                  Buyer Marketplace
+                </p>
+              </div>
+              
+              <h2 className="font-playfair text-3xl md:text-4xl text-charcoal leading-tight mb-4">
+                Discover artisanal home goods
+              </h2>
               <p className="text-earth mt-4 text-lg max-w-xl">
-                Discover a curated collection of handcrafted furniture and décor that brings warmth and character to your home.
+                Find curated collections of handcrafted furniture and décor that brings warmth and character to your home.
               </p>
               
               <form onSubmit={handleSearch} className="mt-8 flex">
@@ -97,6 +105,32 @@ const Index = () => {
                 >
                   For You
                 </Link>
+              </div>
+              
+              {/* Seller Portal Link */}
+              <div className="mt-6 p-4 bg-white/50 rounded-sm border border-taupe/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Store size={20} className="text-terracotta" />
+                  <span className="text-charcoal font-medium">Are you a seller?</span>
+                </div>
+                <p className="text-earth text-sm mb-3">
+                  Join our marketplace and start selling your artisanal products.
+                </p>
+                <div className="flex gap-2">
+                  <Link
+                    to="/seller/login"
+                    className="text-terracotta hover:underline text-sm font-medium"
+                  >
+                    Seller Login
+                  </Link>
+                  <span className="text-earth text-sm">•</span>
+                  <Link
+                    to="/seller/register"
+                    className="text-terracotta hover:underline text-sm font-medium"
+                  >
+                    Become a Seller
+                  </Link>
+                </div>
               </div>
             </div>
             <div className="relative">

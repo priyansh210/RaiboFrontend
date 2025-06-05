@@ -147,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
   
-  // Login function
+  // Login function with portal separation
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     console.log('AuthContext: Starting login process');
@@ -187,6 +187,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       console.log('AuthContext: Login completed successfully');
+      
+      // Don't redirect here - let the login pages handle redirection based on role
       return;
     } catch (error: any) {
       console.error('AuthContext: Login error:', error);
@@ -270,6 +272,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     }
   };
+  
   // Google login function
   const googleLogin = async () => {
     try {

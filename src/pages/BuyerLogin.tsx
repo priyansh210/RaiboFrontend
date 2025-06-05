@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -19,7 +18,7 @@ const BuyerLogin = () => {
   // Get the redirect URL from the location state or default to home
   const from = (location.state as any)?.from || '/';
   
-  // If already logged in, redirect to home
+  // If already logged in, redirect to buyer areas only
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/', { replace: true });
@@ -34,9 +33,10 @@ const BuyerLogin = () => {
       await login(email, password);
       toast({
         title: "Welcome back!",
-        description: "You have successfully logged in.",
+        description: "You have successfully logged in to RAIBO.",
       });
-      navigate(from, { replace: true });
+      // Always redirect to buyer portal (home)
+      navigate('/', { replace: true });
     } catch (err) {
       setError((err as Error).message || 'Failed to log in. Please try again.');
     }
@@ -65,7 +65,11 @@ const BuyerLogin = () => {
       <div className="page-transition min-h-screen bg-cream py-10">
         <div className="container-custom max-w-md">
           <div className="bg-white p-8 rounded-sm shadow-sm animate-fade-in">
-            <h1 className="font-playfair text-2xl text-center text-charcoal mb-6">Buyer Sign In</h1>
+            <div className="text-center mb-6">
+              <h1 className="font-playfair text-3xl text-charcoal mb-2">RAIBO</h1>
+              <p className="text-xs text-earth uppercase tracking-wider mb-4">Buyer Portal</p>
+              <h2 className="font-playfair text-2xl text-charcoal">Welcome Back</h2>
+            </div>
             
             {error && (
               <div className="mb-6 p-3 bg-red-50 text-red-700 rounded-sm flex items-center">
@@ -161,7 +165,7 @@ const BuyerLogin = () => {
             <div className="mt-4 text-center text-sm text-earth">
               Are you a seller?{' '}
               <Link to="/seller/login" className="text-terracotta hover:underline">
-                Seller Login
+                Go to Seller Portal
               </Link>
             </div>
           </div>

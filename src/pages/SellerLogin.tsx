@@ -24,29 +24,30 @@ const SellerLogin = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
     try {
       await login(email, password);
       
-      // Check if the user has a seller role after login
-      if (!roles.includes('seller')) {
-        toast({
-          title: "Access denied",
-          description: "This account doesn't have seller permissions.",
-          variant: "destructive",
-        });
-        
-        // Log out since they don't have seller permissions
-        setIsLoading(false);
-        return;
+      // After login, check if user is a seller
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        if (userData.roles && userData.roles.includes('seller')) {
+          toast({
+            title: "Login successful",
+            description: "Welcome to your seller dashboard!",
+          });
+          navigate('/seller/dashboard');
+        } else {
+          setError('This account does not have seller permissions.');
+          toast({
+            title: "Access denied",
+            description: "This account doesn't have seller permissions.",
+            variant: "destructive",
+          });
+        }
       }
-      
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
-      
-      navigate('/seller/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       setError((err as Error).message || 'Please check your credentials and try again.');
@@ -96,8 +97,12 @@ const SellerLogin = () => {
     <div className="min-h-screen bg-cream py-16 px-4 flex items-center justify-center">
       <div className="bg-white p-8 rounded-sm shadow-sm max-w-md w-full">
         <div className="mb-6 text-center">
-          <h1 className="font-playfair text-2xl text-charcoal mb-2">Seller Login</h1>
-          <p className="text-earth text-sm">Sign in to access your seller dashboard</p>
+          <div className="mb-4">
+            <h1 className="font-playfair text-3xl text-charcoal">RAIBO</h1>
+            <p className="text-xs text-earth uppercase tracking-wider">Seller Portal</p>
+          </div>
+          <h2 className="font-playfair text-2xl text-charcoal mb-2">Seller Login</h2>
+          <p className="text-earth text-sm">Access your seller dashboard</p>
         </div>
         
         {error && (
@@ -165,6 +170,12 @@ const SellerLogin = () => {
             Don't have a seller account?{' '}
             <Link to="/seller/register" className="text-terracotta hover:underline">
               Register here
+            </Link>
+          </p>
+          <p className="text-sm text-earth mt-2">
+            Are you a buyer?{' '}
+            <Link to="/login" className="text-terracotta hover:underline">
+              Go to Buyer Portal
             </Link>
           </p>
         </div>
