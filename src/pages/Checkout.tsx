@@ -8,26 +8,6 @@ import { toast } from '@/hooks/use-toast';
 import { apiService } from '../services/ApiService';
 import { Address, PaymentMethod } from '../api/types';
 
-interface Address {
-  id: string;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  receiver_name: string;
-  receiver_phone: string;
-  is_default?: boolean;
-}
-
-interface PaymentMethod {
-  id: string;
-  card_number: string;
-  card_holder: string;
-  expiry_date: string;
-  card_type: string;
-}
-
 const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotals, updateQuantity, removeFromCart, clearCart } = useCart();

@@ -1,6 +1,6 @@
 import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, getFormDataHeaders, REQUEST_TIMEOUT } from '../api/config';
 import {ExternalProductResponse} from '../models/external/ProductModels';
-import { PaymentMethodsResponse, CreateOrderResponse, PaymentResponse, AddressesResponse } from '../api/types';
+import { PaymentMethod, PaymentMethodsResponse, CreateOrderResponse, PaymentResponse, Address, AddressesResponse } from '../api/types';
 
 class ApiService {
   private baseURL: string;
