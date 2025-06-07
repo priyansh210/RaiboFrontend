@@ -135,14 +135,33 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
-    if (!product || !selectedColor) return;
-    
+    if (!product || !selectedColor) {
+      toast({
+        title: 'Error',
+        description: 'Please select a color before adding to cart.',
+        variant: 'destructive',
+      });
+      return;
+    }
+  
+    const cartItem = {
+      ...product,
+      selectedColor: {
+        name: selectedColor.name,
+        code: selectedColor.code,
+      },
+      quantity: quantity ?? 1, // default to 1 if quantity is undefined
+    };
+  
+    addToCart(cartItem);
+  
     toast({
       title: 'Added to cart',
-      description: `${product.name} has been added to your cart`,
+      description: `${product.name} has been added to your cart.`,
       duration: 3000,
     });
   };
+  
 
   const nextImage = () => {
     if (product?.images && currentImageIndex < product.images.length - 1) {

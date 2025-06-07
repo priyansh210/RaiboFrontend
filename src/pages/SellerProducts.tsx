@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '../context/AuthContext';
 import { Product } from '../models/internal/Product';
 import { fetchProducts } from '../services/ProductService';
+import { apiService } from '@/services/ApiService';
+import { toast } from '@/hooks/use-toast';
 
 const SellerProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -46,7 +48,24 @@ const SellerProducts = () => {
   );
 
   const handleDeleteProduct = (productId: string) => {
-    // TODO: Implement product deletion
+    const company_id = user?.companyId
+    apiService.deleteProduct(company_id, productId) // Implement using Product Service as wrapper
+      .then(() => {
+        setProducts((prevProducts) => prevProducts.filter(product => product.id !== productId));
+        toast({
+                  title: 'Success',
+                  description: 'Product deleted successfully.',
+                  variant: 'default',
+                });
+      })
+      .catch((error) => {
+        console.error('Error deleting product:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to delete product.',
+          variant: 'destructive',
+        });
+      });
     console.log('Delete product:', productId);
   };
 

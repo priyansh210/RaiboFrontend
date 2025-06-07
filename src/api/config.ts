@@ -29,10 +29,10 @@ export const API_ENDPOINTS = {
   // Cart
   CART: {
     GET: '/api/v1/cart/',
-    ADD: '/cart', // Will append /:buyer_id/add
-    REMOVE: '/cart', // Will append /:buyer_id/remove
-    UPDATE: '/cart', // Will append /:buyer_id/update
-    DELETE: '/cart', // Will append /:buyer_id
+    ADD: '/api/v1/cart/add', // Will append /:buyer_id/add
+    REMOVE: '/api/v1/cart/remove', // Will append /:buyer_id/remove
+    UPDATE: '/api/v1/cart/update-quantity',
+    DELETE: '/api/v1/cart/', // Will append /:buyer_id
   },
   
   // Orders

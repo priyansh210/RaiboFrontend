@@ -1,7 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Product } from '../data/products';
+import { Product } from '../models/internal/Product';
+import { apiService } from '@/services/ApiService';
 
 // Define CartItem type
 export interface CartItem {
@@ -30,17 +30,31 @@ interface CartContextProps {
   };
 }
 
-// Load cart from localStorage
-export const loadCart = (): CartItem[] => {
-  if (typeof window === 'undefined') return [];
-  const savedCart = localStorage.getItem('raibo_cart');
-  return savedCart ? JSON.parse(savedCart) : [];
+// Load cart from the database
+export const loadCart = async (): Promise<CartItem[]> => {
+  try {
+    const response = await apiService.getCart();
+    return response.products.map((product: any) => ({
+      id: product.product_id._id,
+      name: product.product_id.name,
+      price: product.product_id.price,
+      image: product.product_id.imageUrls[0] || '/placeholder.svg',
+      quantity: product.quantity,
+      selectedColor: product.selectedColor || { name: 'Default', code: '#000000' },
+    }));
+  } catch (error) {
+    console.error("Failed to load cart from API:", error);
+    return [];
+  }
 };
 
-// Save cart to localStorage
-export const saveCart = (cart: CartItem[]): void => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('raibo_cart', JSON.stringify(cart));
+// Save cart to the database
+export const saveCart = async (cart: CartItem[]): Promise<void> => {
+  // try {
+  //   pass;
+  // } catch (error) {
+  //   console.error("Failed to save cart to API:", error);
+  // }
 };
 
 // Calculate cart totals
@@ -85,63 +99,137 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     total: 0,
   });
 
-  // Load cart from localStorage on initial render
+  // Load cart from the database on initial render
   useEffect(() => {
-    setCartItems(loadCart());
+    const fetchCart = async () => {
+      const cart = await loadCart();
+      setCartItems(cart);
+    };
+    fetchCart();
   }, []);
 
-  // Update localStorage and totals whenever cart changes
+  // Update the database and totals whenever the cart changes
   useEffect(() => {
     saveCart(cartItems);
     setCartTotals(calculateCartTotals(cartItems));
   }, [cartItems]);
 
-  const addToCart = (product: Product & { selectedColor: { name: string; code: string }; quantity: number }) => {
-    setCartItems(prevItems => {
-      // Check if product is already in cart
-      const existingItemIndex = prevItems.findIndex(
-        item => item.id === product.id && item.selectedColor.code === product.selectedColor.code
+  const addToCart = async (product: Product & { selectedColor: { name: string; code: string }; quantity: number }) => {
+    try {
+      // Call the API to add the product to the cart
+      await apiService.addToCart({
+        product_id: product.id,
+        quantity: product.quantity,
+      });
+
+      // Update the local cart state
+      setCartItems(prevItems => {
+        const existingItemIndex = prevItems.findIndex(
+          item => item.id === product.id && item.selectedColor.code === product.selectedColor.code
+        );
+
+        if (existingItemIndex >= 0) {
+          const updatedItems = [...prevItems];
+          updatedItems[existingItemIndex].quantity += product.quantity;
+          return updatedItems;
+        } else {
+          const newItem: CartItem = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg',
+            quantity: product.quantity,
+            selectedColor: product.selectedColor,
+          };
+          return [...prevItems, newItem];
+        }
+      });
+
+      toast({
+        title: "Added to cart",
+        description: `${product.name} has been added to your cart.`,
+      });
+    } catch (error) {
+      console.error("Failed to add product to cart:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add product to cart. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const removeFromCart = async (productId: string) => {
+    try {
+      // Call the API to remove the product from the cart
+      await apiService.removeFromCart({ product_id: productId });
+
+      // Update the local cart state
+      setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+
+      toast({
+        title: "Removed from cart",
+        description: "The product has been removed from your cart.",
+      });
+    } catch (error) {
+      console.error("Failed to remove product from cart:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove product from cart. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateQuantity = async (productId: string, quantity: number) => {
+    try {
+      // Call the API to update the product quantity in the cart
+      await apiService.updateQuantityInCart({
+        product_id: productId,
+        quantity,
+      });
+
+      // Update the local cart state
+      setCartItems(prevItems =>
+        prevItems.map(item =>
+          item.id === productId ? { ...item, quantity } : item
+        )
       );
 
-      if (existingItemIndex >= 0) {
-        // Update quantity if product already exists
-        const updatedItems = [...prevItems];
-        updatedItems[existingItemIndex].quantity += product.quantity;
-        return updatedItems;
-      } else {
-        // Add new item to cart
-        const newItem: CartItem = {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg',
-          quantity: product.quantity,
-          selectedColor: product.selectedColor,
-        };
-        return [...prevItems, newItem];
-      }
-    });
-    
-    toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart.`,
-    });
+      toast({
+        title: "Cart updated",
+        description: "The quantity has been updated in your cart.",
+      });
+    } catch (error) {
+      console.error("Failed to update product quantity in cart:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update product quantity. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const removeFromCart = (productId: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
-  };
+  const clearCart = async () => {
+    try {
+      // Call the API to clear the cart
+      await apiService.clearCart();
 
-  const updateQuantity = (productId: string, quantity: number) => {
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
-      )
-    );
-  };
+      // Update the local cart state
+      setCartItems([]);
 
-  const clearCart = () => {
-    setCartItems([]);
+      toast({
+        title: "Cart cleared",
+        description: "Your cart has been cleared.",
+      });
+    } catch (error) {
+      console.error("Failed to clear cart:", error);
+      toast({
+        title: "Error",
+        description: "Failed to clear cart. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Calculate total

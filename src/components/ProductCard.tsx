@@ -27,11 +27,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // addToCart({
-    //   ...product,
-    //   selectedColor,
-    //   quantity: product.userPreferences?.preferredQuantity || 1, // Use preferred quantity
-    // });
+    addToCart({
+      ...product,
+      selectedColor,
+      quantity: product.userPreferences?.preferredQuantity || 1, // Use preferred quantity
+    });
 
     if (isGuest) {
       toast({

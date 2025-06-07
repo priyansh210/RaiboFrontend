@@ -157,32 +157,31 @@ class ApiService {
 
   // Cart methods
   async getCart() {
-    return this.request(API_ENDPOINTS.CART.GET);
+    const response = await this.request<{ cart: any }>(API_ENDPOINTS.CART.GET);
+    return response.cart;
   }
 
-  async addToCart(buyerId: string, productData: { product_id: string; quantity: number }) {
-    return this.request(`${API_ENDPOINTS.CART.ADD}/${buyerId}/add`, {
+  async addToCart( productData: { product_id: string; quantity: number }) {
+    return this.request(`${API_ENDPOINTS.CART.ADD}`, {
       method: 'PUT',
       body: JSON.stringify(productData),
     });
   }
 
-  async removeFromCart(buyerId: string, productData: { product_id: string }) {
-    return this.request(`${API_ENDPOINTS.CART.REMOVE}/${buyerId}/remove`, {
+  async removeFromCart(productData: { product_id: string }) {
+    return this.request(`${API_ENDPOINTS.CART.REMOVE}`, {
       method: 'PUT',
       body: JSON.stringify(productData),
     });
   }
-
-  async updateCartQuantity(buyerId: string, productData: { product_id: string; quantity: number }) {
-    return this.request(`${API_ENDPOINTS.CART.UPDATE}/${buyerId}/update`, {
+  async updateQuantityInCart(productData: { product_id: string; quantity: number }) {
+    return this.request(`${API_ENDPOINTS.CART.UPDATE}`, {
       method: 'PUT',
       body: JSON.stringify(productData),
     });
   }
-
-  async clearCart(buyerId: string) {
-    return this.request(`${API_ENDPOINTS.CART.DELETE}/${buyerId}`, {
+  async clearCart() {
+    return this.request(`${API_ENDPOINTS.CART.DELETE}`, {
       method: 'DELETE',
     });
   }
