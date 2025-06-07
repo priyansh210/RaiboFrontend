@@ -83,3 +83,43 @@ export interface Order {
   created_at: string;
   items: OrderItem[];
 }
+
+// Payment types
+export interface PaymentMethod {
+  id: string;
+  card_number: string;
+  card_holder: string;
+  expiry_date: string;
+  card_type: string;
+}
+
+export interface PaymentMethodsResponse {
+  payment_methods: PaymentMethod[];
+}
+
+export interface CreateOrderResponse {
+  id: string;
+  error?: string;
+}
+
+export interface PaymentResponse {
+  success: boolean;
+  error?: string;
+}
+
+// Address types
+export interface Address {
+  id: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  receiver_name: string;
+  receiver_phone: string;
+  is_default?: boolean;
+}
+
+export interface AddressesResponse {
+  addresses: Address[];
+}

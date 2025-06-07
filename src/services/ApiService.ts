@@ -1,5 +1,7 @@
 import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, getFormDataHeaders, REQUEST_TIMEOUT } from '../api/config';
 import {ExternalProductResponse} from '../models/external/ProductModels';
+import { PaymentMethodsResponse, CreateOrderResponse, PaymentResponse, AddressesResponse } from '../api/types';
+
 class ApiService {
   private baseURL: string;
 
@@ -193,8 +195,8 @@ class ApiService {
     receiver_phone: string;
     method_id: string;
     delivery_date: string;
-  }) {
-    return this.request(API_ENDPOINTS.ORDERS.CREATE, {
+  }): Promise<CreateOrderResponse> {
+    return this.request<CreateOrderResponse>(API_ENDPOINTS.ORDERS.CREATE, {
       method: 'POST',
       body: JSON.stringify(orderData),
     });
@@ -212,8 +214,9 @@ class ApiService {
   }
 
   // Enhanced Payment Methods
-  async getPaymentMethods() {
-    return this.request(API_ENDPOINTS.PAYMENT_METHODS.GET_ALL);
+  async getPaymentMethods(): Promise<PaymentMethod[]> {
+    const response = await this.request<PaymentMethodsResponse>(API_ENDPOINTS.PAYMENT_METHODS.GET_ALL);
+    return response.payment_methods || [];
   }
 
   async addPaymentMethod(paymentData: {
@@ -247,16 +250,16 @@ class ApiService {
     payment_method_id: string;
     amount: number;
     currency?: string;
-  }) {
-    return this.request('/api/v1/payment/process', {
+  }): Promise<PaymentResponse> {
+    return this.request<PaymentResponse>('/api/v1/payment/process', {
       method: 'POST',
       body: JSON.stringify(paymentData),
     });
   }
 
   // Enhanced Address methods
-  async getAddresses() {
-    const response = await this.request<{ addresses: any[] }>(API_ENDPOINTS.ADDRESS.GET_ALL);
+  async getAddresses(): Promise<Address[]> {
+    const response = await this.request<AddressesResponse>(API_ENDPOINTS.ADDRESS.GET_ALL);
     return response.addresses || [];
   }
 
