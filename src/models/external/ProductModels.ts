@@ -17,6 +17,7 @@ export interface ExternalProductResponse {
     __v: number;
   };
   images: string[];
+  imageUrls: string[];
   discount: number;
   discount_valid_until: string | null;
   average_rating: number;

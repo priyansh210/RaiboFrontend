@@ -1,6 +1,6 @@
 
 import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, getFormDataHeaders, REQUEST_TIMEOUT } from '../api/config';
-
+import {ExternalProductResponse} from '../models/external/ProductModels';
 class ApiService {
   private baseURL: string;
 
@@ -106,20 +106,54 @@ class ApiService {
     });
   }
 
-  // Product methods
-  async getProducts() {
-    const response = await this.request<{ message: string; products: any[] }>(API_ENDPOINTS.PRODUCTS.GET_ALL);
+  // Product API methods
+  async createProduct(companyId: string, productData: any) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.CREATE}/${companyId}`, {
+      method: 'POST',
+      headers: getFormDataHeaders(),
+      body: JSON.stringify(productData),
+    });
+  }
+
+  async getAllProductsBySeller(companyId: string) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.GET_ALL}/${companyId}`);
+  }
+  async getProductById(productId: string) {
+    const response = await this.request<{ product: ExternalProductResponse }>(`${API_ENDPOINTS.PRODUCTS.GET_BY_ID}/${productId}`);
+    return response.product;
+  }
+  async getAllProducts() {
+    const response = await this.request<{ products: any[] }>(`${API_ENDPOINTS.PRODUCTS.GET_ALL}`);
     return response.products;
   }
 
-  async getProductById(id: string) {
-    const response = await this.request<{ message: string; product: any }>(`${API_ENDPOINTS.PRODUCTS.GET_BY_ID}/${id}`);
-    return response.product;
+  async getProductByIdForSeller(companyId: string, productId: string) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.GET_BY_ID_FOR_SELLER}/${companyId}/${productId}`);
   }
 
-  async searchProducts(query: string) {
-    return this.request(`${API_ENDPOINTS.PRODUCTS.SEARCH}?q=${encodeURIComponent(query)}`);
+  async updateProduct(companyId: string, productId: string, productData: any) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.UPDATE}/${companyId}/${productId}`, {
+      method: 'PUT',
+      body: JSON.stringify(productData),
+    });
   }
+
+  async deleteProduct(companyId: string, productId: string) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.DELETE}/${companyId}/${productId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  //Implement search query
+  async searchProducts(query: string) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.GET_ALL}`);
+  }
+
+  async getCategories() {
+    const response = await this.request<{ categories: any[] }>(`${API_ENDPOINTS.CATEGORIES.GET_ALL}`);
+    return response.categories || [];
+  }
+
 
   // Cart methods
   async getCart() {
@@ -234,17 +268,27 @@ class ApiService {
       method: 'DELETE',
     });
   }
-
-  // Image methods
+ 
   async uploadImage(imageFile: File) {
     const formData = new FormData();
     formData.append('image', imageFile);
+    console.log('Uploading image:', imageFile.name);
 
-    return fetch(`${this.baseURL}${API_ENDPOINTS.IMAGES.UPLOAD}`, {
+    const response = await fetch(`${this.baseURL}${API_ENDPOINTS.IMAGES.UPLOAD}`, {
       method: 'POST',
       headers: getFormDataHeaders(),
       body: formData,
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Image upload failed:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('Image upload response:', data);
+    return data.image; // Return only the image part of the response
   }
 
   async getImageById(imageId: string) {

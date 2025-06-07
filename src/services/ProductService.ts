@@ -6,13 +6,12 @@ import { apiService } from './ApiService';
 
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await apiService.getProducts();
+    const response = await apiService.getAllProducts();
     
     if (!response || !Array.isArray(response)) {
       console.error('Invalid products response:', response);
       return [];
     }
-    
     return ProductMapper.mapProductsArrayFromExternal(response as ExternalProductResponse[]);
   } catch (error) {
     console.error('Failed to fetch products:', error);

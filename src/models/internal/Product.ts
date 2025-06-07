@@ -61,7 +61,9 @@ export interface Product {
     email: string;
     address: string;
   };
-  images: string[];
+  images: string[]; // Legacy field for compatibility
+  imageUrls: string[]; // New field for storing image URLs
+  displayImage?: string; // First image from imageUrls for display purposes
   discount: number;
   discountValidUntil?: Date | null;
   averageRating: number;
@@ -78,7 +80,6 @@ export interface Product {
   colors?: ProductColor[];
   subcategory?: string;
 }
-
 export interface ProductCategory {
   id: string;
   name: string;

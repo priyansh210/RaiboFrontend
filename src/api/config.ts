@@ -18,10 +18,12 @@ export const API_ENDPOINTS = {
   
   // Products
   PRODUCTS: {
-    CREATE: '/api/v1/product',
+    CREATE: '/api/v1/product/seller',
     GET_ALL: '/api/v1/product',
     GET_BY_ID: '/api/v1/product', // Will append /:id
-    SEARCH: '/api/v1/products/search',
+    GET_BY_ID_FOR_SELLER: '/api/v1/products/seller',
+    UPDATE: '/api/v1/product/seller',
+    DELETE: '/api/v1/product/seller', // Will append /:id
   },
   
   // Cart
@@ -62,12 +64,13 @@ export const API_ENDPOINTS = {
     UPLOAD: '/api/v1/image/upload',
     GET_BY_ID: '/api/v1/image', // Will append /:imageId
     DELETE: '/api/v1/image/delete', // Will append /:imageId
+    MULTIPLE: '/api/v1/image/multiple',
   },
   
   // Categories
   CATEGORIES: {
     CREATE: '/api/v1/category',
-    GET_ALL: '/api/v1/categories',
+    GET_ALL: '/api/v1/category',
   },
   
   // Companies

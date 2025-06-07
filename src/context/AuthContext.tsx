@@ -10,6 +10,7 @@ export interface AuthUser {
   firstName?: string;
   lastName?: string;
   roles: string[];
+  companyId: string;
 }
 
 // API Response types
@@ -23,6 +24,7 @@ interface LoginResponse {
     first_name?: string;
     last_name?: string;
     role?: string[];
+    companyId?: string;
   };
 }
 
@@ -170,7 +172,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: response.user?.email || email,
         firstName: response.user?.firstName || response.user?.first_name,
         lastName: response.user?.lastName || response.user?.last_name,
-        roles: response.user?.role || ['buyer']
+        roles: response.user?.role || ['buyer'],
+        companyId: response.user?.companyId || 'none', // Default to 'none' if not provided
       };
       
       console.log('AuthContext: User data created:', userData);

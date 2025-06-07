@@ -4,9 +4,12 @@ import { Product } from '../models/internal/Product';
 
 export class ProductMapper {
   static mapExternalToProduct(external: ExternalProductResponse): Product {
-    if (!external || !external._id || !external.name || !external.category_id || !external.company_id) {
+    if (!external || !external._id || !external.name || !external.company_id) {
       throw new Error('Invalid external product response');
     }
+
+    const imageUrls = external.imageUrls || [];
+    const displayImage = imageUrls.length > 0 ? imageUrls[0] : '';
 
     return {
       id: external._id,
@@ -24,7 +27,9 @@ export class ProductMapper {
         email: external.company_id.email,
         address: external.company_id.address,
       },
-      images: external.images || [],
+      images: external.imageUrls || [], // Legacy field
+      imageUrls, // New field for storing image URLs
+      displayImage, // First image from imageUrls
       discount: external.discount || 0,
       discountValidUntil: external.discount_valid_until ? new Date(external.discount_valid_until) : null,
       averageRating: external.average_rating || 0,

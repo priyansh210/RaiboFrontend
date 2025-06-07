@@ -92,7 +92,7 @@ const SellerProducts = () => {
                   <CardHeader className="p-0">
                     <div className="aspect-square relative overflow-hidden rounded-t-lg">
                       <img
-                        src={product.images[0] || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7'}
+                        src={product.imageUrls[0] || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7'}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
