@@ -1,208 +1,211 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Check, ChevronLeft, CreditCard, MapPin, ShoppingBag, Truck } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Check, ChevronLeft, CreditCard, MapPin, ShoppingBag, Truck, Plus, Minus, X, Edit } from 'lucide-react';
 import Layout from '../components/Layout';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { ordersApi } from '../api/mockApi';
+import { apiService } from '../services/ApiService';
 
-// Step interface
-interface CheckoutStep {
-  id: string;
-  title: string;
-  icon: React.ReactNode;
-}
-
-// Address interface
 interface Address {
-  firstName: string;
-  lastName: string;
-  address1: string;
-  address2: string;
+  id: string;
+  street: string;
   city: string;
   state: string;
-  postalCode: string;
+  zip: string;
   country: string;
-  phone: string;
+  receiver_name: string;
+  receiver_phone: string;
+  is_default?: boolean;
 }
 
-// Payment method interface
 interface PaymentMethod {
-  cardNumber: string;
-  nameOnCard: string;
-  expiryDate: string;
-  cvv: string;
+  id: string;
+  card_number: string;
+  card_holder: string;
+  expiry_date: string;
+  card_type: string;
 }
 
 const Checkout = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const { cart, cartTotals, clearCart } = useCart();
+  const { cart, cartTotals, updateQuantity, removeFromCart, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
-  const [currentStep, setCurrentStep] = useState<string>('shipping');
+  
+  const [currentStep, setCurrentStep] = useState<string>('review');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [orderPlaced, setOrderPlaced] = useState<boolean>(false);
-  const [orderId, setOrderId] = useState<string>('');
   
-  // Form states
-  const [address, setAddress] = useState<Address>({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    address1: '',
-    address2: '',
+  // Address state
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  const [showAddAddressForm, setShowAddAddressForm] = useState(false);
+  const [newAddress, setNewAddress] = useState({
+    street: '',
     city: '',
     state: '',
-    postalCode: '',
+    zip: '',
     country: 'United States',
-    phone: '',
+    receiver_name: user?.firstName || '',
+    receiver_phone: '',
   });
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>({
-    cardNumber: '',
-    nameOnCard: '',
-    expiryDate: '',
+  
+  // Payment state
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<string>('');
+  const [showAddPaymentForm, setShowAddPaymentForm] = useState(false);
+  const [newPaymentMethod, setNewPaymentMethod] = useState({
+    card_number: '',
+    card_holder: '',
+    expiry_date: '',
     cvv: '',
+    card_type: 'visa',
   });
-  
-  // Checkout steps
-  const steps: CheckoutStep[] = [
-    {
-      id: 'shipping',
-      title: 'Shipping',
-      icon: <MapPin size={18} className="mr-2" />,
-    },
-    {
-      id: 'payment',
-      title: 'Payment',
-      icon: <CreditCard size={18} className="mr-2" />,
-    },
-    {
-      id: 'review',
-      title: 'Review',
-      icon: <ShoppingBag size={18} className="mr-2" />,
-    },
-  ];
-  
-  // Check if we're on the success page
+
   useEffect(() => {
-    const isSuccess = location.pathname === '/checkout/success';
-    
-    if (isSuccess) {
-      setOrderPlaced(true);
-      const orderIdFromState = location.state?.orderId;
-      if (orderIdFromState) {
-        setOrderId(orderIdFromState);
-      }
-    }
-    
-    // Redirect if cart is empty and not on success page
-    if (cart.length === 0 && !isSuccess && !orderPlaced) {
-      navigate('/cart');
-      toast({
-        title: "Empty Cart",
-        description: "Your cart is empty. Add some items before checking out.",
-      });
-    }
-    
-    // Redirect if not authenticated
-    if (!isAuthenticated && !isSuccess) {
+    if (!isAuthenticated) {
       navigate('/login', { state: { redirect: '/checkout' } });
+      return;
+    }
+    
+    if (cart.length === 0) {
+      navigate('/cart');
+      return;
+    }
+
+    loadAddresses();
+    loadPaymentMethods();
+  }, [isAuthenticated, cart.length, navigate]);
+
+  const loadAddresses = async () => {
+    try {
+      const addressData = await apiService.getAddresses();
+      setAddresses(addressData);
+      const defaultAddress = addressData.find((addr: Address) => addr.is_default);
+      if (defaultAddress) {
+        setSelectedAddressId(defaultAddress.id);
+      }
+    } catch (error) {
+      console.error('Failed to load addresses:', error);
+    }
+  };
+
+  const loadPaymentMethods = async () => {
+    try {
+      const paymentData = await apiService.getPaymentMethods();
+      setPaymentMethods(paymentData);
+    } catch (error) {
+      console.error('Failed to load payment methods:', error);
+    }
+  };
+
+  const handleAddAddress = async () => {
+    try {
+      const response = await apiService.addAddress(newAddress);
+      await loadAddresses();
+      setShowAddAddressForm(false);
+      setNewAddress({
+        street: '',
+        city: '',
+        state: '',
+        zip: '',
+        country: 'United States',
+        receiver_name: user?.firstName || '',
+        receiver_phone: '',
+      });
       toast({
-        title: "Login Required",
-        description: "Please log in to continue with checkout.",
+        title: "Address Added",
+        description: "Your new address has been saved successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add address. Please try again.",
+        variant: "destructive",
       });
     }
-  }, [isAuthenticated, cart.length, location, navigate, orderPlaced]);
-  
-  const handleShippingSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Validation
-    const { firstName, lastName, address1, city, state, postalCode, country, phone } = address;
-    
-    if (!firstName || !lastName || !address1 || !city || !state || !postalCode || !country || !phone) {
+  };
+
+  const handleAddPaymentMethod = async () => {
+    try {
+      const response = await apiService.addPaymentMethod(newPaymentMethod);
+      await loadPaymentMethods();
+      setShowAddPaymentForm(false);
+      setNewPaymentMethod({
+        card_number: '',
+        card_holder: '',
+        expiry_date: '',
+        cvv: '',
+        card_type: 'visa',
+      });
+      toast({
+        title: "Payment Method Added",
+        description: "Your new payment method has been saved successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add payment method. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!selectedAddressId || !selectedPaymentMethodId) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields.",
+        description: "Please select an address and payment method.",
         variant: "destructive",
       });
       return;
     }
-    
-    setCurrentStep('payment');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  
-  const handlePaymentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Validation
-    const { cardNumber, nameOnCard, expiryDate, cvv } = paymentMethod;
-    
-    if (!cardNumber || !nameOnCard || !expiryDate || !cvv) {
-      toast({
-        title: "Missing Payment Information",
-        description: "Please fill in all payment details.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setCurrentStep('review');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  
-  const placeOrder = async () => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to place an order.",
-        variant: "destructive",
-      });
-      navigate('/login', { state: { redirect: '/checkout' } });
-      return;
-    }
-    
+
     setIsLoading(true);
     
     try {
-      // Create order items from cart
-      const orderItems = cart.map(item => ({
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-        color: item.selectedColor?.name || null
-      }));
+      // Create order
+      const orderData = {
+        cart_id: 'temp-cart-id',
+        address_id: selectedAddressId,
+        payment_method: selectedPaymentMethodId,
+        receiver_name: addresses.find(a => a.id === selectedAddressId)?.receiver_name || '',
+        receiver_phone: addresses.find(a => a.id === selectedAddressId)?.receiver_phone || '',
+        method_id: selectedPaymentMethodId,
+        delivery_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+      };
+
+      const orderResponse = await apiService.createOrder(orderData);
       
-      // Format address
-      const shippingAddress = `${address.firstName} ${address.lastName}, ${address.address1}${
-        address.address2 ? `, ${address.address2}` : ''
-      }, ${address.city}, ${address.state} ${address.postalCode}, ${address.country}`;
-      
-      // Create a new order
-      const response = await ordersApi.createOrder({
-        buyer_id: user.id,
-        total_amount: cartTotals.total,
-        shipping_address: shippingAddress,
-        status: 'pending',
-        items: orderItems
-      });
-      
-      if (response.error) {
-        throw new Error(response.error);
+      if (orderResponse.error) {
+        throw new Error(orderResponse.error);
       }
-      
-      // Set order ID and status
-      setOrderId(response.data?.id || '');
-      setOrderPlaced(true);
-      
-      // Clear cart and navigate to success page
-      clearCart();
-      navigate('/checkout/success', { state: { orderId: response.data?.id } });
-      
-      toast({
-        title: "Order Placed Successfully",
-        description: "Thank you for your purchase!",
+
+      // Process payment
+      const paymentResponse = await apiService.processPayment({
+        order_id: orderResponse.id,
+        payment_method_id: selectedPaymentMethodId,
+        amount: Math.round(cartTotals.total * 100), // Convert to cents
+        currency: 'usd',
       });
+
+      if (paymentResponse.success) {
+        // Update order status to placed
+        await apiService.updateOrderStatus(orderResponse.id, 'placed');
+        
+        clearCart();
+        setOrderPlaced(true);
+        
+        toast({
+          title: "Order Placed Successfully",
+          description: "Your payment has been processed and your order is confirmed.",
+        });
+        
+        navigate('/checkout/success', { state: { orderId: orderResponse.id } });
+      } else {
+        throw new Error('Payment failed');
+      }
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
@@ -214,87 +217,33 @@ const Checkout = () => {
       setIsLoading(false);
     }
   };
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    
-    if (currentStep === 'shipping') {
-      setAddress(prev => ({ ...prev, [name]: value }));
-    } else if (currentStep === 'payment') {
-      setPaymentMethod(prev => ({ ...prev, [name]: value }));
-    }
-  };
-  
-  // Format credit card number
+
   const formatCardNumber = (value: string) => {
     return value
       .replace(/\s/g, '')
       .replace(/(\d{4})/g, '$1 ')
       .trim();
   };
-  
-  // Handle card number input
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 16) value = value.slice(0, 16);
-    setPaymentMethod(prev => ({ ...prev, cardNumber: formatCardNumber(value) }));
-  };
-  
-  // Handle expiry date input
-  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
-    
-    if (value.length > 4) value = value.slice(0, 4);
-    
-    if (value.length > 2) {
-      value = value.slice(0, 2) + '/' + value.slice(2);
-    }
-    
-    setPaymentMethod(prev => ({ ...prev, expiryDate: value }));
-  };
-  
-  // Handle CVV input
-  const handleCVVChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 4) value = value.slice(0, 4);
-    setPaymentMethod(prev => ({ ...prev, cvv: value }));
-  };
-  
-  // If we're on the success page or order is placed
-  if (orderPlaced || location.pathname === '/checkout/success') {
+
+  if (orderPlaced) {
     return (
       <Layout>
         <div className="min-h-screen bg-cream py-12">
           <div className="container-custom max-w-3xl">
-            <div className="bg-white p-8 rounded-sm shadow-sm text-center">
+            <div className="bg-white p-8 rounded-lg shadow-sm text-center">
               <div className="mx-auto w-16 h-16 mb-6 bg-olive/20 rounded-full flex items-center justify-center">
                 <Check size={32} className="text-olive" />
               </div>
-              
               <h1 className="font-playfair text-3xl text-charcoal mb-4">Order Confirmed!</h1>
               <p className="text-earth mb-6">
-                Thank you for your purchase. We've received your order and it's being processed.
+                Thank you for your purchase. Your order has been placed successfully.
               </p>
-              
-              <div className="bg-sand/20 p-6 rounded-sm mb-8">
-                <p className="text-sm text-earth mb-2">Order ID:</p>
-                <p className="font-medium text-charcoal">{orderId || 'N/A'}</p>
-                <p className="text-sm text-earth mt-4 mb-2">Order Date:</p>
-                <p className="font-medium text-charcoal">{new Date().toLocaleDateString()}</p>
-              </div>
-              
               <div className="flex justify-center space-x-4">
                 <Link
                   to="/"
-                  className="bg-terracotta text-white px-6 py-3 hover:bg-umber transition-colors"
+                  className="bg-terracotta text-white px-6 py-3 rounded-lg hover:bg-umber transition-colors"
                 >
                   Continue Shopping
-                </Link>
-                <Link
-                  to="/account"
-                  className="bg-transparent text-charcoal border border-taupe/30 px-6 py-3 hover:bg-sand/20 transition-colors"
-                >
-                  View Order History
                 </Link>
               </div>
             </div>
@@ -303,433 +252,302 @@ const Checkout = () => {
       </Layout>
     );
   }
-  
+
   return (
     <Layout>
-      <div className="min-h-screen bg-cream py-12">
-        <div className="container-custom">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Checkout Steps */}
-            <div className="lg:w-2/3">
-              <div className="flex justify-between mb-6">
-                <Link to="/cart" className="flex items-center text-earth hover:text-charcoal">
-                  <ChevronLeft size={16} className="mr-1" />
-                  Back to Cart
-                </Link>
-                <h1 className="font-playfair text-2xl text-charcoal hidden md:block">Checkout</h1>
-              </div>
-              
-              <div className="bg-white p-8 rounded-sm shadow-sm mb-8">
-                <div className="flex border-b border-taupe/20 pb-4 mb-6">
-                  {steps.map((step, index) => (
-                    <React.Fragment key={step.id}>
+      <div className="min-h-screen bg-cream py-8">
+        <div className="container-custom max-w-7xl">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <Link to="/cart" className="flex items-center text-earth hover:text-charcoal transition-colors">
+              <ChevronLeft size={20} className="mr-2" />
+              Back to Cart
+            </Link>
+            <h1 className="font-playfair text-3xl text-charcoal">Checkout</h1>
+            <div></div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Cart & Forms */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Cart Review */}
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-charcoal mb-6 flex items-center">
+                  <ShoppingBag size={20} className="mr-2" />
+                  Review Your Items
+                </h2>
+                
+                <div className="space-y-4">
+                  {cart.map((item) => (
+                    <div key={`${item.id}-${item.selectedColor?.name}`} className="flex items-center space-x-4 p-4 border border-sand rounded-lg">
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="w-20 h-20 object-cover rounded-lg bg-linen"
+                      />
                       <div className="flex-1">
-                        <div
-                          className={`flex items-center justify-center flex-col md:flex-row ${
-                            currentStep === step.id
-                              ? 'text-terracotta'
-                              : steps.findIndex(s => s.id === currentStep) > index
-                              ? 'text-olive'
-                              : 'text-earth'
-                          }`}
-                        >
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 md:mb-0 ${
-                              currentStep === step.id
-                                ? 'bg-terracotta/10 border border-terracotta'
-                                : steps.findIndex(s => s.id === currentStep) > index
-                                ? 'bg-olive/10 border border-olive'
-                                : 'border border-taupe/30'
-                            }`}
-                          >
-                            {steps.findIndex(s => s.id === currentStep) > index ? (
-                              <Check size={16} />
-                            ) : (
-                              <span>{index + 1}</span>
-                            )}
+                        <h3 className="font-medium text-charcoal">{item.name}</h3>
+                        <p className="text-earth text-sm">Price: ${item.price}</p>
+                        {item.selectedColor && (
+                          <div className="flex items-center mt-1">
+                            <span className="text-sm text-earth mr-2">Color:</span>
+                            <span 
+                              className="w-4 h-4 rounded-full border border-gray-200" 
+                              style={{ backgroundColor: item.selectedColor.code }}
+                            ></span>
+                            <span className="text-sm text-earth ml-1">{item.selectedColor.name}</span>
                           </div>
-                          <span className="md:ml-2 text-sm">{step.title}</span>
-                        </div>
+                        )}
                       </div>
-                      {index < steps.length - 1 && (
-                        <div className="w-6 flex items-center justify-center">
-                          <div className="border-t border-taupe/30 w-full"></div>
-                        </div>
-                      )}
-                    </React.Fragment>
+                      <div className="flex items-center space-x-3">
+                        <button 
+                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                          className="w-8 h-8 rounded-full border border-sand hover:border-terracotta flex items-center justify-center"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="font-medium w-8 text-center">{item.quantity}</span>
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="w-8 h-8 rounded-full border border-sand hover:border-terracotta flex items-center justify-center"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-charcoal">${(item.price * item.quantity).toFixed(2)}</p>
+                        <button 
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-earth hover:text-terracotta mt-1"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Address Selection */}
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-charcoal mb-6 flex items-center">
+                  <MapPin size={20} className="mr-2" />
+                  Delivery Address
+                </h2>
                 
-                {/* Shipping Step */}
-                {currentStep === 'shipping' && (
-                  <form onSubmit={handleShippingSubmit}>
-                    <h2 className="text-xl font-medium text-charcoal mb-6">Shipping Address</h2>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label htmlFor="firstName" className="block text-sm text-earth mb-1">
-                          First Name *
-                        </label>
+                <div className="space-y-4">
+                  {addresses.map((address) => (
+                    <div
+                      key={address.id}
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        selectedAddressId === address.id ? 'border-terracotta bg-terracotta/5' : 'border-sand hover:border-terracotta/50'
+                      }`}
+                      onClick={() => setSelectedAddressId(address.id)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium text-charcoal">{address.receiver_name}</p>
+                          <p className="text-earth text-sm">{address.street}</p>
+                          <p className="text-earth text-sm">{address.city}, {address.state} {address.zip}</p>
+                          <p className="text-earth text-sm">{address.receiver_phone}</p>
+                        </div>
                         <input
-                          id="firstName"
-                          name="firstName"
-                          type="text"
-                          value={address.firstName}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
+                          type="radio"
+                          checked={selectedAddressId === address.id}
+                          onChange={() => setSelectedAddressId(address.id)}
+                          className="mt-1"
                         />
                       </div>
-                      
-                      <div>
-                        <label htmlFor="lastName" className="block text-sm text-earth mb-1">
-                          Last Name *
-                        </label>
+                    </div>
+                  ))}
+                  
+                  {/* Add New Address */}
+                  {!showAddAddressForm ? (
+                    <button
+                      onClick={() => setShowAddAddressForm(true)}
+                      className="w-full p-4 border-2 border-dashed border-sand hover:border-terracotta rounded-lg text-earth hover:text-terracotta transition-colors flex items-center justify-center"
+                    >
+                      <Plus size={20} className="mr-2" />
+                      Add New Address
+                    </button>
+                  ) : (
+                    <div className="p-4 border border-sand rounded-lg">
+                      <h3 className="font-medium text-charcoal mb-4">Add New Address</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input
-                          id="lastName"
-                          name="lastName"
                           type="text"
-                          value={address.lastName}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
+                          placeholder="Receiver Name"
+                          value={newAddress.receiver_name}
+                          onChange={(e) => setNewAddress({ ...newAddress, receiver_name: e.target.value })}
+                          className="px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
                         />
-                      </div>
-                      
-                      <div className="md:col-span-2">
-                        <label htmlFor="address1" className="block text-sm text-earth mb-1">
-                          Street Address *
-                        </label>
                         <input
-                          id="address1"
-                          name="address1"
                           type="text"
-                          value={address.address1}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
+                          placeholder="Phone Number"
+                          value={newAddress.receiver_phone}
+                          onChange={(e) => setNewAddress({ ...newAddress, receiver_phone: e.target.value })}
+                          className="px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
                         />
-                      </div>
-                      
-                      <div className="md:col-span-2">
-                        <label htmlFor="address2" className="block text-sm text-earth mb-1">
-                          Apartment, suite, etc. (optional)
-                        </label>
                         <input
-                          id="address2"
-                          name="address2"
                           type="text"
-                          value={address.address2}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
+                          placeholder="Street Address"
+                          value={newAddress.street}
+                          onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
+                          className="md:col-span-2 px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
                         />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="city" className="block text-sm text-earth mb-1">
-                          City *
-                        </label>
                         <input
-                          id="city"
-                          name="city"
                           type="text"
-                          value={address.city}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
+                          placeholder="City"
+                          value={newAddress.city}
+                          onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                          className="px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
                         />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="state" className="block text-sm text-earth mb-1">
-                          State/Province *
-                        </label>
                         <input
-                          id="state"
-                          name="state"
                           type="text"
-                          value={address.state}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
+                          placeholder="State"
+                          value={newAddress.state}
+                          onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                          className="px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
                         />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="postalCode" className="block text-sm text-earth mb-1">
-                          ZIP/Postal Code *
-                        </label>
                         <input
-                          id="postalCode"
-                          name="postalCode"
                           type="text"
-                          value={address.postalCode}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
+                          placeholder="ZIP Code"
+                          value={newAddress.zip}
+                          onChange={(e) => setNewAddress({ ...newAddress, zip: e.target.value })}
+                          className="px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
                         />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="country" className="block text-sm text-earth mb-1">
-                          Country *
-                        </label>
                         <select
-                          id="country"
-                          name="country"
-                          value={address.country}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
+                          value={newAddress.country}
+                          onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
+                          className="px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
                         >
                           <option value="United States">United States</option>
                           <option value="Canada">Canada</option>
-                          <option value="Mexico">Mexico</option>
                           <option value="United Kingdom">United Kingdom</option>
-                          <option value="Australia">Australia</option>
                         </select>
                       </div>
-                      
-                      <div>
-                        <label htmlFor="phone" className="block text-sm text-earth mb-1">
-                          Phone Number *
-                        </label>
-                        <input
-                          id="phone"
-                          name="phone"
-                          type="tel"
-                          value={address.phone}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6 flex justify-end">
-                      <button
-                        type="submit"
-                        className="bg-terracotta hover:bg-umber text-white px-6 py-3 transition-colors"
-                      >
-                        Continue to Payment
-                      </button>
-                    </div>
-                  </form>
-                )}
-                
-                {/* Payment Step */}
-                {currentStep === 'payment' && (
-                  <form onSubmit={handlePaymentSubmit}>
-                    <h2 className="text-xl font-medium text-charcoal mb-6">Payment Information</h2>
-                    
-                    <div className="grid grid-cols-1 gap-6">
-                      <div>
-                        <label htmlFor="cardNumber" className="block text-sm text-earth mb-1">
-                          Card Number *
-                        </label>
-                        <input
-                          id="cardNumber"
-                          name="cardNumber"
-                          type="text"
-                          value={paymentMethod.cardNumber}
-                          onChange={handleCardNumberChange}
-                          placeholder="1234 5678 9012 3456"
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="nameOnCard" className="block text-sm text-earth mb-1">
-                          Name on Card *
-                        </label>
-                        <input
-                          id="nameOnCard"
-                          name="nameOnCard"
-                          type="text"
-                          value={paymentMethod.nameOnCard}
-                          onChange={handleInputChange}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                          required
-                        />
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <label htmlFor="expiryDate" className="block text-sm text-earth mb-1">
-                            Expiry Date (MM/YY) *
-                          </label>
-                          <input
-                            id="expiryDate"
-                            name="expiryDate"
-                            type="text"
-                            value={paymentMethod.expiryDate}
-                            onChange={handleExpiryChange}
-                            placeholder="MM/YY"
-                            className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                            required
-                          />
-                        </div>
-                        
-                        <div>
-                          <label htmlFor="cvv" className="block text-sm text-earth mb-1">
-                            CVV *
-                          </label>
-                          <input
-                            id="cvv"
-                            name="cvv"
-                            type="text"
-                            value={paymentMethod.cvv}
-                            onChange={handleCVVChange}
-                            placeholder="123"
-                            className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
-                            required
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="mt-2">
-                        <p className="text-xs text-earth">
-                          For demo purposes, you can use any valid-looking credit card number.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6 flex justify-between">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep('shipping')}
-                        className="bg-transparent text-charcoal border border-taupe/30 px-6 py-3 hover:bg-sand/20 transition-colors"
-                      >
-                        Back to Shipping
-                      </button>
-                      <button
-                        type="submit"
-                        className="bg-terracotta hover:bg-umber text-white px-6 py-3 transition-colors"
-                      >
-                        Review Order
-                      </button>
-                    </div>
-                  </form>
-                )}
-                
-                {/* Review Step */}
-                {currentStep === 'review' && (
-                  <div>
-                    <h2 className="text-xl font-medium text-charcoal mb-6">Review Your Order</h2>
-                    
-                    <div className="space-y-6">
-                      <div className="border border-taupe/20 rounded-sm p-4">
-                        <div className="flex items-center mb-3">
-                          <MapPin size={18} className="text-terracotta mr-2" />
-                          <h3 className="font-medium">Shipping Address</h3>
-                        </div>
-                        <p className="text-earth">
-                          {address.firstName} {address.lastName}<br />
-                          {address.address1}
-                          {address.address2 && <><br />{address.address2}</>}<br />
-                          {address.city}, {address.state} {address.postalCode}<br />
-                          {address.country}<br />
-                          {address.phone}
-                        </p>
+                      <div className="flex space-x-3 mt-4">
                         <button
-                          onClick={() => setCurrentStep('shipping')}
-                          className="text-sm text-terracotta hover:underline mt-2"
+                          onClick={handleAddAddress}
+                          className="px-4 py-2 bg-terracotta text-white rounded-lg hover:bg-umber transition-colors"
                         >
-                          Edit
+                          Save Address
+                        </button>
+                        <button
+                          onClick={() => setShowAddAddressForm(false)}
+                          className="px-4 py-2 border border-sand text-earth rounded-lg hover:border-terracotta transition-colors"
+                        >
+                          Cancel
                         </button>
                       </div>
-                      
-                      <div className="border border-taupe/20 rounded-sm p-4">
-                        <div className="flex items-center mb-3">
-                          <CreditCard size={18} className="text-terracotta mr-2" />
-                          <h3 className="font-medium">Payment Method</h3>
-                        </div>
-                        <p className="text-earth">
-                          {paymentMethod.cardNumber}<br />
-                          {paymentMethod.nameOnCard}<br />
-                          Expires: {paymentMethod.expiryDate}
-                        </p>
-                        <button
-                          onClick={() => setCurrentStep('payment')}
-                          className="text-sm text-terracotta hover:underline mt-2"
-                        >
-                          Edit
-                        </button>
-                      </div>
-                      
-                      <div className="border border-taupe/20 rounded-sm p-4">
-                        <div className="flex items-center mb-3">
-                          <Truck size={18} className="text-terracotta mr-2" />
-                          <h3 className="font-medium">Shipping Method</h3>
-                        </div>
-                        <p className="text-earth">
-                          Standard Shipping (3-5 business days)<br />
-                          ${cartTotals.shipping.toFixed(2)}
-                        </p>
-                      </div>
                     </div>
-                    
-                    <div className="mt-6 flex justify-between">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep('payment')}
-                        className="bg-transparent text-charcoal border border-taupe/30 px-6 py-3 hover:bg-sand/20 transition-colors"
-                      >
-                        Back to Payment
-                      </button>
-                      <button
-                        type="button"
-                        onClick={placeOrder}
-                        disabled={isLoading}
-                        className="bg-terracotta hover:bg-umber text-white px-6 py-3 transition-colors disabled:bg-taupe"
-                      >
-                        {isLoading ? 'Processing...' : 'Place Order'}
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-            
-            {/* Order Summary */}
-            <div className="lg:w-1/3">
-              <div className="bg-white p-6 rounded-sm shadow-sm sticky top-24">
-                <h2 className="text-xl font-medium text-charcoal mb-4">Order Summary</h2>
+
+              {/* Payment Method Selection */}
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-charcoal mb-6 flex items-center">
+                  <CreditCard size={20} className="mr-2" />
+                  Payment Method
+                </h2>
                 
-                <div className="max-h-72 overflow-y-auto mb-4">
-                  {cart.map((item) => (
-                    <div key={`${item.id}-${item.selectedColor?.name}`} className="flex py-3 border-b border-taupe/10">
-                      <div className="w-16 h-16 flex-shrink-0 bg-linen overflow-hidden mr-4">
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-charcoal">{item.name}</p>
-                        <div className="flex items-center text-sm text-earth mt-1">
-                          <span>Qty: {item.quantity}</span>
-                          {item.selectedColor && (
-                            <span className="flex items-center ml-3">
-                              Color: 
-                              <span 
-                                className="w-3 h-3 rounded-full inline-block ml-1 border border-gray-200" 
-                                style={{ backgroundColor: item.selectedColor.code }}
-                              ></span>
-                            </span>
-                          )}
+                <div className="space-y-4">
+                  {paymentMethods.map((method) => (
+                    <div
+                      key={method.id}
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        selectedPaymentMethodId === method.id ? 'border-terracotta bg-terracotta/5' : 'border-sand hover:border-terracotta/50'
+                      }`}
+                      onClick={() => setSelectedPaymentMethodId(method.id)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-charcoal">**** **** **** {method.card_number.slice(-4)}</p>
+                          <p className="text-earth text-sm">{method.card_holder}</p>
+                          <p className="text-earth text-sm">Expires: {method.expiry_date}</p>
                         </div>
-                        <p className="text-earth font-medium mt-1">${(item.price * item.quantity).toFixed(2)}</p>
+                        <input
+                          type="radio"
+                          checked={selectedPaymentMethodId === method.id}
+                          onChange={() => setSelectedPaymentMethodId(method.id)}
+                        />
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Add New Payment Method */}
+                  {!showAddPaymentForm ? (
+                    <button
+                      onClick={() => setShowAddPaymentForm(true)}
+                      className="w-full p-4 border-2 border-dashed border-sand hover:border-terracotta rounded-lg text-earth hover:text-terracotta transition-colors flex items-center justify-center"
+                    >
+                      <Plus size={20} className="mr-2" />
+                      Add New Payment Method
+                    </button>
+                  ) : (
+                    <div className="p-4 border border-sand rounded-lg">
+                      <h3 className="font-medium text-charcoal mb-4">Add New Payment Method</h3>
+                      <div className="space-y-4">
+                        <input
+                          type="text"
+                          placeholder="Card Number"
+                          value={newPaymentMethod.card_number}
+                          onChange={(e) => setNewPaymentMethod({ ...newPaymentMethod, card_number: formatCardNumber(e.target.value) })}
+                          className="w-full px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Cardholder Name"
+                          value={newPaymentMethod.card_holder}
+                          onChange={(e) => setNewPaymentMethod({ ...newPaymentMethod, card_holder: e.target.value })}
+                          className="w-full px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            placeholder="MM/YY"
+                            value={newPaymentMethod.expiry_date}
+                            onChange={(e) => setNewPaymentMethod({ ...newPaymentMethod, expiry_date: e.target.value })}
+                            className="px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
+                          />
+                          <input
+                            type="text"
+                            placeholder="CVV"
+                            value={newPaymentMethod.cvv}
+                            onChange={(e) => setNewPaymentMethod({ ...newPaymentMethod, cvv: e.target.value })}
+                            className="px-3 py-2 border border-sand rounded-lg focus:outline-none focus:border-terracotta"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex space-x-3 mt-4">
+                        <button
+                          onClick={handleAddPaymentMethod}
+                          className="px-4 py-2 bg-terracotta text-white rounded-lg hover:bg-umber transition-colors"
+                        >
+                          Save Payment Method
+                        </button>
+                        <button
+                          onClick={() => setShowAddPaymentForm(false)}
+                          className="px-4 py-2 border border-sand text-earth rounded-lg hover:border-terracotta transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
+              </div>
+            </div>
+
+            {/* Right Column - Order Summary */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
+                <h2 className="text-xl font-semibold text-charcoal mb-6">Order Summary</h2>
                 
-                <div className="space-y-3 py-4 border-b border-taupe/20">
+                <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-earth">
-                    <span>Subtotal</span>
+                    <span>Subtotal ({cart.length} items)</span>
                     <span>${cartTotals.subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-earth">
@@ -740,11 +558,24 @@ const Checkout = () => {
                     <span>Tax</span>
                     <span>${cartTotals.tax.toFixed(2)}</span>
                   </div>
+                  <div className="border-t border-sand pt-3">
+                    <div className="flex justify-between text-lg font-semibold text-charcoal">
+                      <span>Total</span>
+                      <span>${cartTotals.total.toFixed(2)}</span>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="flex justify-between font-medium text-lg text-charcoal py-4">
-                  <span>Total</span>
-                  <span>${cartTotals.total.toFixed(2)}</span>
+                <button
+                  onClick={handlePlaceOrder}
+                  disabled={isLoading || !selectedAddressId || !selectedPaymentMethodId}
+                  className="w-full bg-terracotta text-white py-3 rounded-lg hover:bg-umber transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  {isLoading ? 'Processing...' : 'Place Order'}
+                </button>
+                
+                <div className="mt-4 text-xs text-earth text-center">
+                  <p>By placing your order, you agree to our Terms of Service and Privacy Policy.</p>
                 </div>
               </div>
             </div>

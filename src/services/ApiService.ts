@@ -1,4 +1,3 @@
-
 import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, getFormDataHeaders, REQUEST_TIMEOUT } from '../api/config';
 import {ExternalProductResponse} from '../models/external/ProductModels';
 class ApiService {
@@ -154,7 +153,6 @@ class ApiService {
     return response.categories || [];
   }
 
-
   // Cart methods
   async getCart() {
     const response = await this.request<{ cart: any }>(API_ENDPOINTS.CART.GET);
@@ -186,7 +184,7 @@ class ApiService {
     });
   }
 
-  // Order methods
+  // Order methods with enhanced checkout functionality
   async createOrder(orderData: {
     cart_id: string;
     address_id: string;
@@ -206,7 +204,14 @@ class ApiService {
     return this.request(`${API_ENDPOINTS.ORDERS.GET_BY_ID}/${id}`);
   }
 
-  // Payment Methods
+  async updateOrderStatus(orderId: string, status: string) {
+    return this.request(`${API_ENDPOINTS.ORDERS.GET_BY_ID}/${orderId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  }
+
+  // Enhanced Payment Methods
   async getPaymentMethods() {
     return this.request(API_ENDPOINTS.PAYMENT_METHODS.GET_ALL);
   }
@@ -215,6 +220,8 @@ class ApiService {
     card_number: string;
     card_holder: string;
     expiry_date: string;
+    cvv?: string;
+    card_type?: string;
   }) {
     return this.request(API_ENDPOINTS.PAYMENT_METHODS.CREATE, {
       method: 'POST',
@@ -235,9 +242,22 @@ class ApiService {
     });
   }
 
-  // Address methods
+  async processPayment(paymentData: {
+    order_id: string;
+    payment_method_id: string;
+    amount: number;
+    currency?: string;
+  }) {
+    return this.request('/api/v1/payment/process', {
+      method: 'POST',
+      body: JSON.stringify(paymentData),
+    });
+  }
+
+  // Enhanced Address methods
   async getAddresses() {
-    return this.request(API_ENDPOINTS.ADDRESS.GET_ALL);
+    const response = await this.request<{ addresses: any[] }>(API_ENDPOINTS.ADDRESS.GET_ALL);
+    return response.addresses || [];
   }
 
   async addAddress(addressData: {
@@ -248,6 +268,7 @@ class ApiService {
     country: string;
     receiver_name: string;
     receiver_phone: string;
+    is_default?: boolean;
   }) {
     return this.request(API_ENDPOINTS.ADDRESS.CREATE, {
       method: 'POST',
@@ -267,7 +288,15 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
+  async setDefaultAddress(id: string) {
+    return this.request(`${API_ENDPOINTS.ADDRESS.UPDATE}/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ is_default: true }),
+    });
+  }
  
+  // Image upload methods
   async uploadImage(imageFile: File) {
     const formData = new FormData();
     formData.append('image', imageFile);
