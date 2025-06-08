@@ -40,6 +40,7 @@ export interface StripePaymentIntent {
   status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'requires_capture' | 'canceled' | 'succeeded';
   client_secret: string;
   payment_method?: string;
+  metadata?: Record<string, string>;
   shipping?: {
     name: string;
     phone?: string;

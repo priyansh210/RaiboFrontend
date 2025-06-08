@@ -2,12 +2,13 @@
 import { apiService } from './ApiService';
 import { PaymentDetails, PaymentMethodDetails, CheckoutSession, CreatePaymentRequest, CreateCheckoutRequest } from '../models/internal/Payment';
 import { PaymentMapper } from '../mappers/PaymentMapper';
+import { CreateCheckoutSessionRequest, CreatePaymentIntentRequest } from '../models/external/StripeModels';
 
 class PaymentService {
   // Create a Stripe checkout session
   async createCheckoutSession(request: CreateCheckoutRequest): Promise<CheckoutSession> {
     try {
-      const response = await apiService.createStripeCheckoutSession({
+      const sessionData: CreateCheckoutSessionRequest = {
         line_items: request.items.map(item => ({
           price_data: {
             currency: 'usd',
@@ -27,8 +28,9 @@ class PaymentService {
         success_url: request.successUrl,
         cancel_url: request.cancelUrl,
         metadata: request.metadata,
-      });
+      };
 
+      const response = await apiService.createStripeCheckoutSession(sessionData);
       return PaymentMapper.mapExternalCheckoutSessionToInternal(response);
     } catch (error) {
       console.error('Failed to create checkout session:', error);
@@ -39,7 +41,7 @@ class PaymentService {
   // Create a payment intent for direct payment processing
   async createPaymentIntent(request: CreatePaymentRequest): Promise<PaymentDetails> {
     try {
-      const response = await apiService.createStripePaymentIntent({
+      const paymentData: CreatePaymentIntentRequest = {
         amount: Math.round(request.amount * 100), // Convert to cents
         currency: request.currency,
         payment_method_id: request.paymentMethodId,
@@ -59,8 +61,9 @@ class PaymentService {
           order_id: request.orderId,
           ...request.metadata,
         },
-      });
+      };
 
+      const response = await apiService.createStripePaymentIntent(paymentData);
       return PaymentMapper.mapExternalPaymentIntentToInternal(response);
     } catch (error) {
       console.error('Failed to create payment intent:', error);

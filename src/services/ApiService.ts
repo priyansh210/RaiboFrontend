@@ -1,6 +1,13 @@
 import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, getFormDataHeaders, REQUEST_TIMEOUT } from '../api/config';
 import {ExternalProductResponse} from '../models/external/ProductModels';
 import { PaymentMethod, PaymentMethodsResponse, CreateOrderResponse, PaymentResponse, Address, AddressesResponse } from '../api/types';
+import { 
+  StripeCheckoutSession, 
+  StripePaymentIntent, 
+  StripePaymentMethod, 
+  CreatePaymentIntentRequest, 
+  CreateCheckoutSessionRequest 
+} from '../models/external/StripeModels';
 
 class ApiService {
   private baseURL: string;
@@ -330,50 +337,76 @@ class ApiService {
   }
 
   // Stripe Payment Methods
-  async createStripeCheckoutSession(sessionData: any) {
-    return this.request('/api/v1/stripe/checkout-session', {
+  async createStripeCheckoutSession(sessionData: CreateCheckoutSessionRequest): Promise<StripeCheckoutSession> {
+    const response = await this.request('/api/v1/stripe/checkout-session', {
       method: 'POST',
       body: JSON.stringify(sessionData),
     });
+    return response as StripeCheckoutSession;
   }
 
-  async createStripePaymentIntent(paymentData: any) {
-    return this.request('/api/v1/stripe/payment-intent', {
+  async createStripePaymentIntent(paymentData: CreatePaymentIntentRequest): Promise<StripePaymentIntent> {
+    const response = await this.request('/api/v1/stripe/payment-intent', {
       method: 'POST',
       body: JSON.stringify(paymentData),
     });
+    return response as StripePaymentIntent;
   }
 
-  async confirmStripePaymentIntent(paymentIntentId: string, paymentMethodId: string) {
-    return this.request(`/api/v1/stripe/payment-intent/${paymentIntentId}/confirm`, {
+  async confirmStripePaymentIntent(paymentIntentId: string, paymentMethodId: string): Promise<StripePaymentIntent> {
+    const response = await this.request(`/api/v1/stripe/payment-intent/${paymentIntentId}/confirm`, {
       method: 'POST',
       body: JSON.stringify({ payment_method_id: paymentMethodId }),
     });
+    return response as StripePaymentIntent;
   }
 
-  async getStripePaymentIntent(paymentIntentId: string) {
-    return this.request(`/api/v1/stripe/payment-intent/${paymentIntentId}`);
+  async getStripePaymentIntent(paymentIntentId: string): Promise<StripePaymentIntent> {
+    const response = await this.request(`/api/v1/stripe/payment-intent/${paymentIntentId}`);
+    return response as StripePaymentIntent;
   }
 
-  async getStripePaymentMethods() {
-    return this.request('/api/v1/stripe/payment-methods');
+  async getStripePaymentMethods(): Promise<StripePaymentMethod[]> {
+    const response = await this.request('/api/v1/stripe/payment-methods');
+    return response as StripePaymentMethod[];
   }
 
-  async createStripePaymentMethod(paymentMethodData: any) {
-    return this.request('/api/v1/stripe/payment-methods', {
+  async createStripePaymentMethod(paymentMethodData: {
+    type: 'card';
+    card: {
+      number: string;
+      exp_month: number;
+      exp_year: number;
+      cvc: string;
+    };
+    billing_details?: {
+      name?: string;
+      email?: string;
+      address?: {
+        line1?: string;
+        line2?: string;
+        city?: string;
+        state?: string;
+        postal_code?: string;
+        country?: string;
+      };
+    };
+  }): Promise<StripePaymentMethod> {
+    const response = await this.request('/api/v1/stripe/payment-methods', {
       method: 'POST',
       body: JSON.stringify(paymentMethodData),
     });
+    return response as StripePaymentMethod;
   }
 
-  async deleteStripePaymentMethod(paymentMethodId: string) {
-    return this.request(`/api/v1/stripe/payment-methods/${paymentMethodId}`, {
+  async deleteStripePaymentMethod(paymentMethodId: string): Promise<void> {
+    await this.request(`/api/v1/stripe/payment-methods/${paymentMethodId}`, {
       method: 'DELETE',
     });
   }
 
-  async createStripeRefund(paymentIntentId: string, amount?: number) {
-    return this.request('/api/v1/stripe/refund', {
+  async createStripeRefund(paymentIntentId: string, amount?: number): Promise<void> {
+    await this.request('/api/v1/stripe/refund', {
       method: 'POST',
       body: JSON.stringify({
         payment_intent_id: paymentIntentId,
@@ -382,7 +415,7 @@ class ApiService {
     });
   }
 
-  async getStripeCustomer() {
+  async getStripeCustomer(): Promise<any> {
     return this.request('/api/v1/stripe/customer');
   }
 
@@ -391,7 +424,7 @@ class ApiService {
     name?: string;
     phone?: string;
     metadata?: Record<string, string>;
-  }) {
+  }): Promise<any> {
     return this.request('/api/v1/stripe/customer', {
       method: 'POST',
       body: JSON.stringify(customerData),
