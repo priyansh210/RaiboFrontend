@@ -17,8 +17,8 @@ class ApiService {
     console.log('ApiService initialized with baseURL:', this.baseURL);
   }
 
-  // Generic request method
-  private async request<T>(
+  // Generic request method - made public for use by other services
+  async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
