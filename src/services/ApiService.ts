@@ -1,3 +1,4 @@
+
 import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, getFormDataHeaders, REQUEST_TIMEOUT } from '../api/config';
 import {ExternalProductResponse} from '../models/external/ProductModels';
 import { PaymentMethod, PaymentMethodsResponse, CreateOrderResponse, PaymentResponse, Address, AddressesResponse } from '../api/types';
@@ -126,10 +127,12 @@ class ApiService {
   async getAllProductsBySeller(companyId: string) {
     return this.request(`${API_ENDPOINTS.PRODUCTS.GET_ALL}/${companyId}`);
   }
+  
   async getProductById(productId: string) {
     const response = await this.request<{ product: ExternalProductResponse }>(`${API_ENDPOINTS.PRODUCTS.GET_BY_ID}/${productId}`);
     return response.product;
   }
+  
   async getAllProducts() {
     const response = await this.request<{ products: any[] }>(`${API_ENDPOINTS.PRODUCTS.GET_ALL}`);
     return response.products;
@@ -181,12 +184,14 @@ class ApiService {
       body: JSON.stringify(productData),
     });
   }
+  
   async updateQuantityInCart(productData: { product_id: string; quantity: number }) {
     return this.request(`${API_ENDPOINTS.CART.UPDATE}`, {
       method: 'PUT',
       body: JSON.stringify(productData),
     });
   }
+  
   async clearCart() {
     return this.request(`${API_ENDPOINTS.CART.DELETE}`, {
       method: 'DELETE',
@@ -338,37 +343,37 @@ class ApiService {
 
   // Stripe Payment Methods
   async createStripeCheckoutSession(sessionData: CreateCheckoutSessionRequest): Promise<StripeCheckoutSession> {
-    const response = await this.request('/api/v1/stripe/checkout-session', {
+    const response = await this.request<StripeCheckoutSession>('/api/v1/stripe/checkout-session', {
       method: 'POST',
       body: JSON.stringify(sessionData),
     });
-    return response as StripeCheckoutSession;
+    return response;
   }
 
   async createStripePaymentIntent(paymentData: CreatePaymentIntentRequest): Promise<StripePaymentIntent> {
-    const response = await this.request('/api/v1/stripe/payment-intent', {
+    const response = await this.request<StripePaymentIntent>('/api/v1/stripe/payment-intent', {
       method: 'POST',
       body: JSON.stringify(paymentData),
     });
-    return response as StripePaymentIntent;
+    return response;
   }
 
   async confirmStripePaymentIntent(paymentIntentId: string, paymentMethodId: string): Promise<StripePaymentIntent> {
-    const response = await this.request(`/api/v1/stripe/payment-intent/${paymentIntentId}/confirm`, {
+    const response = await this.request<StripePaymentIntent>(`/api/v1/stripe/payment-intent/${paymentIntentId}/confirm`, {
       method: 'POST',
       body: JSON.stringify({ payment_method_id: paymentMethodId }),
     });
-    return response as StripePaymentIntent;
+    return response;
   }
 
   async getStripePaymentIntent(paymentIntentId: string): Promise<StripePaymentIntent> {
-    const response = await this.request(`/api/v1/stripe/payment-intent/${paymentIntentId}`);
-    return response as StripePaymentIntent;
+    const response = await this.request<StripePaymentIntent>(`/api/v1/stripe/payment-intent/${paymentIntentId}`);
+    return response;
   }
 
   async getStripePaymentMethods(): Promise<StripePaymentMethod[]> {
-    const response = await this.request('/api/v1/stripe/payment-methods');
-    return response as StripePaymentMethod[];
+    const response = await this.request<StripePaymentMethod[]>('/api/v1/stripe/payment-methods');
+    return response;
   }
 
   async createStripePaymentMethod(paymentMethodData: {
@@ -392,11 +397,11 @@ class ApiService {
       };
     };
   }): Promise<StripePaymentMethod> {
-    const response = await this.request('/api/v1/stripe/payment-methods', {
+    const response = await this.request<StripePaymentMethod>('/api/v1/stripe/payment-methods', {
       method: 'POST',
       body: JSON.stringify(paymentMethodData),
     });
-    return response as StripePaymentMethod;
+    return response;
   }
 
   async deleteStripePaymentMethod(paymentMethodId: string): Promise<void> {
@@ -429,95 +434,6 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(customerData),
     });
-  }
-
-  // Add admin endpoints to the existing AdminService class
-  async getAllCompanies() {
-    return this.request('/api/v1/admin/companies');
-  }
-
-  async getCompanyById(companyId: string) {
-    return this.request(`/api/v1/admin/companies/${companyId}`);
-  }
-
-  async updateCompanyStatus(companyId: string, statusData: { status: string; comments?: string }) {
-    return this.request(`/api/v1/admin/companies/${companyId}/status`, {
-      method: 'PUT',
-      body: JSON.stringify(statusData),
-    });
-  }
-
-  async getAllUsers() {
-    return this.request('/api/v1/admin/users');
-  }
-
-  async getUserById(userId: string) {
-    return this.request(`/api/v1/admin/users/${userId}`);
-  }
-
-  async updateUserStatus(userId: string, statusData: { status: string }) {
-    return this.request(`/api/v1/admin/users/${userId}/status`, {
-      method: 'PUT',
-      body: JSON.stringify(statusData),
-    });
-  }
-
-  async getAllOrders() {
-    return this.request('/api/v1/admin/orders');
-  }
-
-  async getOrderById(orderId: string) {
-    return this.request(`/api/v1/admin/orders/${orderId}`);
-  }
-
-  async getPendingProductVerifications() {
-    return this.request('/api/v1/admin/product-verifications/pending');
-  }
-
-  async verifyProduct(verificationId: string, verificationData: { status: string; comments?: string }) {
-    return this.request(`/api/v1/admin/product-verifications/${verificationId}`, {
-      method: 'PUT',
-      body: JSON.stringify(verificationData),
-    });
-  }
-
-  async getPendingKycVerifications() {
-    return this.request('/api/v1/admin/kyc-verifications/pending');
-  }
-
-  async verifyKyc(verificationId: string, verificationData: { status: string; comments?: string }) {
-    return this.request(`/api/v1/admin/kyc-verifications/${verificationId}`, {
-      method: 'PUT',
-      body: JSON.stringify(verificationData),
-    });
-  }
-
-  async getAdminCategories() {
-    return this.request('/api/v1/admin/categories');
-  }
-
-  async createAdminCategory(categoryData: { name: string; description?: string; parentId?: string }) {
-    return this.request('/api/v1/admin/categories', {
-      method: 'POST',
-      body: JSON.stringify(categoryData),
-    });
-  }
-
-  async updateAdminCategory(categoryId: string, categoryData: { name?: string; description?: string; parentId?: string }) {
-    return this.request(`/api/v1/admin/categories/${categoryId}`, {
-      method: 'PUT',
-      body: JSON.stringify(categoryData),
-    });
-  }
-
-  async deleteAdminCategory(categoryId: string) {
-    return this.request(`/api/v1/admin/categories/${categoryId}`, {
-      method: 'DELETE',
-    });
-  }
-
-  async getAdminDashboardStats() {
-    return this.request('/api/v1/admin/dashboard/stats');
   }
 }
 
