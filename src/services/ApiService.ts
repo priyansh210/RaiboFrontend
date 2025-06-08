@@ -328,6 +328,75 @@ class ApiService {
   async deleteImage(imageId: string) {
     return this.request(`${API_ENDPOINTS.IMAGES.DELETE}/${imageId}`);
   }
+
+  // Stripe Payment Methods
+  async createStripeCheckoutSession(sessionData: any) {
+    return this.request('/api/v1/stripe/checkout-session', {
+      method: 'POST',
+      body: JSON.stringify(sessionData),
+    });
+  }
+
+  async createStripePaymentIntent(paymentData: any) {
+    return this.request('/api/v1/stripe/payment-intent', {
+      method: 'POST',
+      body: JSON.stringify(paymentData),
+    });
+  }
+
+  async confirmStripePaymentIntent(paymentIntentId: string, paymentMethodId: string) {
+    return this.request(`/api/v1/stripe/payment-intent/${paymentIntentId}/confirm`, {
+      method: 'POST',
+      body: JSON.stringify({ payment_method_id: paymentMethodId }),
+    });
+  }
+
+  async getStripePaymentIntent(paymentIntentId: string) {
+    return this.request(`/api/v1/stripe/payment-intent/${paymentIntentId}`);
+  }
+
+  async getStripePaymentMethods() {
+    return this.request('/api/v1/stripe/payment-methods');
+  }
+
+  async createStripePaymentMethod(paymentMethodData: any) {
+    return this.request('/api/v1/stripe/payment-methods', {
+      method: 'POST',
+      body: JSON.stringify(paymentMethodData),
+    });
+  }
+
+  async deleteStripePaymentMethod(paymentMethodId: string) {
+    return this.request(`/api/v1/stripe/payment-methods/${paymentMethodId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async createStripeRefund(paymentIntentId: string, amount?: number) {
+    return this.request('/api/v1/stripe/refund', {
+      method: 'POST',
+      body: JSON.stringify({
+        payment_intent_id: paymentIntentId,
+        amount: amount ? Math.round(amount * 100) : undefined, // Convert to cents if provided
+      }),
+    });
+  }
+
+  async getStripeCustomer() {
+    return this.request('/api/v1/stripe/customer');
+  }
+
+  async createStripeCustomer(customerData: {
+    email: string;
+    name?: string;
+    phone?: string;
+    metadata?: Record<string, string>;
+  }) {
+    return this.request('/api/v1/stripe/customer', {
+      method: 'POST',
+      body: JSON.stringify(customerData),
+    });
+  }
 }
 
 export const apiService = new ApiService();
