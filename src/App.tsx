@@ -16,6 +16,7 @@ import Checkout from './pages/Checkout';
 import Account from './pages/Account';
 import ForYou from './pages/ForYou';
 import NotFound from './pages/NotFound';
+import StripeCheckout from './pages/StripeCheckout';
 
 // Auth Pages
 import Login from './pages/Login';
@@ -30,6 +31,11 @@ import AuthCallback from './pages/AuthCallback';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerProducts from './pages/SellerProducts';
 import SellerProductForm from './pages/SellerProductForm';
+
+// Admin Pages
+import AdminLogin from './pages/AdminLogin';
+import AdminRegister from './pages/AdminRegister';
+import AdminDashboard from './pages/AdminDashboard';
 
 import './App.css';
 
@@ -65,6 +71,7 @@ function App() {
                   <Route path="/search" element={<Search />} />
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/stripe-checkout" element={<StripeCheckout />} />
                   <Route path="/for-you" element={<ForYou />} />
 
                   {/* Auth Routes */}
@@ -75,6 +82,11 @@ function App() {
                   <Route path="/seller/register" element={<SellerRegister />} />
                   <Route path="/account/login" element={<AccountLogin />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
+
+                  {/* Admin Routes */}
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin/register" element={<AdminRegister />} />
+                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
                   {/* User Account */}
                   <Route path="/account" element={<Account />} />

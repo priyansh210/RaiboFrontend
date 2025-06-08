@@ -149,7 +149,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
   
-  // Login function with portal separation
+  // Login function with portal separation and admin redirect
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     console.log('AuthContext: Starting login process');
@@ -191,7 +191,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log('AuthContext: Login completed successfully');
       
-      // Don't redirect here - let the login pages handle redirection based on role
+      // Handle role-based redirects
+      if (userData.roles.includes('admin')) {
+        // Admin users should be redirected to admin dashboard
+        window.location.href = '/admin/dashboard';
+      }
+      
       return;
     } catch (error: any) {
       console.error('AuthContext: Login error:', error);

@@ -430,6 +430,95 @@ class ApiService {
       body: JSON.stringify(customerData),
     });
   }
+
+  // Add admin endpoints to the existing AdminService class
+  async getAllCompanies() {
+    return this.request('/api/v1/admin/companies');
+  }
+
+  async getCompanyById(companyId: string) {
+    return this.request(`/api/v1/admin/companies/${companyId}`);
+  }
+
+  async updateCompanyStatus(companyId: string, statusData: { status: string; comments?: string }) {
+    return this.request(`/api/v1/admin/companies/${companyId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify(statusData),
+    });
+  }
+
+  async getAllUsers() {
+    return this.request('/api/v1/admin/users');
+  }
+
+  async getUserById(userId: string) {
+    return this.request(`/api/v1/admin/users/${userId}`);
+  }
+
+  async updateUserStatus(userId: string, statusData: { status: string }) {
+    return this.request(`/api/v1/admin/users/${userId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify(statusData),
+    });
+  }
+
+  async getAllOrders() {
+    return this.request('/api/v1/admin/orders');
+  }
+
+  async getOrderById(orderId: string) {
+    return this.request(`/api/v1/admin/orders/${orderId}`);
+  }
+
+  async getPendingProductVerifications() {
+    return this.request('/api/v1/admin/product-verifications/pending');
+  }
+
+  async verifyProduct(verificationId: string, verificationData: { status: string; comments?: string }) {
+    return this.request(`/api/v1/admin/product-verifications/${verificationId}`, {
+      method: 'PUT',
+      body: JSON.stringify(verificationData),
+    });
+  }
+
+  async getPendingKycVerifications() {
+    return this.request('/api/v1/admin/kyc-verifications/pending');
+  }
+
+  async verifyKyc(verificationId: string, verificationData: { status: string; comments?: string }) {
+    return this.request(`/api/v1/admin/kyc-verifications/${verificationId}`, {
+      method: 'PUT',
+      body: JSON.stringify(verificationData),
+    });
+  }
+
+  async getAdminCategories() {
+    return this.request('/api/v1/admin/categories');
+  }
+
+  async createAdminCategory(categoryData: { name: string; description?: string; parentId?: string }) {
+    return this.request('/api/v1/admin/categories', {
+      method: 'POST',
+      body: JSON.stringify(categoryData),
+    });
+  }
+
+  async updateAdminCategory(categoryId: string, categoryData: { name?: string; description?: string; parentId?: string }) {
+    return this.request(`/api/v1/admin/categories/${categoryId}`, {
+      method: 'PUT',
+      body: JSON.stringify(categoryData),
+    });
+  }
+
+  async deleteAdminCategory(categoryId: string) {
+    return this.request(`/api/v1/admin/categories/${categoryId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getAdminDashboardStats() {
+    return this.request('/api/v1/admin/dashboard/stats');
+  }
 }
 
 export const apiService = new ApiService();
