@@ -5,7 +5,7 @@ import Layout from '../components/Layout';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { ordersApi } from '../api/mockApi';
+import { apiService } from '../services/ApiService';
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -51,28 +51,21 @@ const Cart = () => {
         color: item.selectedColor?.name || null
       }));
       
-      // Create a new order
-      const response = await ordersApi.createOrder({
-        buyer_id: user.id,
-        total_amount: total,
-        shipping_address: 'Default Address', // In a real app, you'd collect this
-        status: 'pending',
-        items: orderItems
-      });
-      
+      const response = await apiService.getCart() as { error?: any; cart?: any };
+    
       if (response.error) {
         throw new Error(response.error);
       }
       
       // Clear the cart
-      clearCart();
+      // clearCart();
       
       toast({
         title: "Order Placed Successfully",
         description: "Thank you for your purchase!",
       });
       
-      navigate('/checkout/success', { state: { orderId: response.data?.id } });
+      navigate('/checkout', { state: { cart_id: response.cart._id} });
     } catch (error) {
       console.error('Checkout error:', error);
       toast({

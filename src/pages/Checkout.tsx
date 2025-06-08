@@ -29,6 +29,7 @@ const Checkout = () => {
     country: 'United States',
     receiver_name: user?.firstName || '',
     receiver_phone: '',
+    tag: '', // Add a tag field
   });
   
   // Payment state
@@ -41,6 +42,7 @@ const Checkout = () => {
     expiry_date: '',
     cvv: '',
     card_type: 'visa',
+    nickname: '', // Add a nickname field
   });
 
   useEffect(() => {
@@ -64,7 +66,7 @@ const Checkout = () => {
       setAddresses(addressData);
       const defaultAddress = addressData.find((addr: Address) => addr.is_default);
       if (defaultAddress) {
-        setSelectedAddressId(defaultAddress.id);
+        setSelectedAddressId(defaultAddress._id);
       }
     } catch (error) {
       console.error('Failed to load addresses:', error);
@@ -93,6 +95,7 @@ const Checkout = () => {
         country: 'United States',
         receiver_name: user?.firstName || '',
         receiver_phone: '',
+        tag: '', // Reset the tag field
       });
       toast({
         title: "Address Added",
@@ -118,6 +121,7 @@ const Checkout = () => {
         expiry_date: '',
         cvv: '',
         card_type: 'visa',
+        nickname: '', // Reset the nickname field
       });
       toast({
         title: "Payment Method Added",
@@ -147,11 +151,11 @@ const Checkout = () => {
     try {
       // Create order
       const orderData = {
-        cart_id: 'temp-cart-id',
+        cart_id: "temp-cart-id",
         address_id: selectedAddressId,
         payment_method: selectedPaymentMethodId,
-        receiver_name: addresses.find(a => a.id === selectedAddressId)?.receiver_name || '',
-        receiver_phone: addresses.find(a => a.id === selectedAddressId)?.receiver_phone || '',
+        receiver_name: addresses.find(a => a._id === selectedAddressId)?.receiver_name || '',
+        receiver_phone: addresses.find(a => a._id === selectedAddressId)?.receiver_phone || '',
         method_id: selectedPaymentMethodId,
         delivery_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
       };
@@ -318,11 +322,11 @@ const Checkout = () => {
                 <div className="space-y-4">
                   {addresses.map((address) => (
                     <div
-                      key={address.id}
+                      key={address._id}
                       className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        selectedAddressId === address.id ? 'border-terracotta bg-terracotta/5' : 'border-sand hover:border-terracotta/50'
+                        selectedAddressId === address._id ? 'border-terracotta bg-terracotta/5' : 'border-sand hover:border-terracotta/50'
                       }`}
-                      onClick={() => setSelectedAddressId(address.id)}
+                      onClick={() => setSelectedAddressId(address._id)}
                     >
                       <div className="flex items-start justify-between">
                         <div>
@@ -333,8 +337,8 @@ const Checkout = () => {
                         </div>
                         <input
                           type="radio"
-                          checked={selectedAddressId === address.id}
-                          onChange={() => setSelectedAddressId(address.id)}
+                          checked={selectedAddressId === address._id}
+                          onChange={() => setSelectedAddressId(address._id)}
                           className="mt-1"
                         />
                       </div>

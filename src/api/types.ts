@@ -109,7 +109,7 @@ export interface PaymentResponse {
 
 // Address types
 export interface Address {
-  id: string;
+  _id: string;
   street: string;
   city: string;
   state: string;

@@ -33,8 +33,8 @@ interface CartContextProps {
 // Load cart from the database
 export const loadCart = async (): Promise<CartItem[]> => {
   try {
-    const response = await apiService.getCart();
-    return response.products.map((product: any) => ({
+    const response = await apiService.getCart() as { cart: any };
+    return response.cart.products.map((product: any) => ({
       id: product.product_id._id,
       name: product.product_id.name,
       price: product.product_id.price,

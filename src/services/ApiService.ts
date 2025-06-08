@@ -157,8 +157,8 @@ class ApiService {
 
   // Cart methods
   async getCart() {
-    const response = await this.request<{ cart: any }>(API_ENDPOINTS.CART.GET);
-    return response.cart;
+    const response = await this.request(API_ENDPOINTS.CART.GET);
+    return response;
   }
 
   async addToCart( productData: { product_id: string; quantity: number }) {
@@ -259,8 +259,7 @@ class ApiService {
 
   // Enhanced Address methods
   async getAddresses(): Promise<Address[]> {
-    const response = await this.request<AddressesResponse>(API_ENDPOINTS.ADDRESS.GET_ALL);
-    return response.addresses || [];
+    return this.request(API_ENDPOINTS.ADDRESS.GET_ALL);
   }
 
   async addAddress(addressData: {
