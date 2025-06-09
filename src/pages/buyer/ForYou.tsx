@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Layout from '../components/Layout';
-import ProductInteractions from '../components/ProductInteractions';
-import { Product } from '../models/internal/Product';
-import { fetchProducts } from '../services/ProductService';
+import Layout from '@/components/Layout';
+import ProductInteractions from '@/components/ProductInteractions';
+import { Product } from '@/models/internal/Product';
+import { fetchProducts } from '@/services/ProductService';
 import { Heart, TrendingUp, ArrowUp } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useIsMobile } from '../hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Link } from 'react-router-dom';
 
 // Dummy interaction data

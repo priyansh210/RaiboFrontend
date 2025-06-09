@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
-import Layout from '../components/Layout';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import Layout from '@/components/Layout';
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { apiService } from '../services/ApiService';
+import { apiService } from '@/services/ApiService';
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, clearCart } = useCart();

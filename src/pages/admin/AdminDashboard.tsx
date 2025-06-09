@@ -4,14 +4,14 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '../context/AuthContext';
-import { adminService } from '../services/AdminService';
-import { AdminDashboardStats } from '../models/internal/Admin';
+import { useAuth } from '@/context/AuthContext';
+import { adminService } from '@/services/AdminService';
+import { AdminDashboardStats } from '@/models/internal/Admin';
 import { toast } from '@/hooks/use-toast';
-import Layout from '../components/Layout';
-import AdminCompanyInfo from '../components/admin/AdminCompanyInfo';
-import AdminRequests from '../components/admin/AdminRequests';
-import AdminCategories from '../components/admin/AdminCategories';
+import Layout from '@/components/Layout';
+import AdminCompanyInfo from '@/components/admin/AdminCompanyInfo';
+import AdminRequests from '@/components/admin/AdminRequests';
+import AdminCategories from '@/components/admin/AdminCategories';
 
 const AdminDashboard: React.FC = () => {
   const { user, isAdmin } = useAuth();

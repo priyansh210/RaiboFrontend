@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import Layout from '../components/Layout';
+import Layout from '@/components/Layout';
 
 const AdminLogin: React.FC = () => {
   const [credentials, setCredentials] = useState({
