@@ -7,35 +7,35 @@ import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/LoadingScreen';
 
 // Pages
-import Index from './pages/Index';
-import Browse from './pages/Browse';
-import ProductDetail from './pages/ProductDetail';
-import Search from './pages/Search';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Account from './pages/Account';
-import ForYou from './pages/ForYou';
-import NotFound from './pages/NotFound';
-import StripeCheckout from './pages/StripeCheckout';
+import Index from './pages/buyer/Index';
+import Browse from './pages/buyer/Browse';
+import ProductDetail from './pages/buyer/ProductDetail';
+import Search from './pages/buyer/Search';
+import Cart from './pages/buyer/Cart';
+import Checkout from './pages/buyer/Checkout';
+import Account from './pages/buyer/Account';
+import ForYou from './pages/buyer/ForYou';
+import NotFound from './pages/buyer/NotFound';
+import StripeCheckout from './pages/buyer/StripeCheckout';
 
 // Auth Pages
-import Login from './pages/Login';
-import BuyerLogin from './pages/BuyerLogin';
-import BuyerRegister from './pages/BuyerRegister';
-import SellerLogin from './pages/SellerLogin';
-import SellerRegister from './pages/SellerRegister';
+import Login from './pages/buyer/Login';
+import BuyerLogin from './pages/buyer/BuyerLogin';
+import BuyerRegister from './pages/buyer/BuyerRegister';
+import SellerLogin from './pages/seller/SellerLogin';
+import SellerRegister from './pages/seller/SellerRegister';
 import AccountLogin from './pages/AccountLogin';
 import AuthCallback from './pages/AuthCallback';
 
 // Seller Pages
-import SellerDashboard from './pages/SellerDashboard';
-import SellerProducts from './pages/SellerProducts';
-import SellerProductForm from './pages/SellerProductForm';
+import SellerDashboard from './pages/seller/SellerDashboard';
+import SellerProducts from './pages/seller/SellerProducts';
+import SellerProductForm from './pages/seller/SellerProductForm';
 
 // Admin Pages
-import AdminLogin from './pages/AdminLogin';
-import AdminRegister from './pages/AdminRegister';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminRegister from './pages/admin/AdminRegister';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 import './App.css';
 

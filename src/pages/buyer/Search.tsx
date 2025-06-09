@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
 import { Search as SearchIcon } from 'lucide-react';
-import Layout from '../components/Layout';
-import ProductCard from '../components/ProductCard';
-import SearchFilters from '../components/search/SearchFilters';
-import { fetchProducts } from '../services/ProductService';
-import { Product, ProductColor } from '../models/internal/Product';
+import Layout from '../../components/Layout';
+import ProductCard from '../../components/ProductCard';
+import SearchFilters from '../../components/search/SearchFilters';
+import { fetchProducts } from '../../services/ProductService';
+import { Product, ProductColor } from '../../models/internal/Product';
 
 const Search = () => {
   const [searchTerm, setSearchTerm] = useState('');

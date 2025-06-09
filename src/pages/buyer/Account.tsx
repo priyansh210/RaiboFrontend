@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import Layout from '../components/Layout';
+import { useAuth } from '../../context/AuthContext';
+import Layout from '../../components/Layout';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Phone, Mail, MapPin, User, Package, LogOut, Save, AlertCircle, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ordersApi } from '../api/mockApi';
+import { ordersApi } from '../../api/mockApi';
 
 // Mock user data to extend the profile
 const mockOrderHistory = [

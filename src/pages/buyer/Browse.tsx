@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import Layout from '../components/Layout';
-import ProductCard from '../components/ProductCard';
-import CategoryFilter from '../components/CategoryFilter';
-import PriceRangeSlider from '../components/PriceRangeSlider';
-import { categories } from '../data/products';
-import { fetchProducts, searchProducts } from '../services/ProductService';
+import Layout from '../../components/Layout';
+import ProductCard from '../../components/ProductCard';
+import CategoryFilter from '../../components/CategoryFilter';
+import PriceRangeSlider from '../../components/PriceRangeSlider';
+import { categories } from '../../data/products';
+import { fetchProducts, searchProducts } from '../../services/ProductService';
 import { Filter, Grid, List, SlidersHorizontal, X } from 'lucide-react';
-import { Product } from '../models/internal/Product';
+import { Product } from '../../models/internal/Product';
 
 const Browse = () => {
   const { category } = useParams();

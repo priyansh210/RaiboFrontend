@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Upload, X } from 'lucide-react';
-import Layout from '../components/Layout';
+import Layout from '../../components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,8 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '../context/AuthContext';
-import {apiService} from '../services/ApiService';
+import { useAuth } from '../../context/AuthContext';
+import {apiService} from '../../services/ApiService';
 import { ExternalProductResponse } from '@/models/external/ProductModels';
 
 interface ProductFormData {

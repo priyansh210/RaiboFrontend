@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import Layout from '../components/Layout';
+import { useAuth } from '../../context/AuthContext';
+import Layout from '../../components/Layout';
 import { toast } from '@/hooks/use-toast';
-import LoginForm from '../components/auth/LoginForm';
-import { googleAuthService } from '../services/GoogleAuthService';
-import { STORAGE_KEYS } from '../api/config';
+import LoginForm from '../../components/auth/LoginForm';
+import { googleAuthService } from '../../services/GoogleAuthService';
+import { STORAGE_KEYS } from '../../api/config';
 
 const Login = () => {
   const { login, isAuthenticated, isLoading } = useAuth();

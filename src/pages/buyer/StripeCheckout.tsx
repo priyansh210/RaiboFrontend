@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Check, ChevronLeft, CreditCard, MapPin, ShoppingBag, Truck, Plus, Minus, X, Loader } from 'lucide-react';
-import Layout from '../components/Layout';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import Layout from '../../components/Layout';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { paymentService } from '../services/PaymentService';
-import { apiService } from '../services/ApiService';
-import { Address } from '../api/types';
-import { PaymentMethodDetails } from '../models/internal/Payment';
+import { paymentService } from '../../services/PaymentService';
+import { apiService } from '../../services/ApiService';
+import { Address } from '../../api/types';
+import { PaymentMethodDetails } from '../../models/internal/Payment';
 
 const StripeCheckout = () => {
   const navigate = useNavigate();

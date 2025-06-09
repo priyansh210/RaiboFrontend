@@ -1,6 +1,6 @@
 
 import React from 'react';
-import Layout from '../components/Layout';
+import Layout from '../../components/Layout';
 import { BarChart3, Package, ShoppingBag, Star, Users } from 'lucide-react';
 
 const SellerDashboard = () => {

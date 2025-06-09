@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, Search, Package, Star, Eye } from 'lucide-react';
-import Layout from '../components/Layout';
+import Layout from '../../components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '../context/AuthContext';
-import { Product } from '../models/internal/Product';
-import { fetchProducts } from '../services/ProductService';
+import { useAuth } from '../../context/AuthContext';
+import { Product } from '../../models/internal/Product';
+import { fetchProducts } from '../../services/ProductService';
 import { apiService } from '@/services/ApiService';
 import { toast } from '@/hooks/use-toast';
 

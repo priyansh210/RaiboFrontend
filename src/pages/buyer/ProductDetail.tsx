@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Layout from '../components/Layout';
-import ProductInteractions from '../components/ProductInteractions';
-import { useCart } from '../context/CartContext';
-import { getProductById, getSimilarProducts } from '../services/ProductService';
-import { Product } from '../models/internal/Product';
+import Layout from '../../components/Layout';
+import ProductInteractions from '../../components/ProductInteractions';
+import { useCart } from '../../context/CartContext';
+import { getProductById, getSimilarProducts } from '../../services/ProductService';
+import { Product } from '../../models/internal/Product';
 import { toast } from '@/hooks/use-toast';
 import { 
   ArrowLeft, 
