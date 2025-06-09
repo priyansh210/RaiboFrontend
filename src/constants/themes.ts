@@ -85,7 +85,34 @@ export const DARK_THEME = {
   earth: '#5A514B' // Darker earth
 } as const;
 
-export type ThemeColors = typeof LIGHT_THEME;
+// Create a proper type that represents the structure of both themes
+export type ThemeColors = {
+  background: string;
+  foreground: string;
+  card: string;
+  cardForeground: string;
+  primary: string;
+  primaryForeground: string;
+  secondary: string;
+  secondaryForeground: string;
+  muted: string;
+  mutedForeground: string;
+  accent: string;
+  accentForeground: string;
+  border: string;
+  input: string;
+  ring: string;
+  terracotta: string;
+  sand: string;
+  umber: string;
+  taupe: string;
+  olive: string;
+  forest: string;
+  cream: string;
+  charcoal: string;
+  linen: string;
+  earth: string;
+};
 
 export const getTheme = (isDark: boolean): ThemeColors => {
   return isDark ? DARK_THEME : LIGHT_THEME;
