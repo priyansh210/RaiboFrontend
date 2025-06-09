@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Layout from '@/components/Layout';
 import ProductInteractions from '@/components/ProductInteractions';
@@ -7,6 +6,7 @@ import { fetchProducts } from '@/services/ProductService';
 import { Heart, TrendingUp, ArrowUp } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTheme } from '@/context/ThemeContext';
 import { Link } from 'react-router-dom';
 
 // Dummy interaction data
@@ -50,6 +50,7 @@ const ForYou = () => {
   const observer = useRef<IntersectionObserver | null>(null);
   const productsPerPage = 10;
   const isMobile = useIsMobile();
+  const { theme } = useTheme();
 
   // Fetch initial products
   useEffect(() => {
@@ -187,21 +188,21 @@ const ForYou = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 py-4 md:py-8">
+      <div className="min-h-screen py-4 md:py-8" style={{ backgroundColor: theme.muted }}>
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-center mb-6 md:mb-8">
-            <Heart size={isMobile ? 20 : 24} className="text-terracotta mr-2" />
-            <h1 className="font-playfair text-2xl md:text-4xl text-charcoal">For You</h1>
+            <Heart size={isMobile ? 20 : 24} className="mr-2" style={{ color: theme.primary }} />
+            <h1 className="font-playfair text-2xl md:text-4xl" style={{ color: theme.foreground }}>For You</h1>
           </div>
 
           {isLoading && displayProducts.length === 0 ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2" style={{ borderColor: theme.primary }}></div>
             </div>
           ) : displayProducts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-lg text-charcoal mb-2">No products found</p>
-              <p className="text-earth">Check back later for new recommendations</p>
+              <p className="text-lg mb-2" style={{ color: theme.foreground }}>No products found</p>
+              <p style={{ color: theme.mutedForeground }}>Check back later for new recommendations</p>
             </div>
           ) : (
             <>
@@ -215,7 +216,8 @@ const ForYou = () => {
                     <div 
                       key={product.id}
                       ref={isLast ? lastProductElementRef : null}
-                      className="break-inside-avoid bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-4"
+                      className="break-inside-avoid rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-4"
+                      style={{ backgroundColor: theme.background }}
                     >
                       <Link to={`/product/${product.id}`} className="block">
                         <div className="relative overflow-hidden">
@@ -260,14 +262,14 @@ const ForYou = () => {
 
               {isLoading && displayProducts.length > 0 && (
                 <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-terracotta mx-auto"></div>
-                  <p className="text-earth mt-2">Loading more...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 mx-auto" style={{ borderColor: theme.primary }}></div>
+                  <p className="mt-2" style={{ color: theme.mutedForeground }}>Loading more...</p>
                 </div>
               )}
 
               {!hasMore && displayProducts.length > 0 && (
                 <div className="text-center py-8">
-                  <p className="text-earth">You've reached the end!</p>
+                  <p style={{ color: theme.mutedForeground }}>You've reached the end!</p>
                 </div>
               )}
             </>
@@ -276,9 +278,10 @@ const ForYou = () => {
           {/* Scroll to top button */}
           <button
             onClick={scrollToTop}
-            className={`fixed bottom-6 right-6 bg-terracotta text-white rounded-full p-3 shadow-lg transition-all duration-300 z-50 ${
+            className={`fixed bottom-6 right-6 text-white rounded-full p-3 shadow-lg transition-all duration-300 z-50 ${
               showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
             }`}
+            style={{ backgroundColor: theme.primary }}
             aria-label="Scroll to top"
           >
             <ArrowUp size={20} />
