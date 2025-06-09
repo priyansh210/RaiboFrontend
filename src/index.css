@@ -1,6 +1,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -68,6 +69,27 @@
     --input: 20 10% 20%;
     --ring: 16 59% 58%;
   }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    text-align: right;
+  }
+
+  [dir="rtl"] .flex {
+    flex-direction: row-reverse;
+  }
+
+  [dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+  }
+
+  [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+  }
+
+  [dir="rtl"] .space-x-6 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
+  }
 }
 
 @layer base {
@@ -80,11 +102,23 @@
   }
   
   body {
-    @apply bg-background text-foreground font-outfit;
+    @apply bg-background text-foreground;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  /* Arabic font support */
+  [lang="ar"] body {
+    font-family: 'Amiri', serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-playfair font-medium tracking-wide;
+  }
+
+  /* Arabic headings */
+  [lang="ar"] h1, [lang="ar"] h2, [lang="ar"] h3, [lang="ar"] h4, [lang="ar"] h5, [lang="ar"] h6 {
+    font-family: 'Amiri', serif;
+    font-weight: 700;
   }
 }
 
@@ -126,5 +160,14 @@
   
   .page-transition {
     @apply animate-fade-in;
+  }
+
+  /* RTL-specific utilities */
+  .rtl-flip {
+    transform: scaleX(-1);
+  }
+
+  [dir="rtl"] .rtl-flip {
+    transform: scaleX(1);
   }
 }

@@ -1,12 +1,15 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
+import ThemeLanguageToggle from './ThemeLanguageToggle';
 
 import {
   DropdownMenu,
@@ -25,6 +28,7 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const { cart: cartItems } = useCart();
   const { isAuthenticated, user, logout, isSeller, isGuest } = useAuth();
+  const { t } = useLanguage();
   const isMobile = useIsMobile();
 
   // Get user initials for avatar
@@ -41,16 +45,16 @@ const Navbar: React.FC = () => {
   };
 
   const categories = [
-    { name: 'FURNITURE', path: '/browse/furniture' },
-    { name: 'OUTDOOR', path: '/browse/outdoor' },
-    { name: 'BEDDING & BATH', path: '/browse/bedding-bath' },
-    { name: 'RUGS', path: '/browse/rugs' },
-    { name: 'DECOR & PILLOWS', path: '/browse/decor' },
-    { name: 'LIGHTING', path: '/browse/lighting' },
-    { name: 'ORGANIZATION', path: '/browse/organization' },
-    { name: 'KITCHEN', path: '/browse/kitchen' },
-    { name: 'HOME IMPROVEMENT', path: '/browse/home-improvement' },
-    { name: 'SHOP BY ROOMS', path: '/browse/rooms' },
+    { name: t('furniture'), path: '/browse/furniture' },
+    { name: t('outdoor'), path: '/browse/outdoor' },
+    { name: t('bedding'), path: '/browse/bedding-bath' },
+    { name: t('rugs'), path: '/browse/rugs' },
+    { name: t('decor'), path: '/browse/decor' },
+    { name: t('lighting'), path: '/browse/lighting' },
+    { name: t('organization'), path: '/browse/organization' },
+    { name: t('kitchen'), path: '/browse/kitchen' },
+    { name: t('homeImprovement'), path: '/browse/home-improvement' },
+    { name: t('shopByRooms'), path: '/browse/rooms' },
   ];
 
   useEffect(() => {
@@ -84,14 +88,14 @@ const Navbar: React.FC = () => {
     try {
       await logout();
       toast({
-        title: "Logged out successfully",
+        title: t('success'),
         description: "You have been logged out of your account.",
       });
       navigate('/');
     } catch (error) {
       console.error('Logout error:', error);
       toast({
-        title: "Logout failed",
+        title: t('error'),
         description: "There was an issue logging out. Please try again.",
         variant: "destructive",
       });
@@ -114,10 +118,10 @@ const Navbar: React.FC = () => {
             description: "Sign in to save your search history and get personalized recommendations.",
             action: (
               <ToastAction 
-                altText="Sign In" 
+                altText={t('signIn')}
                 onClick={() => navigate('/login')}
               >
-                Sign In
+                {t('signIn')}
               </ToastAction>
             ),
           });
@@ -158,7 +162,7 @@ const Navbar: React.FC = () => {
           <form onSubmit={handleSearch} className="hidden md:flex relative flex-grow max-w-md mx-4">
             <input
               type="text"
-              placeholder={isSeller ? "Search products, orders..." : "Search for furniture..."}
+              placeholder={isSeller ? "Search products, orders..." : t('searchForFurniture')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={`w-full rounded-md border-none pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-terracotta/50 ${
@@ -177,6 +181,9 @@ const Navbar: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
+            {/* Theme and Language Toggle */}
+            <ThemeLanguageToggle />
+
             {/* Seller Navigation */}
             {isSeller ? (
               <>
@@ -185,7 +192,7 @@ const Navbar: React.FC = () => {
                   className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
                 >
                   <BarChart3 size={16} />
-                  <span>Dashboard</span>
+                  <span>{t('dashboard')}</span>
                 </Link>
                 
                 <Link 
@@ -193,7 +200,7 @@ const Navbar: React.FC = () => {
                   className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
                 >
                   <Package size={16} />
-                  <span>Products</span>
+                  <span>{t('products')}</span>
                 </Link>
                 
                 <Link 
@@ -201,7 +208,7 @@ const Navbar: React.FC = () => {
                   className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
                 >
                   <CreditCard size={16} />
-                  <span>Payments</span>
+                  <span>{t('payments')}</span>
                 </Link>
                 
                 <Link 
@@ -209,7 +216,7 @@ const Navbar: React.FC = () => {
                   className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
                 >
                   <Truck size={16} />
-                  <span>Logistics</span>
+                  <span>{t('logistics')}</span>
                 </Link>
               </>
             ) : (
@@ -224,17 +231,17 @@ const Navbar: React.FC = () => {
                       description: "Create an account to get recommendations tailored just for you.",
                       action: (
                         <ToastAction 
-                          altText="Sign In" 
+                          altText={t('signIn')}
                           onClick={() => navigate('/login')}
                         >
-                          Sign In
+                          {t('signIn')}
                         </ToastAction>
                       ),
                     });
                   }
                 }}
               >
-                For You
+                {t('forYou')}
               </Link>
             )}
             
@@ -252,7 +259,7 @@ const Navbar: React.FC = () => {
                     className={`flex items-center ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
                   >
                     <User size={16} className="mr-1" />
-                    Account <ChevronDown size={16} className="ml-1" />
+                    {t('account')} <ChevronDown size={16} className="ml-1" />
                   </button>
                 )}
               </DropdownMenuTrigger>
@@ -266,42 +273,42 @@ const Navbar: React.FC = () => {
                     {isSeller ? (
                       <>
                         <DropdownMenuItem asChild>
-                          <Link to="/seller/dashboard" className="cursor-pointer w-full">Dashboard</Link>
+                          <Link to="/seller/dashboard" className="cursor-pointer w-full">{t('dashboard')}</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link to="/seller/products" className="cursor-pointer w-full">Products</Link>
+                          <Link to="/seller/products" className="cursor-pointer w-full">{t('products')}</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link to="/seller/payments" className="cursor-pointer w-full">Payments</Link>
+                          <Link to="/seller/payments" className="cursor-pointer w-full">{t('payments')}</Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link to="/seller/logistics" className="cursor-pointer w-full">Logistics</Link>
+                          <Link to="/seller/logistics" className="cursor-pointer w-full">{t('logistics')}</Link>
                         </DropdownMenuItem>
                       </>
                     ) : (
                       <DropdownMenuItem asChild>
-                        <Link to="/account" className="cursor-pointer w-full">My Account</Link>
+                        <Link to="/account" className="cursor-pointer w-full">{t('myAccount')}</Link>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>
-                      <Link to="/orders" className="cursor-pointer w-full">Orders</Link>
+                      <Link to="/orders" className="cursor-pointer w-full">{t('orders')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/wishlist" className="cursor-pointer w-full">Wishlist</Link>
+                      <Link to="/wishlist" className="cursor-pointer w-full">{t('wishlist')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                       <LogOut size={16} className="mr-2" />
-                      Sign Out
+                      {t('signOut')}
                     </DropdownMenuItem>
                   </>
                 ) : (
                   <>
                     <DropdownMenuItem asChild>
-                      <Link to="/login" className="cursor-pointer w-full">Sign In</Link>
+                      <Link to="/login" className="cursor-pointer w-full">{t('signIn')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/register" className="cursor-pointer w-full">Register</Link>
+                      <Link to="/register" className="cursor-pointer w-full">{t('signUp')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
@@ -342,6 +349,7 @@ const Navbar: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
+            <ThemeLanguageToggle />
             {!isSeller && (
               <Link 
                 to="/cart" 
@@ -402,7 +410,7 @@ const Navbar: React.FC = () => {
             <div className="relative">
               <input
                 type="text"
-                placeholder={isSeller ? "Search products, orders..." : "Search for furniture..."}
+                placeholder={isSeller ? "Search products, orders..." : t('searchForFurniture')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-md border border-gray-200 bg-white pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-terracotta/50"
