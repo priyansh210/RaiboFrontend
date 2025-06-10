@@ -115,6 +115,18 @@ class ApiService {
     });
   }
 
+  async googleLogin(access_token: string) {
+  return this.request(API_ENDPOINTS.AUTH.GOOGLE_LOGIN, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    credentials: 'include', // Important for handling cookies from Passport
+    body: JSON.stringify({ access_token : access_token }), // Passport Google strategy expects access_token
+  });
+}
+
   // Product API methods
   async createProduct(companyId: string, productData: any) {
     return this.request(`${API_ENDPOINTS.PRODUCTS.CREATE}/${companyId}`, {

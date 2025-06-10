@@ -9,7 +9,7 @@ import { googleAuthService } from '../../services/GoogleAuthService';
 import { STORAGE_KEYS } from '../../api/config';
 
 const Login = () => {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, googleLogin,  isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const redirectPath = location.state?.redirect || '/';
@@ -54,28 +54,15 @@ const Login = () => {
   
   const handleGoogleLogin = async () => {
     try {
-      console.log('Attempting Google login');
-      const authData = await googleAuthService.signInWithGoogle();
-      
-      // Store the auth data returned from backend
-      if (authData.access_token) {
-        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authData.access_token);
-      }
-      
-      if (authData.user) {
-        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(authData.user));
-      }
-      
-      toast({
-        title: "Google login successful",
-        description: "Welcome to RAIBO!",
-      });
-      
-      // Refresh the page to update auth context
-      window.location.href = redirectPath;
+      await googleLogin();
+      navigate(redirectPath, { replace: true });
     } catch (err) {
       console.error('Google login error:', err);
-      setError((err as Error).message || 'Failed to login with Google. Please try again.');
+      toast({
+        title: "Login failed",
+        description: "Failed to login with Google. Please try again.",
+        variant: "destructive"
+      });
     }
   };
   

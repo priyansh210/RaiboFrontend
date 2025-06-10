@@ -1,14 +1,14 @@
 import { API_BASE_URL, API_ENDPOINTS } from '../api/config';
+import { apiService } from './ApiService';
 
 declare global {
   interface Window {
     google: any;
-    googleAuthCallback: (response: any) => void;
   }
 }
 
 export class GoogleAuthService {
-  private static CLIENT_ID = '693648106725-olokecr9une9afstkek5dcfltc2d0rmj.apps.googleusercontent.com693648106725-olokecr9une9afstkek5dcfltc2d0rmj.apps.googleusercontent.com'; // This should be set from environment or config
+  private static CLIENT_ID = import.meta.env.VITE_APP_GOOGLE_CLIENT_ID;
   private static instance: GoogleAuthService;
 
   public static getInstance(): GoogleAuthService {
@@ -42,36 +42,37 @@ export class GoogleAuthService {
     }
 
     return new Promise((resolve, reject) => {
-      window.googleAuthCallback = async (response: any) => {
-        try {
-          // Send the credential to the backend via GET request
-          const backendResponse = await fetch(`${API_BASE_URL}${API_ENDPOINTS.AUTH.GOOGLE_LOGIN}?credential=${encodeURIComponent(response.credential)}`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-
-          if (!backendResponse.ok) {
-            throw new Error('Failed to authenticate with backend');
+      const client = window.google.accounts.oauth2.initTokenClient({
+        client_id: GoogleAuthService.CLIENT_ID,
+        scope: 'profile email',
+        callback: async (response: any) => {
+          if (response.error) {
+            reject(new Error(response.error));
+            return;
           }
 
-          const authData = await backendResponse.json();
-          resolve(authData);
-        } catch (error) {
-          reject(error);
-        }
-      };
-
-      window.google.accounts.id.initialize({
-        client_id: GoogleAuthService.CLIENT_ID,
-        callback: window.googleAuthCallback,
+          try {
+            // Send access token to backend
+            const authResult = await this.handleGoogleToken(response.access_token);
+            resolve({ access_token: authResult.access_token, user: authResult.user });
+          } catch (error) {
+            reject(error);
+          }
+        },
       });
 
-      window.google.accounts.id.prompt();
+      client.requestAccessToken();
     });
   }
 
+  private async handleGoogleToken(googleAccessToken: string): Promise<any> {
+    const data = await apiService.googleLogin(googleAccessToken);
+    
+    if (!data) {
+      throw new Error('Failed to authenticate with backend');
+    }
+    return data;
+  }
 }
 
 export const googleAuthService = GoogleAuthService.getInstance();

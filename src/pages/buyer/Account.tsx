@@ -35,7 +35,7 @@ const mockOrderHistory = [
 ];
 
 const Account = () => {
-  const { user, isAuthenticated, logout, isBuyer } = useAuth();
+  const { user, isAuthenticated, logout, isBuyer, isSeller, isAdmin } = useAuth();
   const navigate = useNavigate();
   
   // Profile state
@@ -56,7 +56,7 @@ const Account = () => {
       navigate('/login');
     }
     // If user is a seller, redirect to seller dashboard
-    if (user && !isBuyer) {
+    if (user && isSeller) {
       navigate('/seller/dashboard');
     }
   }, [isAuthenticated, navigate, user, isBuyer]);

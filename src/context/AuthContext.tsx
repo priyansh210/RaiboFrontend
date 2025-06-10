@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { apiService } from '../services/ApiService';
 import { STORAGE_KEYS } from '../api/config';
 import { toast } from '@/hooks/use-toast';
+import { googleAuthService } from '@/services/GoogleAuthService';
 
 // Auth user type
 export interface AuthUser {
@@ -283,14 +284,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Google login function
   const googleLogin = async () => {
-    try {
-      // This will be handled by the GoogleAuthService
-      throw new Error('Use GoogleAuthService for Google login');
-    } catch (error: any) {
-      console.error('Google login error:', error);
-      throw new Error(error.message || 'Failed to login with Google');
+  setIsLoading(true);
+  console.log('AuthContext: Starting Google login process');
+  
+  try {
+    const response = await googleAuthService.signInWithGoogle();
+    // Store the auth data returned from backend
+
+    if (!response) throw new Error('No response from server');
+
+    // Store the auth token
+    if (response.access_token) {
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
+      console.log('AuthContext: Token stored');
     }
-  };
+    
+    // Create user object from response
+    const userData: AuthUser = {
+      id: response.user?.id,
+      email: response.user?.email,
+      firstName: response.user?.firstName || response.user?.first_name,
+      lastName: response.user?.lastName || response.user?.last_name,
+      roles: response.user?.role || ['buyer'],
+      companyId: response.user?.companyId || 'none',
+    };
+    
+    console.log('AuthContext: User data created:', userData);
+    
+    // Store user data
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+    
+    setUser(userData);
+    setRoles(getUserRoles(userData));
+    setProfile({
+      first_name: userData.firstName,
+      last_name: userData.lastName,
+      email: userData.email,
+    });
+    
+    toast({
+      title: "Google login successful",
+      description: "Welcome to RAIBO!",
+    });
+    
+    console.log('AuthContext: Google login completed successfully');
+    
+    // Handle role-based redirects
+    if (userData.roles.includes('admin')) {
+      window.location.href = '/admin/dashboard';
+    }
+    return;
+  } catch (error: any) {
+    console.error('AuthContext: Google login error:', error);
+    toast({
+      title: "Login failed",
+      description: error.message || "Failed to login with Google",
+      variant: "destructive"
+    });
+    throw new Error(error.message || 'Failed to login with Google');
+  } finally {
+    setIsLoading(false);
+  }
+};
   
   const logout = async () => {
     try {

@@ -13,7 +13,7 @@ export const API_ENDPOINTS = {
     REGISTER: '/api/v1/auth/register',
     LOGIN: '/api/v1/auth/login',
     REFRESH: '/api/v1/auth/refresh',
-    GOOGLE_LOGIN: '/api/v1/auth/login/google',
+    GOOGLE_LOGIN: '/api/v1/auth/login/google-auth',
   },
   
   // Products
