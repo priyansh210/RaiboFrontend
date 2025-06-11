@@ -1,4 +1,3 @@
-
 /**
  * API configuration settings for RAIBO furniture shop
  */
@@ -24,6 +23,10 @@ export const API_ENDPOINTS = {
     GET_BY_ID_FOR_SELLER: '/api/v1/products/seller',
     UPDATE: '/api/v1/product/seller',
     DELETE: '/api/v1/product/seller', // Will append /:id
+    LIKE: '/api/v1/product/like', // Will append /:id
+    UNLIKE: '/api/v1/product/unlike', // Will append /:id
+    COMMENT: '/api/v1/product/comment', // Will append /:id
+    REPLY: '/api/v1/product/comment/reply', // Will append /:commentId
   },
   
   // Cart

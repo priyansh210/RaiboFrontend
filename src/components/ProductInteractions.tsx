@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Heart, Share2, MessageCircle, Star } from 'lucide-react';
 import { ProductInteraction } from '../models/internal/Product';
 import { useIsMobile } from '../hooks/use-mobile';
+import { likeProduct, unlikeProduct } from '../services/ProductService';
+import { toast } from '@/hooks/use-toast';
 
 interface ProductInteractionsProps {
   productId: string;
@@ -24,16 +26,46 @@ const ProductInteractions: React.FC<ProductInteractionsProps> = ({
   showCommentPreview = false,
 }) => {
   const isMobile = useIsMobile();
+  const [isLiking, setIsLiking] = useState(false);
+
+  const handleLike = async () => {
+    if (isLiking) return;
+    
+    setIsLiking(true);
+    try {
+      if (interactions.userHasLiked) {
+        await unlikeProduct(productId);
+      } else {
+        await likeProduct(productId);
+      }
+      onLike(productId);
+      
+      toast({
+        title: interactions.userHasLiked ? "Removed from favorites" : "Added to favorites",
+        description: interactions.userHasLiked ? "Product unliked" : "Product liked",
+      });
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update like status",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLiking(false);
+    }
+  };
 
   return (
     <div className="p-3 border-t border-gray-100">
       <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
         <div className="flex items-center space-x-3 md:space-x-4">
           <button
-            onClick={() => onLike(productId)}
+            onClick={handleLike}
+            disabled={isLiking}
             className={`flex items-center space-x-1 transition-colors ${
               interactions.userHasLiked ? 'text-red-500' : 'hover:text-red-500'
-            }`}
+            } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <Heart size={isMobile ? 14 : 16} fill={interactions.userHasLiked ? 'currentColor' : 'none'} />
             <span className="text-xs md:text-sm">{interactions.likes}</span>

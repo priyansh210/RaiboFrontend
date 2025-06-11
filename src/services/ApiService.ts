@@ -1,4 +1,3 @@
-
 import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, getFormDataHeaders, REQUEST_TIMEOUT } from '../api/config';
 import {ExternalProductResponse} from '../models/external/ProductModels';
 import { PaymentMethod, PaymentMethodsResponse, CreateOrderResponse, PaymentResponse, Address, AddressesResponse } from '../api/types';
@@ -16,6 +15,11 @@ class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
     console.log('ApiService initialized with baseURL:', this.baseURL);
+  }
+
+  // Helper method to get endpoints
+  getEndpoint(category: keyof typeof API_ENDPOINTS, endpoint: string): string {
+    return API_ENDPOINTS[category][endpoint as keyof typeof API_ENDPOINTS[typeof category]];
   }
 
   // Generic request method - made public for use by other services
@@ -450,3 +454,5 @@ class ApiService {
 }
 
 export const apiService = new ApiService();
+
+}

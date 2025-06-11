@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import ProductInteractions from '../../components/ProductInteractions';
+import CommentSection from '../../components/CommentSection';
 import { useCart } from '../../context/CartContext';
-import { getProductById, getSimilarProducts } from '../../services/ProductService';
+import { getProductById, getSimilarProducts, addComment, replyToComment } from '../../services/ProductService';
 import { Product } from '../../models/internal/Product';
 import { toast } from '@/hooks/use-toast';
 import { 
@@ -35,6 +35,7 @@ const ProductDetail = () => {
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [showComments, setShowComments] = useState<boolean>(false);
 
   // Dummy comparison data
   const comparisonData = [
@@ -206,6 +207,66 @@ const ProductDetail = () => {
         description: "Product link copied to clipboard.",
       });
     }
+  };
+
+  const handleAddComment = async (productId: string, comment: string) => {
+    try {
+      const response = await addComment(productId, comment);
+      
+      // Add the new comment to the local state
+      if (product) {
+        const newComment = {
+          id: response.id || Date.now().toString(),
+          userId: 'current-user',
+          userName: 'You',
+          rating: 5,
+          comment: comment,
+          createdAt: new Date(),
+          likes: 0,
+          userHasLiked: false,
+        };
+        
+        setProduct(prev => prev ? {
+          ...prev,
+          interactions: {
+            ...prev.interactions!,
+            comments: [newComment, ...prev.interactions!.comments],
+          }
+        } : null);
+      }
+      
+      toast({
+        title: "Comment added",
+        description: "Your comment has been posted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add comment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReplyToComment = async (commentId: string, reply: string) => {
+    try {
+      await replyToComment(commentId, reply);
+      
+      toast({
+        title: "Reply added",
+        description: "Your reply has been posted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add reply. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleComment = (productId: string) => {
+    setShowComments(!showComments);
   };
 
   if (isLoading) {
@@ -422,10 +483,28 @@ const ProductDetail = () => {
                 ratings={{ average: product.averageRating, count: product.totalRatings }}
                 onLike={handleLike}
                 onShare={handleShare}
+                onComment={handleComment}
                 showCommentPreview={false}
               />
             </CardContent>
           </Card>
+
+          {/* Comments Section */}
+          {showComments && (
+            <Card className="mb-12">
+              <CardHeader>
+                <CardTitle className="text-2xl text-charcoal">Comments & Reviews</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CommentSection
+                  productId={product.id}
+                  comments={product.interactions!.comments}
+                  onAddComment={handleAddComment}
+                  onReplyToComment={handleReplyToComment}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Comparison Table */}
           <Card className="mb-12">
