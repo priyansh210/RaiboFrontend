@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import InstagramStylePost from '../../components/InstagramStylePost';
 import CommentsModal from '../../components/CommentsModal';
-import { getAllProducts, addComment, replyToComment } from '../../services/ProductService';
+import { fetchProducts, addComment, replyToComment } from '../../services/ProductService';
 import { Product } from '../../models/internal/Product';
 import { apiService } from '../../services/ApiService';
 import { toast } from '@/hooks/use-toast';
@@ -23,13 +23,13 @@ const ForYou = () => {
   }>({ isOpen: false, productId: '', productName: '', comments: [] });
 
   useEffect(() => {
-    fetchProducts();
+    fetchProductsData();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchProductsData = async () => {
     setIsLoading(true);
     try {
-      const productsData = await getAllProducts();
+      const productsData = await fetchProducts();
       
       // Generate interactions for each product
       const productsWithInteractions = productsData.map(product => ({
