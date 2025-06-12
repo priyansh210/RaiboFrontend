@@ -13,7 +13,9 @@ interface ProductInteractionsProps {
   onLike: (productId: string) => void;
   onShare: (productId: string) => void;
   onComment?: (productId: string) => void;
+  onDoubleClick?: (productId: string) => void;
   showCommentPreview?: boolean;
+  layout?: 'horizontal' | 'vertical';
 }
 
 const ProductInteractions: React.FC<ProductInteractionsProps> = ({
@@ -23,7 +25,9 @@ const ProductInteractions: React.FC<ProductInteractionsProps> = ({
   onLike,
   onShare,
   onComment,
+  onDoubleClick,
   showCommentPreview = false,
+  layout = 'horizontal',
 }) => {
   const isMobile = useIsMobile();
   const [isLiking, setIsLiking] = useState(false);
@@ -52,12 +56,60 @@ const ProductInteractions: React.FC<ProductInteractionsProps> = ({
     }
   };
 
+  const handleDoubleClick = () => {
+    if (onDoubleClick) {
+      onDoubleClick(productId);
+    } else {
+      handleLike();
+    }
+  };
+
+  if (layout === 'vertical') {
+    return (
+      <div className="flex flex-col items-center space-y-4 py-4">
+        <button
+          onClick={handleLike}
+          onDoubleClick={handleDoubleClick}
+          disabled={isLiking}
+          className={`flex flex-col items-center space-y-1 transition-colors ${
+            interactions.userHasLiked ? 'text-red-500' : 'text-white hover:text-red-500'
+          } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <Heart size={24} fill={interactions.userHasLiked ? 'currentColor' : 'none'} />
+          <span className="text-xs">{interactions.likes}</span>
+        </button>
+        
+        <button
+          onClick={() => onComment?.(productId)}
+          className="flex flex-col items-center space-y-1 text-white hover:text-green-500 transition-colors"
+        >
+          <MessageCircle size={24} />
+          <span className="text-xs">{interactions.comments.length}</span>
+        </button>
+        
+        <button
+          onClick={() => onShare(productId)}
+          className="flex flex-col items-center space-y-1 text-white hover:text-blue-500 transition-colors"
+        >
+          <Share2 size={24} />
+          <span className="text-xs">{interactions.shares}</span>
+        </button>
+        
+        <div className="flex flex-col items-center space-y-1 text-white">
+          <Star size={20} className="text-yellow-400 fill-current" />
+          <span className="text-xs">{ratings.average}</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-3 border-t border-gray-100">
       <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
         <div className="flex items-center space-x-3 md:space-x-4">
           <button
             onClick={handleLike}
+            onDoubleClick={handleDoubleClick}
             disabled={isLiking}
             className={`flex items-center space-x-1 transition-colors ${
               interactions.userHasLiked ? 'text-red-500' : 'hover:text-red-500'

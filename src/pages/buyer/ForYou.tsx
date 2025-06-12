@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Layout from '@/components/Layout';
-import ProductInteractions from '@/components/ProductInteractions';
+import InstagramStylePost from '@/components/InstagramStylePost';
+import CommentsModal from '@/components/CommentsModal';
 import { Product } from '@/models/internal/Product';
-import { fetchProducts } from '@/services/ProductService';
+import { fetchProducts, addComment, replyToComment } from '@/services/ProductService';
 import { Heart, TrendingUp, ArrowUp } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTheme } from '@/context/ThemeContext';
-import { Link } from 'react-router-dom';
+import { apiService } from '@/services/ApiService';
 
-// Dummy interaction data
-const generateDummyInteractions = (productId: string) => ({
+// Generate realistic interaction data
+const generateInteractions = (productId: string) => ({
   likes: Math.floor(Math.random() * 500) + 10,
   shares: Math.floor(Math.random() * 100) + 5,
   comments: [
@@ -46,6 +47,11 @@ const ForYou = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [commentsModal, setCommentsModal] = useState<{
+    isOpen: boolean;
+    productId: string;
+    productName: string;
+  }>({ isOpen: false, productId: '', productName: '' });
 
   const observer = useRef<IntersectionObserver | null>(null);
   const productsPerPage = 10;
@@ -62,7 +68,7 @@ const ForYou = () => {
         // Add dummy interactions to products
         const productsWithInteractions = productsData.map(product => ({
           ...product,
-          interactions: generateDummyInteractions(product.id),
+          interactions: generateInteractions(product.id),
         }));
 
         setProducts(productsWithInteractions);
@@ -113,26 +119,40 @@ const ForYou = () => {
   };
 
   // Handle product interactions
-  const handleLike = (productId: string) => {
-    setDisplayProducts(prev => prev.map(product => {
-      if (product.id === productId && product.interactions) {
-        const isLiked = product.interactions.userHasLiked;
-        return {
-          ...product,
-          interactions: {
-            ...product.interactions,
-            likes: isLiked ? product.interactions.likes - 1 : product.interactions.likes + 1,
-            userHasLiked: !isLiked,
-          },
-        };
-      }
-      return product;
-    }));
+  const handleLike = async (productId: string) => {
+    try {
+      await apiService.handleLike(productId);
+      
+      setDisplayProducts(prev => prev.map(product => {
+        if (product.id === productId && product.interactions) {
+          const isLiked = product.interactions.userHasLiked;
+          return {
+            ...product,
+            interactions: {
+              ...product.interactions,
+              likes: isLiked ? product.interactions.likes - 1 : product.interactions.likes + 1,
+              userHasLiked: !isLiked,
+            },
+          };
+        }
+        return product;
+      }));
 
-    toast({
-      title: "Product liked!",
-      description: "Added to your favorites.",
-    });
+      const product = displayProducts.find(p => p.id === productId);
+      const isLiked = product?.interactions?.userHasLiked;
+      
+      toast({
+        title: isLiked ? "Unliked!" : "Liked!",
+        description: isLiked ? "Removed from favorites" : "Added to favorites",
+      });
+    } catch (error) {
+      console.error('Failed to like product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update like status",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleShare = (productId: string) => {
@@ -168,6 +188,59 @@ const ForYou = () => {
     }));
   };
 
+  const handleComment = (productId: string) => {
+    const product = displayProducts.find(p => p.id === productId);
+    if (product) {
+      setCommentsModal({
+        isOpen: true,
+        productId,
+        productName: product.name,
+      });
+    }
+  };
+
+  const handleAddComment = async (productId: string, comment: string) => {
+    try {
+      const response = await addComment(productId, comment);
+      
+      setDisplayProducts(prev => prev.map(product => {
+        if (product.id === productId && product.interactions) {
+          const newComment = {
+            id: response.id || Date.now().toString(),
+            userId: 'current-user',
+            userName: 'You',
+            rating: 5,
+            comment: comment,
+            createdAt: new Date(),
+            likes: 0,
+            userHasLiked: false,
+          };
+          
+          return {
+            ...product,
+            interactions: {
+              ...product.interactions,
+              comments: [newComment, ...product.interactions.comments],
+            },
+          };
+        }
+        return product;
+      }));
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+      throw error;
+    }
+  };
+
+  const handleReplyToComment = async (commentId: string, reply: string) => {
+    try {
+      await replyToComment(commentId, reply);
+    } catch (error) {
+      console.error('Failed to reply to comment:', error);
+      throw error;
+    }
+  };
+
   // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({
@@ -185,6 +258,8 @@ const ForYou = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const currentProduct = displayProducts.find(p => p.id === commentsModal.productId);
 
   return (
     <Layout>
@@ -206,60 +281,48 @@ const ForYou = () => {
             </div>
           ) : (
             <>
-              {/* Pinterest-style masonry grid */}
-              <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
-                {displayProducts.map((product, index) => {
-                  const isLast = displayProducts.length === index + 1;
-                  const imageHeight = Math.floor(Math.random() * 200) + 200; // Random height for masonry effect
+              {/* Instagram-style layout for mobile, Pinterest for desktop */}
+              {isMobile ? (
+                <div className="space-y-0">
+                  {displayProducts.map((product, index) => {
+                    const isLast = displayProducts.length === index + 1;
+                    return (
+                      <div 
+                        key={product.id}
+                        ref={isLast ? lastProductElementRef : null}
+                      >
+                        <InstagramStylePost
+                          product={product}
+                          onLike={handleLike}
+                          onShare={handleShare}
+                          onComment={handleComment}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+                  {displayProducts.map((product, index) => {
+                    const isLast = displayProducts.length === index + 1;
+                    return (
+                      <div 
+                        key={product.id}
+                        ref={isLast ? lastProductElementRef : null}
+                      >
+                        <InstagramStylePost
+                          product={product}
+                          onLike={handleLike}
+                          onShare={handleShare}
+                          onComment={handleComment}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
-                  return (
-                    <div 
-                      key={product.id}
-                      ref={isLast ? lastProductElementRef : null}
-                      className="break-inside-avoid rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 mb-4"
-                      style={{ backgroundColor: theme.background }}
-                    >
-                      <Link to={`/product/${product.id}`} className="block">
-                        <div className="relative overflow-hidden">
-                          <img 
-                            src={product.images?.[0] || 'https://picsum.photos/300/400'} 
-                            alt={product.name}
-                            className="w-full object-cover transition-transform duration-500 hover:scale-105"
-                            style={{ height: `${imageHeight}px` }}
-                          />
-                          
-                          {/* Overlay with product info */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-                            <div className="absolute bottom-4 left-4 right-4 text-white">
-                              <h3 className="font-medium text-lg mb-1 line-clamp-2">{product.name}</h3>
-                              <p className="text-sm opacity-90">{product.company.name}</p>
-                              <div className="flex items-center justify-between mt-2">
-                                <span className="text-xl font-bold">${product.price}</span>
-                                {product.discount > 0 && (
-                                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">
-                                    -{product.discount}%
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-
-                      {/* Product interactions */}
-                      <ProductInteractions
-                        productId={product.id}
-                        interactions={product.interactions!}
-                        ratings={{ average: product.averageRating, count: product.totalRatings }}
-                        onLike={handleLike}
-                        onShare={handleShare}
-                        showCommentPreview={true}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-
+              {/* Loading and end messages */}
               {isLoading && displayProducts.length > 0 && (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 mx-auto" style={{ borderColor: theme.primary }}></div>
@@ -288,6 +351,17 @@ const ForYou = () => {
           </button>
         </div>
       </div>
+
+      {/* Comments Modal */}
+      <CommentsModal
+        isOpen={commentsModal.isOpen}
+        onClose={() => setCommentsModal({ isOpen: false, productId: '', productName: '' })}
+        productId={commentsModal.productId}
+        comments={currentProduct?.interactions?.comments || []}
+        onAddComment={handleAddComment}
+        onReplyToComment={handleReplyToComment}
+        productName={commentsModal.productName}
+      />
     </Layout>
   );
 };

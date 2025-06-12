@@ -2,22 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import ProductInteractions from '../../components/ProductInteractions';
-import CommentSection from '../../components/CommentSection';
+import CommentsModal from '../../components/CommentsModal';
 import { useCart } from '../../context/CartContext';
-import { getProductById, getSimilarProducts, likeProduct, addComment, replyToComment } from '../../services/ProductService';
+import { getProductById, getSimilarProducts, addComment, replyToComment } from '../../services/ProductService';
 import { Product } from '../../models/internal/Product';
 import { toast } from '@/hooks/use-toast';
+import { apiService } from '@/services/ApiService';
 import { 
   ArrowLeft, 
   Truck, 
   ShieldCheck, 
   RefreshCw, 
-  Info, 
-  Heart, 
   Star, 
   ShoppingCart,
-  Share2,
-  MessageCircle,
+  Heart,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -35,7 +33,11 @@ const ProductDetail = () => {
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [showComments, setShowComments] = useState<boolean>(false);
+  const [commentsModal, setCommentsModal] = useState<{
+    isOpen: boolean;
+    productId: string;
+    productName: string;
+  }>({ isOpen: false, productId: '', productName: '' });
 
   // Dummy comparison data
   const comparisonData = [
@@ -91,7 +93,37 @@ const ProductDetail = () => {
         const productData = await getProductById(id);
         
         if (productData) {
-          setProduct(productData);
+          // Generate interactions for this product
+          const interactions = {
+            likes: Math.floor(Math.random() * 500) + 10,
+            shares: Math.floor(Math.random() * 100) + 5,
+            comments: [
+              {
+                id: `${productData.id}-comment-1`,
+                userId: 'user1',
+                userName: 'Sarah Chen',
+                rating: 5,
+                comment: 'Absolutely love this! Quality is amazing and arrived quickly.',
+                createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+                likes: Math.floor(Math.random() * 20),
+                userHasLiked: false,
+              },
+              {
+                id: `${productData.id}-comment-2`,
+                userId: 'user2',
+                userName: 'Mike Johnson',
+                rating: 4,
+                comment: 'Great product, exactly as described. Highly recommend!',
+                createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+                likes: Math.floor(Math.random() * 15),
+                userHasLiked: false,
+              },
+            ],
+            userHasLiked: false,
+            userHasShared: false,
+          };
+
+          setProduct({ ...productData, interactions });
           setSelectedImage(productData.images?.[0] || 'https://picsum.photos/600/400');
           setSelectedColor(productData.userPreferences?.preferredColors?.[0] || null);
           
@@ -174,7 +206,7 @@ const ProductDetail = () => {
     if (!product) return;
     
     try {
-      await likeProduct(productId);
+      await apiService.handleLike(productId);
       
       setProduct(prev => prev ? {
         ...prev,
@@ -184,8 +216,18 @@ const ProductDetail = () => {
           userHasLiked: !prev.interactions!.userHasLiked,
         }
       } : null);
+      
+      toast({
+        title: product.interactions!.userHasLiked ? "Unliked!" : "Liked!",
+        description: product.interactions!.userHasLiked ? "Removed from favorites" : "Added to favorites",
+      });
     } catch (error) {
       console.error('Failed to like product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update like status",
+        variant: "destructive",
+      });
     }
   };
 
@@ -202,6 +244,16 @@ const ProductDetail = () => {
       toast({
         title: "Link copied!",
         description: "Product link copied to clipboard.",
+      });
+    }
+  };
+
+  const handleComment = (productId: string) => {
+    if (product) {
+      setCommentsModal({
+        isOpen: true,
+        productId,
+        productName: product.name,
       });
     }
   };
@@ -243,10 +295,6 @@ const ProductDetail = () => {
       console.error('Failed to reply to comment:', error);
       throw error;
     }
-  };
-
-  const handleComment = (productId: string) => {
-    setShowComments(!showComments);
   };
 
   if (isLoading) {
@@ -470,20 +518,16 @@ const ProductDetail = () => {
           </Card>
 
           {/* Comments Section */}
-          {showComments && (
-            <Card className="mb-12">
-              <CardHeader>
-                <CardTitle className="text-2xl text-charcoal">Comments & Reviews</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CommentSection
-                  productId={product.id}
-                  comments={product.interactions!.comments}
-                  onAddComment={handleAddComment}
-                  onReplyToComment={handleReplyToComment}
-                />
-              </CardContent>
-            </Card>
+          {commentsModal.isOpen && (
+            <CommentsModal
+              isOpen={commentsModal.isOpen}
+              onClose={() => setCommentsModal({ isOpen: false, productId: '', productName: '' })}
+              productId={commentsModal.productId}
+              comments={product?.interactions?.comments || []}
+              onAddComment={handleAddComment}
+              onReplyToComment={handleReplyToComment}
+              productName={commentsModal.productName}
+            />
           )}
 
           {/* Comparison Table */}
