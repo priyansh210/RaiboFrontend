@@ -502,6 +502,123 @@ class ApiService {
       body: JSON.stringify(customerData),
     });
   }
+
+  // Room API methods
+  async createRoom(roomData: {
+    name: string;
+    description?: string;
+    room_type: string;
+  }) {
+    // Return dummy data for now
+    const dummyRoom = {
+      id: `room-${Date.now()}`,
+      name: roomData.name,
+      description: roomData.description || '',
+      room_type: roomData.room_type,
+      items: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    
+    console.log('Creating room:', roomData);
+    return Promise.resolve(dummyRoom);
+  }
+
+  async getUserRooms() {
+    // Return dummy rooms data
+    const dummyRooms = [
+      {
+        id: 'room-1',
+        name: 'Living Room',
+        description: 'Main living area with sofa and TV',
+        room_type: 'living_room',
+        items: [
+          { id: '1', name: 'Modern Sofa', image: 'https://picsum.photos/200/200?random=1' },
+          { id: '2', name: 'Coffee Table', image: 'https://picsum.photos/200/200?random=2' },
+        ],
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      },
+      {
+        id: 'room-2',
+        name: 'Bedroom',
+        description: 'Master bedroom with queen bed',
+        room_type: 'bedroom',
+        items: [
+          { id: '3', name: 'Queen Bed', image: 'https://picsum.photos/200/200?random=3' },
+        ],
+        created_at: '2024-01-02T00:00:00Z',
+        updated_at: '2024-01-02T00:00:00Z',
+      },
+      {
+        id: 'room-3',
+        name: 'Kitchen',
+        description: 'Modern kitchen with island',
+        room_type: 'kitchen',
+        items: [],
+        created_at: '2024-01-03T00:00:00Z',
+        updated_at: '2024-01-03T00:00:00Z',
+      },
+    ];
+    
+    console.log('Fetching user rooms');
+    return Promise.resolve({ rooms: dummyRooms });
+  }
+
+  async getRoomById(roomId: string) {
+    // Return dummy room data
+    const dummyRoom = {
+      id: roomId,
+      name: 'Living Room',
+      description: 'Main living area with sofa and TV',
+      room_type: 'living_room',
+      items: [
+        { 
+          id: '1', 
+          name: 'Modern Sofa', 
+          image: 'https://picsum.photos/300/300?random=1',
+          price: 899,
+          description: 'Comfortable modern sofa'
+        },
+        { 
+          id: '2', 
+          name: 'Coffee Table', 
+          image: 'https://picsum.photos/300/300?random=2',
+          price: 299,
+          description: 'Elegant coffee table'
+        },
+      ],
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    };
+    
+    console.log('Fetching room by ID:', roomId);
+    return Promise.resolve(dummyRoom);
+  }
+
+  async addItemToRoom(roomId: string, productId: string) {
+    console.log('Adding item to room:', { roomId, productId });
+    return Promise.resolve({ success: true });
+  }
+
+  async removeItemFromRoom(roomId: string, productId: string) {
+    console.log('Removing item from room:', { roomId, productId });
+    return Promise.resolve({ success: true });
+  }
+
+  async updateRoom(roomId: string, roomData: {
+    name?: string;
+    description?: string;
+    room_type?: string;
+  }) {
+    console.log('Updating room:', { roomId, roomData });
+    return Promise.resolve({ success: true });
+  }
+
+  async deleteRoom(roomId: string) {
+    console.log('Deleting room:', roomId);
+    return Promise.resolve({ success: true });
+  }
 }
 
 export const apiService = new ApiService();

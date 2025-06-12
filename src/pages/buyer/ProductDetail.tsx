@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import ProductInteractions from '../../components/ProductInteractions';
 import CommentsModal from '../../components/CommentsModal';
+import AddToRoomModal from '../../components/AddToRoomModal';
 import { useCart } from '../../context/CartContext';
 import { getProductById, getSimilarProducts, addComment, replyToComment } from '../../services/ProductService';
 import { Product } from '../../models/internal/Product';
@@ -17,7 +18,8 @@ import {
   ShoppingCart,
   Heart,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Home
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -33,6 +35,7 @@ const ProductDetail = () => {
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [showAddToRoomModal, setShowAddToRoomModal] = useState(false);
   const [commentsModal, setCommentsModal] = useState<{
     isOpen: boolean;
     productId: string;
@@ -297,6 +300,10 @@ const ProductDetail = () => {
     }
   };
 
+  const handleAddToRoom = () => {
+    setShowAddToRoomModal(true);
+  };
+
   if (isLoading) {
     return (
       <Layout>
@@ -477,6 +484,13 @@ const ProductDetail = () => {
                     <ShoppingCart size={20} className="mr-2" />
                     Add to Cart
                   </button>
+                  <button 
+                    onClick={handleAddToRoom}
+                    className="flex-1 border border-terracotta text-terracotta py-3 px-6 rounded-lg hover:bg-terracotta hover:text-white transition-colors flex items-center justify-center text-lg font-medium"
+                  >
+                    <Home size={20} className="mr-2" />
+                    Add to Room
+                  </button>
                   <button className="flex-1 border border-terracotta text-terracotta py-3 px-6 rounded-lg hover:bg-terracotta hover:text-white transition-colors flex items-center justify-center text-lg font-medium">
                     <Heart size={20} className="mr-2" />
                     Wishlist
@@ -529,6 +543,14 @@ const ProductDetail = () => {
               productName={commentsModal.productName}
             />
           )}
+
+          {/* Add to Room Modal */}
+          <AddToRoomModal
+            isOpen={showAddToRoomModal}
+            onClose={() => setShowAddToRoomModal(false)}
+            productId={product.id}
+            productName={product.name}
+          />
 
           {/* Comparison Table */}
           <Card className="mb-12">

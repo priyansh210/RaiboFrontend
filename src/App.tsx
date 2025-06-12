@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -18,6 +17,8 @@ import Cart from './pages/buyer/Cart';
 import Checkout from './pages/buyer/Checkout';
 import Account from './pages/buyer/Account';
 import ForYou from './pages/buyer/ForYou';
+import MyRooms from './pages/buyer/MyRooms';
+import RoomDetail from './pages/buyer/RoomDetail';
 import NotFound from './pages/buyer/NotFound';
 import StripeCheckout from './pages/buyer/StripeCheckout';
 
@@ -75,6 +76,8 @@ const AppContent = () => {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/stripe-checkout" element={<StripeCheckout />} />
                 <Route path="/for-you" element={<ForYou />} />
+                <Route path="/my-rooms" element={<MyRooms />} />
+                <Route path="/room/:id" element={<RoomDetail />} />
 
                 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
