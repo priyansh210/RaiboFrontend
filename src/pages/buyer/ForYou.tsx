@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
-import InstagramStylePost from '../../components/InstagramStylePost';
+import ProductCard from '../../components/ProductCard';
 import CommentsModal from '../../components/CommentsModal';
 import { fetchProducts, addComment, replyToComment } from '../../services/ProductService';
 import { Product } from '../../models/internal/Product';
@@ -201,34 +202,28 @@ const ForYou = () => {
 
   return (
     <Layout>
-      <div className={`min-h-screen ${isMobile ? 'bg-black' : 'bg-gray-50'} ${isMobile ? 'py-0' : 'py-6 md:py-10'}`}>
-        <div className={`${isMobile ? '' : 'container mx-auto px-4 max-w-4xl'}`}>
-          {/* Desktop Header */}
-          {!isMobile && (
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-charcoal mb-2">For You</h1>
-                <p className="text-earth">Discover products curated just for you</p>
-              </div>
-              <Link to="/my-rooms">
-                <Button className="bg-terracotta hover:bg-umber text-white">
-                  <Home size={20} className="mr-2" />
-                  My Rooms
-                </Button>
-              </Link>
+      <div className="min-h-screen bg-gray-50 py-6 md:py-10">
+        <div className="container mx-auto px-4 max-w-7xl">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-charcoal mb-2">For You</h1>
+              <p className="text-earth">Discover products curated just for you</p>
             </div>
-          )}
+            <Link to="/my-rooms">
+              <Button className="bg-terracotta hover:bg-umber text-white">
+                <Home size={20} className="mr-2" />
+                My Rooms
+              </Button>
+            </Link>
+          </div>
 
-          {/* Products Feed */}
-          <div className={isMobile ? 'space-y-0' : 'space-y-6'}>
+          {/* Pinterest-style Masonry Grid */}
+          <div className={`columns-2 ${isMobile ? 'gap-3' : 'md:columns-3 lg:columns-4 xl:columns-5 gap-4'} space-y-4`}>
             {products.map((product) => (
-              <InstagramStylePost
-                key={product.id}
-                product={product}
-                onLike={handleLike}
-                onShare={handleShare}
-                onComment={handleComment}
-              />
+              <div key={product.id} className="break-inside-avoid mb-4">
+                <ProductCard product={product} />
+              </div>
             ))}
           </div>
 

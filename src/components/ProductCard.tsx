@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart, Home } from 'lucide-react';
@@ -101,15 +102,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
     e.currentTarget.src = 'https://picsum.photos/200';
   };
 
+  // Calculate dynamic height based on image aspect ratio for Pinterest effect
+  const aspectRatio = Math.random() * 0.5 + 0.75; // Random aspect ratio between 0.75 and 1.25
+  const imageHeight = `${200 + Math.random() * 100}px`; // Random height between 200-300px
+
   return (
     <>
       <div 
-        className="group bg-white rounded-sm overflow-hidden transition-all duration-300 hover:card-shadow animate-fade-up"
+        className="group bg-white rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg border border-gray-200 animate-fade-up"
         onMouseEnter={() => !isMobile && setIsHovered(true)}
         onMouseLeave={() => !isMobile && setIsHovered(false)}
       >
         <Link to={`/product/${product.id}`} className="block">
-          <div className="aspect-square relative overflow-hidden">
+          <div className="relative overflow-hidden" style={{ height: imageHeight }}>
             <img 
               src={product.images?.[0] || '/placeholder-image.jpg'}
               alt={product.name}
@@ -119,36 +124,36 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
             
             {badge && (
               <div className="absolute top-2 md:top-3 left-2 md:left-3">
-                <span className="bg-terracotta text-white text-xs px-2 py-1 uppercase tracking-wider">
+                <span className="bg-terracotta text-white text-xs px-2 py-1 uppercase tracking-wider rounded">
                   {badge}
                 </span>
               </div>
             )}
             
-            {/* Action buttons overlay */}
+            {/* Action buttons overlay - Always visible on mobile, hover on desktop */}
             {(isHovered || isMobile) && (
               <div className="absolute inset-0 bg-black/20 flex items-end justify-end p-3">
                 <div className="flex gap-2">
                   <button
                     onClick={handleAddToRoom}
-                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
+                    className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
                     title="Add to Room"
                   >
-                    <Home size={18} className="text-terracotta" />
+                    <Home size={16} className="text-terracotta" />
                   </button>
                   <button
                     onClick={handleWishlistClick}
-                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
+                    className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
                     title="Add to Wishlist"
                   >
-                    <Heart size={18} className="text-terracotta" />
+                    <Heart size={16} className="text-terracotta" />
                   </button>
                   <button
                     onClick={handleAddToCart}
-                    className="w-10 h-10 bg-terracotta rounded-full flex items-center justify-center hover:bg-umber transition-colors shadow-lg"
+                    className="w-8 h-8 md:w-10 md:h-10 bg-terracotta rounded-full flex items-center justify-center hover:bg-umber transition-colors shadow-lg"
                     title="Add to Cart"
                   >
-                    <ShoppingCart size={18} className="text-white" />
+                    <ShoppingCart size={16} className="text-white" />
                   </button>
                 </div>
               </div>
@@ -157,7 +162,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
             {/* Color options */}
             {product.userPreferences?.preferredColors && product.userPreferences.preferredColors.length > 0 && (
               <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 flex space-x-1">
-                {product.userPreferences.preferredColors.slice(0, 4).map((color) => (
+                {product.userPreferences.preferredColors.slice(0, 3).map((color) => (
                   <button
                     key={color.name}
                     onClick={(e) => {
@@ -165,8 +170,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
                       setSelectedColor(color);
                     }}
                     aria-label={`Select ${color.name} color`}
-                    className={`w-4 h-4 md:w-6 md:h-6 rounded-full transition-transform ${
-                      selectedColor.code === color.code ? 'ring-2 ring-white ring-offset-1' : ''
+                    className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-transform border border-white ${
+                      selectedColor.code === color.code ? 'ring-1 ring-white ring-offset-1' : ''
                     }`}
                     style={{ backgroundColor: color.code }}
                   />
@@ -183,7 +188,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
           </h3>
           <p className="text-xs md:text-sm text-earth mb-2">{product.company.name}</p>
           <div className="flex items-center justify-between">
-            <span className="text-lg md:text-xl font-bold text-terracotta">
+            <span className="text-base md:text-lg font-bold text-terracotta">
               ${product.price}
             </span>
             {product.discount > 0 && (
