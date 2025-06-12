@@ -33,11 +33,7 @@ const ProductInteractions: React.FC<ProductInteractionsProps> = ({
     
     setIsLiking(true);
     try {
-      if (interactions.userHasLiked) {
-        await apiService.handleLike(productId);
-      } else {
-        await apiService.handleLike(productId);
-      }
+      await apiService.handleLike(productId);
       onLike(productId);
       
       toast({

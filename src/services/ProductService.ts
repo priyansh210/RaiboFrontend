@@ -1,3 +1,4 @@
+
 import { Product } from '../models/internal/Product';
 import { ExternalProductResponse } from '../models/external/ProductModels';
 import { ProductMapper } from '../mappers/ProductMapper';
@@ -64,34 +65,18 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
   }
 };
 
-// export const likeProduct = async (productId: string): Promise<void> => {
-//   try {
-//     await apiService.request(`${apiService.getEndpoint('PRODUCTS', 'LIKE')}/${productId}`, {
-//       method: 'POST',
-//     });
-//   } catch (error) {
-//     console.error('Failed to like product:', error);
-//     throw error;
-//   }
-// };
-
-// export const unlikeProduct = async (productId: string): Promise<void> => {
-//   try {
-//     await apiService.request(`${apiService.getEndpoint('PRODUCTS', 'UNLIKE')}/${productId}`, {
-//       method: 'POST',
-//     });
-//   } catch (error) {
-//     console.error('Failed to unlike product:', error);
-//     throw error;
-//   }
-// };
+export const likeProduct = async (productId: string): Promise<void> => {
+  try {
+    await apiService.handleLike(productId);
+  } catch (error) {
+    console.error('Failed to like product:', error);
+    throw error;
+  }
+};
 
 export const addComment = async (productId: string, comment: string): Promise<any> => {
   try {
-    const response = await apiService.request(`${apiService.getEndpoint('PRODUCTS', 'COMMENT')}/${productId}`, {
-      method: 'POST',
-      body: JSON.stringify({ comment }),
-    });
+    const response = await apiService.addComment(productId, comment);
     return response;
   } catch (error) {
     console.error('Failed to add comment:', error);
@@ -101,10 +86,7 @@ export const addComment = async (productId: string, comment: string): Promise<an
 
 export const replyToComment = async (commentId: string, reply: string): Promise<any> => {
   try {
-    const response = await apiService.request(`${apiService.getEndpoint('PRODUCTS', 'REPLY')}/${commentId}`, {
-      method: 'POST',
-      body: JSON.stringify({ reply }),
-    });
+    const response = await apiService.replyToComment(commentId, reply);
     return response;
   } catch (error) {
     console.error('Failed to reply to comment:', error);

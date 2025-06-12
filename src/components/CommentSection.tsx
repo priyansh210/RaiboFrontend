@@ -6,6 +6,8 @@ import { useTheme } from '../context/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import { apiService } from '@/services/ApiService';
+import { toast } from '@/hooks/use-toast';
 
 interface CommentSectionProps {
   productId: string;
@@ -33,8 +35,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     try {
       await onAddComment(productId, newComment);
       setNewComment('');
+      toast({
+        title: "Comment added",
+        description: "Your comment has been posted successfully.",
+      });
     } catch (error) {
       console.error('Failed to add comment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add comment. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -48,8 +59,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       await onReplyToComment(commentId, replyText);
       setReplyText('');
       setReplyingTo(null);
+      toast({
+        title: "Reply added",
+        description: "Your reply has been posted successfully.",
+      });
     } catch (error) {
       console.error('Failed to reply to comment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add reply. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

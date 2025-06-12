@@ -4,7 +4,7 @@ import Layout from '../../components/Layout';
 import ProductInteractions from '../../components/ProductInteractions';
 import CommentSection from '../../components/CommentSection';
 import { useCart } from '../../context/CartContext';
-import { getProductById, getSimilarProducts, addComment, replyToComment } from '../../services/ProductService';
+import { getProductById, getSimilarProducts, likeProduct, addComment, replyToComment } from '../../services/ProductService';
 import { Product } from '../../models/internal/Product';
 import { toast } from '@/hooks/use-toast';
 import { 
@@ -91,10 +91,7 @@ const ProductDetail = () => {
         const productData = await getProductById(id);
         
         if (productData) {
-          setProduct({
-            ...productData,
-
-          });
+          setProduct(productData);
           setSelectedImage(productData.images?.[0] || 'https://picsum.photos/600/400');
           setSelectedColor(productData.userPreferences?.preferredColors?.[0] || null);
           
@@ -145,7 +142,7 @@ const ProductDetail = () => {
         name: selectedColor.name,
         code: selectedColor.code,
       },
-      quantity: quantity ?? 1, // default to 1 if quantity is undefined
+      quantity: quantity ?? 1,
     };
   
     addToCart(cartItem);
@@ -156,7 +153,6 @@ const ProductDetail = () => {
       duration: 3000,
     });
   };
-  
 
   const nextImage = () => {
     if (product?.images && currentImageIndex < product.images.length - 1) {
@@ -174,16 +170,23 @@ const ProductDetail = () => {
     }
   };
 
-  const handleLike = (productId: string) => {
+  const handleLike = async (productId: string) => {
     if (!product) return;
-    setProduct(prev => prev ? {
-      ...prev,
-      interactions: {
-        ...prev.interactions!,
-        likes: prev.interactions!.userHasLiked ? prev.interactions!.likes - 1 : prev.interactions!.likes + 1,
-        userHasLiked: !prev.interactions!.userHasLiked,
-      }
-    } : null);
+    
+    try {
+      await likeProduct(productId);
+      
+      setProduct(prev => prev ? {
+        ...prev,
+        interactions: {
+          ...prev.interactions!,
+          likes: prev.interactions!.userHasLiked ? prev.interactions!.likes - 1 : prev.interactions!.likes + 1,
+          userHasLiked: !prev.interactions!.userHasLiked,
+        }
+      } : null);
+    } catch (error) {
+      console.error('Failed to like product:', error);
+    }
   };
 
   const handleShare = (productId: string) => {
@@ -207,7 +210,6 @@ const ProductDetail = () => {
     try {
       const response = await addComment(productId, comment);
       
-      // Add the new comment to the local state
       if (product) {
         const newComment = {
           id: response.id || Date.now().toString(),
@@ -228,34 +230,18 @@ const ProductDetail = () => {
           }
         } : null);
       }
-      
-      toast({
-        title: "Comment added",
-        description: "Your comment has been posted successfully.",
-      });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add comment. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Failed to add comment:', error);
+      throw error;
     }
   };
 
   const handleReplyToComment = async (commentId: string, reply: string) => {
     try {
       await replyToComment(commentId, reply);
-      
-      toast({
-        title: "Reply added",
-        description: "Your reply has been posted successfully.",
-      });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add reply. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Failed to reply to comment:', error);
+      throw error;
     }
   };
 
