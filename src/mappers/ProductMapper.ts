@@ -1,4 +1,5 @@
 
+import { boolean } from 'zod';
 import { ExternalProductResponse } from '../models/external/ProductModels';
 import { Product } from '../models/internal/Product';
 
@@ -35,7 +36,7 @@ export class ProductMapper {
       averageRating: external.average_rating || 0,
       totalRatings: external.total_ratings || 0,
       version: external.__v || 0,
-      interactions: this.generateDefaultInteractions(external._id),
+      interactions: this.generateInteractions(external.isLikedByUser, external.likesCount),
       userPreferences: this.generateDefaultUserPreferences(),
       // Add dummy values for display properties
       featured: Math.random() > 0.8, // 20% chance of being featured
@@ -52,12 +53,12 @@ export class ProductMapper {
     return externals.map(external => this.mapExternalToProduct(external));
   }
 
-  private static generateDefaultInteractions(productId: string) {
+  private static generateInteractions(userHasLiked: boolean = false, likesCount : number = 0) {
     return {
-      likes: Math.floor(Math.random() * 500) + 10,
+      likes: likesCount,
       shares: Math.floor(Math.random() * 100) + 5,
       comments: [],
-      userHasLiked: false,
+      userHasLiked: userHasLiked,
       userHasShared: false,
     };
   }

@@ -3,8 +3,8 @@
  */
 
 // Base API URL - Updated to use your hosted backend
-export const API_BASE_URL = 'http://127.0.0.1:3000';
-
+export const API_BASE_URL = 'https://3000-firebase-raibobackend-1748292729909.cluster-c23mj7ubf5fxwq6nrbev4ugaxa.cloudworkstations.dev';
+// export const API_BASE_URL = "http://localhost:3000";
 // API endpoints
 export const API_ENDPOINTS = {
   // Authentication
@@ -24,9 +24,12 @@ export const API_ENDPOINTS = {
     UPDATE: '/api/v1/product/seller',
     DELETE: '/api/v1/product/seller', // Will append /:id
     LIKE: '/api/v1/product/like', // Will append /:id
-    UNLIKE: '/api/v1/product/unlike', // Will append /:id
-    COMMENT: '/api/v1/product/comment', // Will append /:id
-    REPLY: '/api/v1/product/comment/reply', // Will append /:commentId
+    COMMENT: '/api/v1/comment', // Will append /:id
+    ADMIN: {
+      PENDING: '/api/v1/product/admin/pending',
+      APPROVE: '/api/v1/product/admin/approve', // Will append /:id
+      REJECT: '/api/v1/product/admin/reject', // Will append /:id
+    },
   },
   
   // Cart

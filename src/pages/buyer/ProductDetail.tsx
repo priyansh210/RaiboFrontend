@@ -93,13 +93,7 @@ const ProductDetail = () => {
         if (productData) {
           setProduct({
             ...productData,
-            interactions: {
-              likes: Math.floor(Math.random() * 500) + 50,
-              shares: Math.floor(Math.random() * 100) + 10,
-              comments: dummyReviews,
-              userHasLiked: false,
-              userHasShared: false,
-            }
+
           });
           setSelectedImage(productData.images?.[0] || 'https://picsum.photos/600/400');
           setSelectedColor(productData.userPreferences?.preferredColors?.[0] || null);

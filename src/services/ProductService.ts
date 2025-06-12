@@ -64,27 +64,27 @@ export const searchProducts = async (query: string): Promise<Product[]> => {
   }
 };
 
-export const likeProduct = async (productId: string): Promise<void> => {
-  try {
-    await apiService.request(`${apiService.getEndpoint('PRODUCTS', 'LIKE')}/${productId}`, {
-      method: 'POST',
-    });
-  } catch (error) {
-    console.error('Failed to like product:', error);
-    throw error;
-  }
-};
+// export const likeProduct = async (productId: string): Promise<void> => {
+//   try {
+//     await apiService.request(`${apiService.getEndpoint('PRODUCTS', 'LIKE')}/${productId}`, {
+//       method: 'POST',
+//     });
+//   } catch (error) {
+//     console.error('Failed to like product:', error);
+//     throw error;
+//   }
+// };
 
-export const unlikeProduct = async (productId: string): Promise<void> => {
-  try {
-    await apiService.request(`${apiService.getEndpoint('PRODUCTS', 'UNLIKE')}/${productId}`, {
-      method: 'POST',
-    });
-  } catch (error) {
-    console.error('Failed to unlike product:', error);
-    throw error;
-  }
-};
+// export const unlikeProduct = async (productId: string): Promise<void> => {
+//   try {
+//     await apiService.request(`${apiService.getEndpoint('PRODUCTS', 'UNLIKE')}/${productId}`, {
+//       method: 'POST',
+//     });
+//   } catch (error) {
+//     console.error('Failed to unlike product:', error);
+//     throw error;
+//   }
+// };
 
 export const addComment = async (productId: string, comment: string): Promise<any> => {
   try {

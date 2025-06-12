@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Heart, Share2, MessageCircle, Star } from 'lucide-react';
 import { ProductInteraction } from '../models/internal/Product';
 import { useIsMobile } from '../hooks/use-mobile';
-import { likeProduct, unlikeProduct } from '../services/ProductService';
 import { toast } from '@/hooks/use-toast';
+import { apiService } from '@/services/ApiService';
 
 interface ProductInteractionsProps {
   productId: string;
@@ -34,9 +34,9 @@ const ProductInteractions: React.FC<ProductInteractionsProps> = ({
     setIsLiking(true);
     try {
       if (interactions.userHasLiked) {
-        await unlikeProduct(productId);
+        await apiService.handleLike(productId);
       } else {
-        await likeProduct(productId);
+        await apiService.handleLike(productId);
       }
       onLike(productId);
       

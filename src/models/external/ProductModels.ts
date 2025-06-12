@@ -23,6 +23,13 @@ export interface ExternalProductResponse {
   average_rating: number;
   total_ratings: number;
   __v: number;
+  likesCount: number;
+  isLikedByUser: boolean;
+  comments: {
+    _id: string;
+    content: string;
+    parentComment?: string;
+  }[];
 }
 
 export interface ExternalProductsListResponse {

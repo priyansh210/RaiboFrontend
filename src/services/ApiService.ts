@@ -1,12 +1,12 @@
 import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, getFormDataHeaders, REQUEST_TIMEOUT } from '../api/config';
-import {ExternalProductResponse} from '../models/external/ProductModels';
+import { ExternalProductResponse } from '../models/external/ProductModels';
 import { PaymentMethod, PaymentMethodsResponse, CreateOrderResponse, PaymentResponse, Address, AddressesResponse } from '../api/types';
-import { 
-  StripeCheckoutSession, 
-  StripePaymentIntent, 
-  StripePaymentMethod, 
-  CreatePaymentIntentRequest, 
-  CreateCheckoutSessionRequest 
+import {
+  StripeCheckoutSession,
+  StripePaymentIntent,
+  StripePaymentMethod,
+  CreatePaymentIntentRequest,
+  CreateCheckoutSessionRequest
 } from '../models/external/StripeModels';
 
 class ApiService {
@@ -120,18 +120,30 @@ class ApiService {
   }
 
   async googleLogin(access_token: string) {
-  return this.request(API_ENDPOINTS.AUTH.GOOGLE_LOGIN, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    credentials: 'include', // Important for handling cookies from Passport
-    body: JSON.stringify({ access_token : access_token }), // Passport Google strategy expects access_token
-  });
-}
+    return this.request(API_ENDPOINTS.AUTH.GOOGLE_LOGIN, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      credentials: 'include', // Important for handling cookies from Passport
+      body: JSON.stringify({ access_token: access_token }), // Passport Google strategy expects access_token
+    });
+  }
 
   // Product API methods
+  async handleLike(productId: string): Promise<void> {
+    try {
+      await this.request(`${API_ENDPOINTS.PRODUCTS.LIKE}`, {
+        method: 'POST',
+        body: JSON.stringify({ product_id: productId }),
+      });
+    } catch (error) {
+      console.error('Failed to like product:', error);
+      throw error;
+    }
+  }
+
   async createProduct(companyId: string, productData: any) {
     return this.request(`${API_ENDPOINTS.PRODUCTS.CREATE}/${companyId}`, {
       method: 'POST',
@@ -143,12 +155,12 @@ class ApiService {
   async getAllProductsBySeller(companyId: string) {
     return this.request(`${API_ENDPOINTS.PRODUCTS.GET_ALL}/${companyId}`);
   }
-  
+
   async getProductById(productId: string) {
     const response = await this.request<{ product: ExternalProductResponse }>(`${API_ENDPOINTS.PRODUCTS.GET_BY_ID}/${productId}`);
     return response.product;
   }
-  
+
   async getAllProducts() {
     const response = await this.request<{ products: any[] }>(`${API_ENDPOINTS.PRODUCTS.GET_ALL}`);
     return response.products;
@@ -171,6 +183,28 @@ class ApiService {
     });
   }
 
+  async addComment(productId: string, comment: string) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.COMMENT}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        content: comment,
+        reference: productId,   // ID of the referenced entity (e.g., product)
+        onModel: "Product",                      // Name of the referenced model
+        type: "external",                        // or "internal"
+        parentComment: null                      // or parent comment ID for a reply
+      }),
+    });
+  }
+
+  async replyToComment(commentId: string, reply: string ) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.COMMENT}/${commentId}/reply`, {
+      method: 'POST',
+      body: JSON.stringify({
+        "content": reply             // or parent comment ID for a reply
+      }),
+    });
+  }
+
   //Implement search query
   async searchProducts(query: string) {
     return this.request(`${API_ENDPOINTS.PRODUCTS.GET_ALL}`);
@@ -187,7 +221,7 @@ class ApiService {
     return response;
   }
 
-  async addToCart( productData: { product_id: string; quantity: number }) {
+  async addToCart(productData: { product_id: string; quantity: number }) {
     return this.request(`${API_ENDPOINTS.CART.ADD}`, {
       method: 'PUT',
       body: JSON.stringify(productData),
@@ -200,17 +234,34 @@ class ApiService {
       body: JSON.stringify(productData),
     });
   }
-  
+
   async updateQuantityInCart(productData: { product_id: string; quantity: number }) {
     return this.request(`${API_ENDPOINTS.CART.UPDATE}`, {
       method: 'PUT',
       body: JSON.stringify(productData),
     });
   }
-  
+
   async clearCart() {
     return this.request(`${API_ENDPOINTS.CART.DELETE}`, {
       method: 'DELETE',
+    });
+  }
+
+  // Admin product approval methods
+  async getPendingProducts() {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.ADMIN.PENDING}`);
+  }
+
+  async approveProduct(productId: string) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.ADMIN.APPROVE}/${productId}`, {
+      method: 'PUT',
+    });
+  }
+
+  async rejectProduct(productId: string) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.ADMIN.REJECT}/${productId}`, {
+      method: 'PUT',
     });
   }
 
@@ -325,7 +376,7 @@ class ApiService {
       body: JSON.stringify({ is_default: true }),
     });
   }
- 
+
   // Image upload methods
   async uploadImage(imageFile: File) {
     const formData = new FormData();
