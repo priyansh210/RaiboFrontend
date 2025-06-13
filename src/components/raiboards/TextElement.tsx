@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { X, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,8 +33,18 @@ export const TextElement: React.FC<TextElementProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(element.content);
+  const [localPosition, setLocalPosition] = useState(element.position);
+  const [localSize, setLocalSize] = useState(element.size);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const elementRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number>();
+
+  // Update local state when element changes
+  useEffect(() => {
+    setLocalPosition(element.position);
+    setLocalSize(element.size);
+  }, [element.position, element.size]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!canEdit || isEditing) return;
@@ -44,25 +54,78 @@ export const TextElement: React.FC<TextElementProps> = ({
     
     setIsDragging(true);
     setDragStart({
-      x: e.clientX - element.position.x * zoom,
-      y: e.clientY - element.position.y * zoom,
+      x: e.clientX - localPosition.x * zoom,
+      y: e.clientY - localPosition.y * zoom,
     });
     onSelect(element.id);
-  }, [canEdit, isEditing, element.position, element.id, onSelect, zoom]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging || !canEdit) return;
-    
-    const newX = (e.clientX - dragStart.x) / zoom;
-    const newY = (e.clientY - dragStart.y) / zoom;
-    
-    onMove(element.id, { x: newX, y: newY });
-  }, [isDragging, canEdit, dragStart, element.id, onMove, zoom]);
+    // Add global mouse event listeners for smoother dragging
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      
+      rafRef.current = requestAnimationFrame(() => {
+        const newX = (e.clientX - dragStart.x) / zoom;
+        const newY = (e.clientY - dragStart.y) / zoom;
+        setLocalPosition({ x: newX, y: newY });
+      });
+    };
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    setIsResizing(false);
-  }, []);
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+      onMove(element.id, localPosition);
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+  }, [canEdit, isEditing, localPosition, element.id, onSelect, onMove, zoom, dragStart.x, dragStart.y]);
+
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!canEdit) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeStart({
+      x: e.clientX,
+      y: e.clientY,
+      width: localSize.width,
+      height: localSize.height,
+    });
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      
+      rafRef.current = requestAnimationFrame(() => {
+        const deltaX = e.clientX - resizeStart.x;
+        const deltaY = e.clientY - resizeStart.y;
+        const newWidth = Math.max(100, resizeStart.width + deltaX / zoom);
+        const newHeight = Math.max(50, resizeStart.height + deltaY / zoom);
+        setLocalSize({ width: newWidth, height: newHeight });
+      });
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsResizing(false);
+      onResize(element.id, localSize);
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+  }, [canEdit, localSize, element.id, onResize, zoom, resizeStart.x, resizeStart.y, resizeStart.width, resizeStart.height]);
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -90,29 +153,21 @@ export const TextElement: React.FC<TextElementProps> = ({
     onRemove(element.id);
   }, [element.id, onRemove]);
 
-  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsResizing(true);
-  }, []);
-
   return (
     <div
       ref={elementRef}
       className={`absolute select-none cursor-pointer transition-all duration-200 ${
         isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-      } ${isDragging ? 'opacity-80' : ''}`}
+      } ${isDragging || isResizing ? 'opacity-80 z-50' : ''}`}
       style={{
-        left: element.position.x,
-        top: element.position.y,
-        width: element.size.width,
-        height: element.size.height,
+        left: localPosition.x,
+        top: localPosition.y,
+        width: localSize.width,
+        height: localSize.height,
         zIndex: element.zIndex + (isSelected ? 1000 : 0),
+        willChange: isDragging || isResizing ? 'transform' : 'auto',
       }}
       onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
     >

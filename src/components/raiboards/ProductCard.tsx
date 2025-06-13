@@ -1,7 +1,7 @@
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { RaiBoardProduct } from '@/models/internal/RaiBoard';
-import { X, RotateCw } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ProductCardProps {
@@ -28,7 +28,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [clickCount, setClickCount] = useState(0);
+  const [localPosition, setLocalPosition] = useState(product.position);
   const cardRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number>();
+
+  // Update local position when product position changes
+  useEffect(() => {
+    setLocalPosition(product.position);
+  }, [product.position]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!canEdit) return;
@@ -38,24 +45,37 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     
     setIsDragging(true);
     setDragStart({
-      x: e.clientX - product.position.x * zoom,
-      y: e.clientY - product.position.y * zoom,
+      x: e.clientX - localPosition.x * zoom,
+      y: e.clientY - localPosition.y * zoom,
     });
     onSelect(product.id);
-  }, [canEdit, product.position, product.id, onSelect, zoom]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging || !canEdit) return;
-    
-    const newX = (e.clientX - dragStart.x) / zoom;
-    const newY = (e.clientY - dragStart.y) / zoom;
-    
-    onMove(product.id, { x: newX, y: newY });
-  }, [isDragging, canEdit, dragStart, product.id, onMove, zoom]);
+    // Add global mouse event listeners for smoother dragging
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      
+      rafRef.current = requestAnimationFrame(() => {
+        const newX = (e.clientX - dragStart.x) / zoom;
+        const newY = (e.clientY - dragStart.y) / zoom;
+        setLocalPosition({ x: newX, y: newY });
+      });
+    };
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+      onMove(product.id, localPosition);
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+  }, [canEdit, localPosition, product.id, onSelect, onMove, zoom, dragStart.x, dragStart.y]);
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -81,19 +101,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       ref={cardRef}
       className={`absolute select-none cursor-pointer transition-all duration-200 ${
         isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-      } ${isDragging ? 'opacity-80' : ''}`}
+      } ${isDragging ? 'opacity-80 z-50' : ''}`}
       style={{
-        left: product.position.x,
-        top: product.position.y,
+        left: localPosition.x,
+        top: localPosition.y,
         width: product.size.width,
         height: product.size.height,
         zIndex: product.zIndex + (isSelected ? 1000 : 0),
         transform: `rotate(${product.rotation}deg)`,
+        willChange: isDragging ? 'transform' : 'auto',
       }}
       onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
       onClick={handleClick}
     >
       {/* Product Card Content */}

@@ -1,12 +1,15 @@
 
+
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { RaiBoard, RaiBoardTextElement } from '@/models/internal/RaiBoard';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { Product } from '@/models/internal/Product';
 import { raiBoardService } from '@/services/RaiBoardService';
 import { searchProducts } from '@/services/ProductService';
 import { RaiBoardCanvas } from '@/components/raiboards/RaiBoardCanvas';
 import { CollaboratorPanel } from '@/components/raiboards/CollaboratorPanel';
+import { SaveConfirmationDialog } from '@/components/raiboards/SaveConfirmationDialog';
+import { RaiBoardProvider, useRaiBoard } from '@/context/RaiBoardContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,19 +17,21 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, Search, Settings, Share2, Save, Type, Heading } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const RaiBoardDetail: React.FC = () => {
+const RaiBoardDetailContent: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  const { state, dispatch, addProductLocally, addTextElementLocally } = useRaiBoard();
 
-  const [board, setBoard] = useState<RaiBoard | null>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showCollaborators, setShowCollaborators] = useState(false);
   const [showProductSearch, setShowProductSearch] = useState(false);
+  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [userRole] = useState<'owner' | 'editor' | 'viewer'>('owner'); // Dummy user role
+  const [userRole] = useState<'owner' | 'editor' | 'viewer'>('owner');
 
   useEffect(() => {
     if (boardId) {
@@ -34,13 +39,26 @@ const RaiBoardDetail: React.FC = () => {
     }
   }, [boardId]);
 
+  // Prevent navigation when there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (state.hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [state.hasUnsavedChanges]);
+
   const loadBoard = async () => {
     if (!boardId) return;
     
     try {
-      setLoading(true);
+      dispatch({ type: 'SET_LOADING', payload: true });
       const boardData = await raiBoardService.getBoardById(boardId);
-      setBoard(boardData);
+      dispatch({ type: 'SET_BOARD', payload: boardData });
     } catch (error) {
       toast({
         title: 'Error',
@@ -49,16 +67,17 @@ const RaiBoardDetail: React.FC = () => {
       });
       navigate('/raiboards');
     } finally {
-      setLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
   const handleSaveBoard = async () => {
-    if (!board) return;
+    if (!state.board) return;
     
     try {
       setSaving(true);
-      await raiBoardService.saveBoard(board);
+      await raiBoardService.saveBoard(state.board);
+      dispatch({ type: 'MARK_SAVED' });
       toast({
         title: 'Success',
         description: 'Board saved successfully',
@@ -74,196 +93,87 @@ const RaiBoardDetail: React.FC = () => {
     }
   };
 
-  const handleAddTextElement = async (type: 'heading' | 'paragraph') => {
-    if (!board) return;
-    
-    try {
-      const textElement = await raiBoardService.addTextElementToBoard(
-        board.id,
-        type,
-        { x: 200, y: 200 }
-      );
-      
-      // Update local state
-      setBoard(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          textElements: [...prev.textElements, textElement],
-        };
-      });
-      
-      toast({
-        title: 'Success',
-        description: `${type === 'heading' ? 'Heading' : 'Paragraph'} added to board`,
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to add text element',
-        variant: 'destructive',
-      });
+  const handleNavigateWithConfirmation = (path: string) => {
+    if (state.hasUnsavedChanges) {
+      setPendingNavigation(path);
+      setShowSaveConfirmation(true);
+    } else {
+      navigate(path);
     }
   };
 
-  const handleTextElementMove = async (elementId: string, position: { x: number; y: number }, zIndex?: number) => {
-    if (!board) return;
-    
-    try {
-      await raiBoardService.updateTextElement(board.id, elementId, { position, ...(zIndex !== undefined && { zIndex }) });
-      
-      // Update local state
-      setBoard(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          textElements: prev.textElements.map(el =>
-            el.id === elementId
-              ? { ...el, position, ...(zIndex !== undefined && { zIndex }) }
-              : el
-          ),
-        };
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update text element position',
-        variant: 'destructive',
-      });
+  const handleSaveAndNavigate = async () => {
+    await handleSaveBoard();
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
     }
+    setShowSaveConfirmation(false);
+    setPendingNavigation(null);
   };
 
-  const handleTextElementResize = async (elementId: string, size: { width: number; height: number }) => {
-    if (!board) return;
-    
-    try {
-      await raiBoardService.updateTextElement(board.id, elementId, { size });
-      
-      // Update local state
-      setBoard(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          textElements: prev.textElements.map(el =>
-            el.id === elementId ? { ...el, size } : el
-          ),
-        };
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to resize text element',
-        variant: 'destructive',
-      });
+  const handleDiscardAndNavigate = () => {
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
     }
+    setShowSaveConfirmation(false);
+    setPendingNavigation(null);
   };
 
-  const handleTextElementUpdate = async (elementId: string, updates: Partial<RaiBoardTextElement>) => {
-    if (!board) return;
-    
-    try {
-      await raiBoardService.updateTextElement(board.id, elementId, updates);
-      
-      // Update local state
-      setBoard(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          textElements: prev.textElements.map(el =>
-            el.id === elementId ? { ...el, ...updates } : el
-          ),
-        };
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update text element',
-        variant: 'destructive',
-      });
-    }
+  const handleCancelNavigation = () => {
+    setShowSaveConfirmation(false);
+    setPendingNavigation(null);
   };
 
-  const handleTextElementRemove = async (elementId: string) => {
-    if (!board) return;
-    
-    try {
-      await raiBoardService.removeTextElementFromBoard(board.id, elementId);
-      
-      // Update local state
-      setBoard(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          textElements: prev.textElements.filter(el => el.id !== elementId),
-        };
-      });
-      
-      toast({
-        title: 'Success',
-        description: 'Text element removed from board',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to remove text element',
-        variant: 'destructive',
-      });
-    }
+  const handleAddTextElement = (type: 'heading' | 'paragraph') => {
+    addTextElementLocally(type, { x: 200, y: 200 });
+    toast({
+      title: 'Success',
+      description: `${type === 'heading' ? 'Heading' : 'Paragraph'} added to board`,
+    });
   };
 
-  const handleProductMove = async (productId: string, position: { x: number; y: number }, zIndex?: number) => {
-    if (!board) return;
-    
-    try {
-      await raiBoardService.updateProductPosition(board.id, productId, position, zIndex);
-      
-      // Update local state
-      setBoard(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          products: prev.products.map(p =>
-            p.id === productId
-              ? { ...p, position, ...(zIndex !== undefined && { zIndex }) }
-              : p
-          ),
-        };
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update product position',
-        variant: 'destructive',
-      });
-    }
+  const handleTextElementMove = (elementId: string, position: { x: number; y: number }, zIndex?: number) => {
+    dispatch({
+      type: 'UPDATE_TEXT_ELEMENT_POSITION',
+      payload: { elementId, position, zIndex },
+    });
   };
 
-  const handleProductRemove = async (productId: string) => {
-    if (!board) return;
-    
-    try {
-      await raiBoardService.removeProductFromBoard(board.id, productId);
-      
-      // Update local state
-      setBoard(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          products: prev.products.filter(p => p.id !== productId),
-        };
-      });
-      
-      toast({
-        title: 'Success',
-        description: 'Product removed from board',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to remove product',
-        variant: 'destructive',
-      });
-    }
+  const handleTextElementResize = (elementId: string, size: { width: number; height: number }) => {
+    dispatch({
+      type: 'UPDATE_TEXT_ELEMENT_SIZE',
+      payload: { elementId, size },
+    });
+  };
+
+  const handleTextElementUpdate = (elementId: string, updates: Partial<RaiBoardTextElement>) => {
+    dispatch({
+      type: 'UPDATE_TEXT_ELEMENT',
+      payload: { elementId, updates },
+    });
+  };
+
+  const handleTextElementRemove = (elementId: string) => {
+    dispatch({ type: 'REMOVE_TEXT_ELEMENT', payload: elementId });
+    toast({
+      title: 'Success',
+      description: 'Text element removed from board',
+    });
+  };
+
+  const handleProductMove = (productId: string, position: { x: number; y: number }, zIndex?: number) => {
+    dispatch({
+      type: 'UPDATE_PRODUCT_POSITION',
+      payload: { productId, position, zIndex },
+    });
+  };
+
+  const handleProductRemove = (productId: string) => {
+    dispatch({ type: 'REMOVE_PRODUCT', payload: productId });
+    toast({
+      title: 'Success',
+      description: 'Product removed from board',
+    });
   };
 
   const handleProductDoubleClick = (productId: string) => {
@@ -271,10 +181,10 @@ const RaiBoardDetail: React.FC = () => {
   };
 
   const handleInviteCollaborator = async (email: string, role: 'editor' | 'viewer') => {
-    if (!board) return;
+    if (!state.board) return;
     
     try {
-      await raiBoardService.inviteCollaborator(board.id, email, role);
+      await raiBoardService.inviteCollaborator(state.board.id, email, role);
       toast({
         title: 'Success',
         description: `Invitation sent to ${email}`,
@@ -302,40 +212,15 @@ const RaiBoardDetail: React.FC = () => {
     }
   };
 
-  const handleAddProductToBoard = async (product: Product) => {
-    if (!board) return;
-    
-    try {
-      const boardProduct = await raiBoardService.addProductToBoard(
-        board.id,
-        product,
-        { x: 100, y: 100 }
-      );
-      
-      // Update local state
-      setBoard(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          products: [...prev.products, boardProduct],
-        };
-      });
-      
-      setShowProductSearch(false);
-      setSearchTerm('');
-      setSearchResults([]);
-      
-      toast({
-        title: 'Success',
-        description: 'Product added to board',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to add product to board',
-        variant: 'destructive',
-      });
-    }
+  const handleAddProductToBoard = (product: Product) => {
+    addProductLocally(product, { x: 100, y: 100 });
+    setShowProductSearch(false);
+    setSearchTerm('');
+    setSearchResults([]);
+    toast({
+      title: 'Success',
+      description: 'Product added to board',
+    });
   };
 
   useEffect(() => {
@@ -346,7 +231,7 @@ const RaiBoardDetail: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
-  if (loading) {
+  if (state.isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="text-center">
@@ -357,7 +242,7 @@ const RaiBoardDetail: React.FC = () => {
     );
   }
 
-  if (!board) {
+  if (!state.board) {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="text-center">
@@ -378,19 +263,24 @@ const RaiBoardDetail: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/raiboards')}
+            onClick={() => handleNavigateWithConfirmation('/raiboards')}
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
           
           <div>
-            <h1 className="font-semibold text-lg">{board.name}</h1>
-            {board.description && (
-              <p className="text-sm text-gray-600">{board.description}</p>
+            <div className="flex items-center gap-2">
+              <h1 className="font-semibold text-lg">{state.board.name}</h1>
+              {state.hasUnsavedChanges && (
+                <div className="w-2 h-2 bg-orange-500 rounded-full" title="Unsaved changes" />
+              )}
+            </div>
+            {state.board.description && (
+              <p className="text-sm text-gray-600">{state.board.description}</p>
             )}
           </div>
           
-          {board.isPublic && (
+          {state.board.isPublic && (
             <Badge variant="secondary">Public</Badge>
           )}
         </div>
@@ -427,13 +317,13 @@ const RaiBoardDetail: React.FC = () => {
           </Button>
           
           <Button
-            variant="outline"
+            variant={state.hasUnsavedChanges ? "default" : "outline"}
             size="sm"
             onClick={handleSaveBoard}
             disabled={saving || userRole === 'viewer'}
           >
             <Save className="w-4 h-4 mr-2" />
-            {saving ? 'Saving...' : 'Save'}
+            {saving ? 'Saving...' : state.hasUnsavedChanges ? 'Save*' : 'Save'}
           </Button>
           
           <Button variant="outline" size="sm">
@@ -450,7 +340,7 @@ const RaiBoardDetail: React.FC = () => {
       {/* Canvas */}
       <div className="flex-1 relative">
         <RaiBoardCanvas
-          board={board}
+          board={state.board}
           onProductMove={handleProductMove}
           onProductRemove={handleProductRemove}
           onProductDoubleClick={handleProductDoubleClick}
@@ -463,7 +353,7 @@ const RaiBoardDetail: React.FC = () => {
         
         {/* Collaborator Panel */}
         <CollaboratorPanel
-          collaborators={board.collaborators}
+          collaborators={state.board.collaborators}
           onInviteCollaborator={handleInviteCollaborator}
           userRole={userRole}
           isOpen={showCollaborators}
@@ -518,7 +408,23 @@ const RaiBoardDetail: React.FC = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Save Confirmation Dialog */}
+      <SaveConfirmationDialog
+        isOpen={showSaveConfirmation}
+        onSave={handleSaveAndNavigate}
+        onDiscard={handleDiscardAndNavigate}
+        onCancel={handleCancelNavigation}
+      />
     </div>
+  );
+};
+
+const RaiBoardDetail: React.FC = () => {
+  return (
+    <RaiBoardProvider>
+      <RaiBoardDetailContent />
+    </RaiBoardProvider>
   );
 };
 
