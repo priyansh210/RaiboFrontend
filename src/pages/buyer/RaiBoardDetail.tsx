@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RaiBoard } from '@/models/internal/RaiBoard';
 import { Product } from '@/models/internal/Product';
 import { raiBoardService } from '@/services/RaiBoardService';
-import { productService } from '@/services/ProductService';
+import { searchProducts } from '@/services/ProductService';
 import { RaiBoardCanvas } from '@/components/raiboards/RaiBoardCanvas';
 import { CollaboratorPanel } from '@/components/raiboards/CollaboratorPanel';
 import { Button } from '@/components/ui/button';
@@ -136,8 +135,8 @@ const RaiBoardDetail: React.FC = () => {
     }
     
     try {
-      const results = await productService.searchProducts(term, { limit: 10 });
-      setSearchResults(results.products);
+      const results = await searchProducts(term);
+      setSearchResults(results);
     } catch (error) {
       console.error('Failed to search products:', error);
     }
