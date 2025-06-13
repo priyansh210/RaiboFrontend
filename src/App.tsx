@@ -22,6 +22,8 @@ import MyRooms from './pages/buyer/MyRooms';
 import RoomDetail from './pages/buyer/RoomDetail';
 import NotFound from './pages/buyer/NotFound';
 import StripeCheckout from './pages/buyer/StripeCheckout';
+import RaiBoards from './pages/buyer/RaiBoards';
+import RaiBoardDetail from './pages/buyer/RaiBoardDetail';
 
 // Auth Pages
 import Login from './pages/buyer/Login';
@@ -81,6 +83,10 @@ const AppContent = () => {
                 <Route path="/for-you" element={<ForYou />} />
                 <Route path="/my-rooms" element={<MyRooms />} />
                 <Route path="/room/:id" element={<RoomDetail />} />
+
+                {/* RaiBoards Routes */}
+                <Route path="/raiboards" element={<RaiBoards />} />
+                <Route path="/raiboards/:boardId" element={<RaiBoardDetail />} />
 
                 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />
