@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RaiBoard, RaiBoardTextElement } from '@/models/internal/RaiBoard';
@@ -411,7 +412,7 @@ const RaiBoardDetail: React.FC = () => {
             onClick={() => handleAddTextElement('paragraph')}
             disabled={userRole === 'viewer'}
           >
-            <Paragraph className="w-4 h-4 mr-2" />
+            <Type className="w-4 h-4 mr-2" />
             Add Paragraph
           </Button>
           
