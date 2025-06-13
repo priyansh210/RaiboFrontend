@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Heart, Search, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Heart, Search, Menu, X, Grid3X3 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import {
@@ -62,6 +62,10 @@ const BuyerNavbar = () => {
             </Link>
             <Link to="/browse/office" className="text-earth hover:text-charcoal transition-colors">
               Office
+            </Link>
+            <Link to="/raiboards" className="text-earth hover:text-charcoal transition-colors flex items-center gap-1">
+              <Grid3X3 size={16} />
+              RaiBoards
             </Link>
             <Link to="/search" className="text-earth hover:text-charcoal transition-colors">
               <Search size={20} />
@@ -184,6 +188,13 @@ const BuyerNavbar = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Office
+              </Link>
+              <Link 
+                to="/raiboards" 
+                className="block px-4 py-2 text-earth hover:text-charcoal hover:bg-sand/20 transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                RaiBoards
               </Link>
               <Link 
                 to="/search" 

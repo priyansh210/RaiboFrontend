@@ -17,6 +17,24 @@ export interface RaiBoardProduct {
   rotation: number;
 }
 
+export interface RaiBoardTextElement {
+  id: string;
+  type: 'heading' | 'paragraph';
+  content: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  size: {
+    width: number;
+    height: number;
+  };
+  zIndex: number;
+  fontSize: number;
+  fontWeight: 'normal' | 'bold';
+  color: string;
+}
+
 export interface RaiBoardCollaborator {
   id: string;
   userId: string;
@@ -34,6 +52,7 @@ export interface RaiBoard {
   ownerId: string;
   ownerName: string;
   products: RaiBoardProduct[];
+  textElements: RaiBoardTextElement[];
   collaborators: RaiBoardCollaborator[];
   settings: {
     gridSize: number;

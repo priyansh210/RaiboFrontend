@@ -1,7 +1,8 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { RaiBoard, RaiBoardProduct } from '@/models/internal/RaiBoard';
+import { RaiBoard, RaiBoardProduct, RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { ProductCard } from './ProductCard';
+import { TextElement } from './TextElement';
 import { ZoomControls } from './ZoomControls';
 
 interface RaiBoardCanvasProps {
@@ -9,6 +10,10 @@ interface RaiBoardCanvasProps {
   onProductMove: (productId: string, position: { x: number; y: number }, zIndex?: number) => void;
   onProductRemove: (productId: string) => void;
   onProductDoubleClick: (productId: string) => void;
+  onTextElementMove: (elementId: string, position: { x: number; y: number }, zIndex?: number) => void;
+  onTextElementResize: (elementId: string, size: { width: number; height: number }) => void;
+  onTextElementUpdate: (elementId: string, updates: Partial<RaiBoardTextElement>) => void;
+  onTextElementRemove: (elementId: string) => void;
   userRole: 'owner' | 'editor' | 'viewer';
 }
 
@@ -17,6 +22,10 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   onProductMove,
   onProductRemove,
   onProductDoubleClick,
+  onTextElementMove,
+  onTextElementResize,
+  onTextElementUpdate,
+  onTextElementRemove,
   userRole,
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -25,6 +34,7 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   const [isPanning, setIsPanning] = useState(false);
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
+  const [selectedTextElement, setSelectedTextElement] = useState<string | null>(null);
 
   const canEdit = userRole === 'owner' || userRole === 'editor';
 
@@ -73,11 +83,18 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
 
   const handleProductSelect = (productId: string) => {
     setSelectedProduct(productId);
+    setSelectedTextElement(null);
+  };
+
+  const handleTextElementSelect = (elementId: string) => {
+    setSelectedTextElement(elementId);
+    setSelectedProduct(null);
   };
 
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       setSelectedProduct(null);
+      setSelectedTextElement(null);
     }
   };
 
@@ -129,6 +146,22 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
             zoom={zoom}
           />
         ))}
+
+        {/* Text Elements */}
+        {board.textElements.map((element) => (
+          <TextElement
+            key={element.id}
+            element={element}
+            isSelected={selectedTextElement === element.id}
+            canEdit={canEdit}
+            onMove={onTextElementMove}
+            onResize={onTextElementResize}
+            onUpdate={onTextElementUpdate}
+            onRemove={onTextElementRemove}
+            onSelect={handleTextElementSelect}
+            zoom={zoom}
+          />
+        ))}
       </div>
 
       {/* Zoom Controls */}
@@ -146,6 +179,7 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
         <div className="font-medium">{board.name}</div>
         <div className="text-gray-500">Zoom: {Math.round(zoom * 100)}%</div>
         <div className="text-gray-500">Products: {board.products.length}</div>
+        <div className="text-gray-500">Text Elements: {board.textElements.length}</div>
       </div>
     </div>
   );

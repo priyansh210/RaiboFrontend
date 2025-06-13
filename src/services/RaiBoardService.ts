@@ -1,5 +1,4 @@
-
-import { RaiBoard, RaiBoardProduct, RaiBoardCollaborator, RaiBoardInvite } from '@/models/internal/RaiBoard';
+import { RaiBoard, RaiBoardProduct, RaiBoardTextElement, RaiBoardCollaborator, RaiBoardInvite } from '@/models/internal/RaiBoard';
 import { Product } from '@/models/internal/Product';
 
 class RaiBoardService {
@@ -16,6 +15,7 @@ class RaiBoardService {
             ownerId: 'user-1',
             ownerName: 'John Doe',
             products: this.getDummyBoardProducts(),
+            textElements: this.getDummyTextElements(),
             collaborators: this.getDummyCollaborators(),
             settings: {
               gridSize: 20,
@@ -35,6 +35,7 @@ class RaiBoardService {
             ownerId: 'user-1',
             ownerName: 'John Doe',
             products: [],
+            textElements: [],
             collaborators: [],
             settings: {
               gridSize: 20,
@@ -65,6 +66,7 @@ class RaiBoardService {
             ownerId: 'user-1',
             ownerName: 'John Doe',
             products: this.getDummyBoardProducts(),
+            textElements: this.getDummyTextElements(),
             collaborators: this.getDummyCollaborators(),
             settings: {
               gridSize: 20,
@@ -96,6 +98,7 @@ class RaiBoardService {
           ownerId: 'user-1',
           ownerName: 'John Doe',
           products: [],
+          textElements: [],
           collaborators: [],
           settings: {
             gridSize: 20,
@@ -109,6 +112,59 @@ class RaiBoardService {
           isPublic: boardData.isPublic || false,
         });
       }, 300);
+    });
+  }
+
+  // Save board
+  async saveBoard(board: RaiBoard): Promise<void> {
+    // Dummy implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('Board saved:', board);
+        resolve();
+      }, 500);
+    });
+  }
+
+  // Add text element to board
+  async addTextElementToBoard(boardId: string, type: 'heading' | 'paragraph', position: { x: number; y: number }): Promise<RaiBoardTextElement> {
+    // Dummy implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          id: 'text-' + Date.now(),
+          type,
+          content: '',
+          position,
+          size: { width: 200, height: type === 'heading' ? 50 : 100 },
+          zIndex: 1,
+          fontSize: type === 'heading' ? 24 : 16,
+          fontWeight: type === 'heading' ? 'bold' : 'normal',
+          color: '#000000',
+        });
+      }, 200);
+    });
+  }
+
+  // Update text element
+  async updateTextElement(boardId: string, elementId: string, updates: Partial<RaiBoardTextElement>): Promise<void> {
+    // Dummy implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('Updated text element:', { boardId, elementId, updates });
+        resolve();
+      }, 100);
+    });
+  }
+
+  // Remove text element from board
+  async removeTextElementFromBoard(boardId: string, elementId: string): Promise<void> {
+    // Dummy implementation
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('Removed text element from board:', { boardId, elementId });
+        resolve();
+      }, 200);
     });
   }
 
@@ -206,6 +262,33 @@ class RaiBoardService {
         size: { width: 150, height: 150 },
         zIndex: 2,
         rotation: 15,
+      },
+    ];
+  }
+
+  private getDummyTextElements(): RaiBoardTextElement[] {
+    return [
+      {
+        id: 'text-1',
+        type: 'heading',
+        content: 'Living Room Layout',
+        position: { x: 50, y: 50 },
+        size: { width: 300, height: 50 },
+        zIndex: 1,
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333333',
+      },
+      {
+        id: 'text-2',
+        type: 'paragraph',
+        content: 'This is our main seating area with a modern sofa and coffee table setup.',
+        position: { x: 50, y: 450 },
+        size: { width: 250, height: 80 },
+        zIndex: 1,
+        fontSize: 16,
+        fontWeight: 'normal',
+        color: '#666666',
       },
     ];
   }

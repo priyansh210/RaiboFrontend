@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { RaiBoard } from '@/models/internal/RaiBoard';
+import { RaiBoard, RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { Product } from '@/models/internal/Product';
 import { raiBoardService } from '@/services/RaiBoardService';
 import { searchProducts } from '@/services/ProductService';
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Search, Settings, Share2 } from 'lucide-react';
+import { ArrowLeft, Plus, Search, Settings, Share2, Save, Type, Heading, Paragraph } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const RaiBoardDetail: React.FC = () => {
@@ -20,6 +20,7 @@ const RaiBoardDetail: React.FC = () => {
 
   const [board, setBoard] = useState<RaiBoard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showCollaborators, setShowCollaborators] = useState(false);
   const [showProductSearch, setShowProductSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,6 +49,164 @@ const RaiBoardDetail: React.FC = () => {
       navigate('/raiboards');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveBoard = async () => {
+    if (!board) return;
+    
+    try {
+      setSaving(true);
+      await raiBoardService.saveBoard(board);
+      toast({
+        title: 'Success',
+        description: 'Board saved successfully',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save board',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAddTextElement = async (type: 'heading' | 'paragraph') => {
+    if (!board) return;
+    
+    try {
+      const textElement = await raiBoardService.addTextElementToBoard(
+        board.id,
+        type,
+        { x: 200, y: 200 }
+      );
+      
+      // Update local state
+      setBoard(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          textElements: [...prev.textElements, textElement],
+        };
+      });
+      
+      toast({
+        title: 'Success',
+        description: `${type === 'heading' ? 'Heading' : 'Paragraph'} added to board`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to add text element',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleTextElementMove = async (elementId: string, position: { x: number; y: number }, zIndex?: number) => {
+    if (!board) return;
+    
+    try {
+      await raiBoardService.updateTextElement(board.id, elementId, { position, ...(zIndex !== undefined && { zIndex }) });
+      
+      // Update local state
+      setBoard(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          textElements: prev.textElements.map(el =>
+            el.id === elementId
+              ? { ...el, position, ...(zIndex !== undefined && { zIndex }) }
+              : el
+          ),
+        };
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update text element position',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleTextElementResize = async (elementId: string, size: { width: number; height: number }) => {
+    if (!board) return;
+    
+    try {
+      await raiBoardService.updateTextElement(board.id, elementId, { size });
+      
+      // Update local state
+      setBoard(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          textElements: prev.textElements.map(el =>
+            el.id === elementId ? { ...el, size } : el
+          ),
+        };
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to resize text element',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleTextElementUpdate = async (elementId: string, updates: Partial<RaiBoardTextElement>) => {
+    if (!board) return;
+    
+    try {
+      await raiBoardService.updateTextElement(board.id, elementId, updates);
+      
+      // Update local state
+      setBoard(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          textElements: prev.textElements.map(el =>
+            el.id === elementId ? { ...el, ...updates } : el
+          ),
+        };
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update text element',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleTextElementRemove = async (elementId: string) => {
+    if (!board) return;
+    
+    try {
+      await raiBoardService.removeTextElementFromBoard(board.id, elementId);
+      
+      // Update local state
+      setBoard(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          textElements: prev.textElements.filter(el => el.id !== elementId),
+        };
+      });
+      
+      toast({
+        title: 'Success',
+        description: 'Text element removed from board',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove text element',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -239,11 +398,41 @@ const RaiBoardDetail: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => handleAddTextElement('heading')}
+            disabled={userRole === 'viewer'}
+          >
+            <Heading className="w-4 h-4 mr-2" />
+            Add Heading
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleAddTextElement('paragraph')}
+            disabled={userRole === 'viewer'}
+          >
+            <Paragraph className="w-4 h-4 mr-2" />
+            Add Paragraph
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setShowProductSearch(true)}
             disabled={userRole === 'viewer'}
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Product
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSaveBoard}
+            disabled={saving || userRole === 'viewer'}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? 'Saving...' : 'Save'}
           </Button>
           
           <Button variant="outline" size="sm">
@@ -264,6 +453,10 @@ const RaiBoardDetail: React.FC = () => {
           onProductMove={handleProductMove}
           onProductRemove={handleProductRemove}
           onProductDoubleClick={handleProductDoubleClick}
+          onTextElementMove={handleTextElementMove}
+          onTextElementResize={handleTextElementResize}
+          onTextElementUpdate={handleTextElementUpdate}
+          onTextElementRemove={handleTextElementRemove}
           userRole={userRole}
         />
         
