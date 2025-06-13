@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,11 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Eye, MessageCircle } from 'lucide-react';
 import { adminService } from '../../services/AdminService';
 import { ProductVerification, KycVerification } from '../../models/internal/Admin';
 import { toast } from '@/hooks/use-toast';
 
 const AdminRequests: React.FC = () => {
+  const navigate = useNavigate();
   const [productVerifications, setProductVerifications] = useState<ProductVerification[]>([]);
   const [kycVerifications, setKycVerifications] = useState<KycVerification[]>([]);
   const [selectedVerification, setSelectedVerification] = useState<ProductVerification | KycVerification | null>(null);
@@ -130,56 +133,74 @@ const AdminRequests: React.FC = () => {
                       <TableCell>{getStatusBadge(verification.status)}</TableCell>
                       <TableCell>{verification.createdAt.toLocaleDateString()}</TableCell>
                       <TableCell>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setSelectedVerification(verification)}
-                            >
-                              Review
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Product Verification</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              <div>
-                                <label className="text-sm font-medium">Product ID:</label>
-                                <p className="text-sm text-gray-600">{verification.productId}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium">Company ID:</label>
-                                <p className="text-sm text-gray-600">{verification.companyId}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium">Comments (optional):</label>
-                                <Textarea
-                                  value={comments}
-                                  onChange={(e) => setComments(e.target.value)}
-                                  placeholder="Add comments for the seller..."
-                                  rows={3}
-                                />
-                              </div>
-                              <div className="flex gap-2">
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/admin/products/preview/${verification.productId}`)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Preview
+                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedVerification(verification)}
+                              >
+                                <MessageCircle className="h-4 w-4 mr-1" />
+                                Quick Review
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Quick Product Review</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="text-sm font-medium">Product ID:</label>
+                                  <p className="text-sm text-gray-600">{verification.productId}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Company ID:</label>
+                                  <p className="text-sm text-gray-600">{verification.companyId}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Comments (optional):</label>
+                                  <Textarea
+                                    value={comments}
+                                    onChange={(e) => setComments(e.target.value)}
+                                    placeholder="Add comments for the seller..."
+                                    rows={3}
+                                  />
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    onClick={() => handleProductVerification(verification.id, 'approved')}
+                                    className="flex-1"
+                                  >
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleProductVerification(verification.id, 'rejected')}
+                                    variant="destructive"
+                                    className="flex-1"
+                                  >
+                                    Reject
+                                  </Button>
+                                </div>
                                 <Button
-                                  onClick={() => handleProductVerification(verification.id, 'approved')}
-                                  className="flex-1"
+                                  variant="outline"
+                                  className="w-full"
+                                  onClick={() => navigate(`/admin/products/preview/${verification.productId}`)}
                                 >
-                                  Approve
-                                </Button>
-                                <Button
-                                  onClick={() => handleProductVerification(verification.id, 'rejected')}
-                                  variant="destructive"
-                                  className="flex-1"
-                                >
-                                  Reject
+                                  Open Full Preview
                                 </Button>
                               </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -1,4 +1,3 @@
-
 import { apiService } from './ApiService';
 import { AdminMapper } from '../mappers/AdminMapper';
 import { 
@@ -10,6 +9,8 @@ import {
   AdminCategory,
   AdminDashboardStats
 } from '../models/internal/Admin';
+import { ProductComment, ProductVerificationStatus } from '../models/internal/ProductComments';
+import { Product } from '../models/internal/Product';
 import { 
   ExternalCompanyResponse,
   ExternalUserResponse,
@@ -19,6 +20,7 @@ import {
   ExternalCategoryResponse
 } from '../models/external/AdminModels';
 import { ExternalProductResponse } from '@/models/external/ProductModels';
+import { ProductMapper } from '@/mappers/ProductMapper';
 
 class AdminService {
   // Dashboard Stats
@@ -130,6 +132,86 @@ class AdminService {
     }
   }
 
+  async getProductForPreview(productId: string): Promise<Product> {
+    try {
+      const response = await apiService.getProductById(productId);
+      return ProductMapper.mapExternalToProduct(response as ExternalProductResponse);
+    } catch (error) {
+      console.error('Failed to get product for preview:', error);
+      throw new Error('Failed to get product for preview');
+    }
+  }
+
+  async getProductComments(productId: string): Promise<ProductComment[]> {
+    try {
+      // Using the existing comment API, filtering for internal comments
+      const response = await apiService.request<{ comments: any[] }>(`/api/v1/products/${productId}/comments?type=internal`);
+      
+      return response.comments.map(comment => ({
+        id: comment._id,
+        productId: productId,
+        userId: comment.user_id || 'admin',
+        userRole: comment.type === 'internal' ? 'admin' : 'seller',
+        userName: comment.user_name || 'Admin',
+        content: comment.content,
+        commentType: comment.comment_type || 'feedback',
+        parentCommentId: comment.parentComment,
+        status: comment.status || 'active',
+        createdAt: new Date(comment.created_at || Date.now()),
+        updatedAt: new Date(comment.updated_at || Date.now()),
+      }));
+    } catch (error) {
+      console.error('Failed to get product comments:', error);
+      return [];
+    }
+  }
+
+  async addProductComment(productId: string, content: string, commentType: string = 'feedback', parentId?: string): Promise<ProductComment> {
+    try {
+      const response = await apiService.addComment(productId, content, 'Product', 'internal');
+      
+      return {
+        id: response._id || Date.now().toString(),
+        productId: productId,
+        userId: 'admin',
+        userRole: 'admin',
+        userName: 'Admin',
+        content: content,
+        commentType: commentType as any,
+        parentCommentId: parentId,
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    } catch (error) {
+      console.error('Failed to add product comment:', error);
+      throw new Error('Failed to add product comment');
+    }
+  }
+
+  async replyToProductComment(parentCommentId: string, content: string): Promise<ProductComment> {
+    try {
+      const response = await apiService.replyToComment(parentCommentId, content);
+      
+      return {
+        id: response._id || Date.now().toString(),
+        productId: response.productId || '',
+        userId: 'admin',
+        userRole: 'admin',
+        userName: 'Admin',
+        content: content,
+        commentType: 'response',
+        parentCommentId: parentCommentId,
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    } catch (error) {
+      console.error('Failed to reply to comment:', error);
+      throw new Error('Failed to reply to comment');
+    }
+  }
+
   async verifyProduct(product_id: string, status: 'approved' | 'rejected'): Promise<void> {
     try {
       if(status === 'rejected') {
@@ -141,6 +223,24 @@ class AdminService {
     } catch (error) {
       console.error('Failed to verify product:', error);
       throw new Error('Failed to verify product');
+    }
+  }
+
+  async updateProductVerificationStatus(productId: string, status: 'approved' | 'rejected' | 'needs_revision', comments?: string): Promise<void> {
+    try {
+      if (status === 'approved') {
+        await apiService.approveProductByAdmin(productId);
+      } else {
+        await apiService.rejectProductByAdmin(productId, comments);
+      }
+      
+      // Add admin comment if provided
+      if (comments) {
+        await this.addProductComment(productId, comments, 'feedback');
+      }
+    } catch (error) {
+      console.error('Failed to update product verification status:', error);
+      throw new Error('Failed to update product verification status');
     }
   }
 

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -35,11 +36,13 @@ import AuthCallback from './pages/AuthCallback';
 import SellerDashboard from './pages/seller/SellerDashboard';
 import SellerProducts from './pages/seller/SellerProducts';
 import SellerProductForm from './pages/seller/SellerProductForm';
+import SellerProductPreview from './pages/seller/SellerProductPreview';
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminRegister from './pages/admin/AdminRegister';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProductPreview from './pages/admin/AdminProductPreview';
 
 import './App.css';
 
@@ -92,6 +95,7 @@ const AppContent = () => {
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/register" element={<AdminRegister />} />
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/products/preview/:productId" element={<AdminProductPreview />} />
 
                 {/* User Account */}
                 <Route path="/account" element={<Account />} />
@@ -101,6 +105,7 @@ const AppContent = () => {
                 <Route path="/seller/products" element={<SellerProducts />} />
                 <Route path="/seller/products/add" element={<SellerProductForm />} />
                 <Route path="/seller/products/edit/:productId" element={<SellerProductForm />} />
+                <Route path="/seller/products/preview/:productId" element={<SellerProductPreview />} />
 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />
