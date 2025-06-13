@@ -1,3 +1,4 @@
+
 import { apiService } from './ApiService';
 import { AdminMapper } from '../mappers/AdminMapper';
 import { 
@@ -21,6 +22,21 @@ import {
 } from '../models/external/AdminModels';
 import { ExternalProductResponse } from '@/models/external/ProductModels';
 import { ProductMapper } from '@/mappers/ProductMapper';
+
+// Add interface for comment API responses
+interface CommentApiResponse {
+  _id: string;
+  content: string;
+  user_id?: string;
+  user_name?: string;
+  type?: string;
+  comment_type?: string;
+  parentComment?: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
+  productId?: string;
+}
 
 class AdminService {
   // Dashboard Stats
@@ -145,18 +161,18 @@ class AdminService {
   async getProductComments(productId: string): Promise<ProductComment[]> {
     try {
       // Using the existing comment API, filtering for internal comments
-      const response = await apiService.request<{ comments: any[] }>(`/api/v1/products/${productId}/comments?type=internal`);
+      const response = await apiService.request<{ comments: CommentApiResponse[] }>(`/api/v1/products/${productId}/comments?type=internal`);
       
       return response.comments.map(comment => ({
         id: comment._id,
         productId: productId,
         userId: comment.user_id || 'admin',
-        userRole: comment.type === 'internal' ? 'admin' : 'seller',
+        userRole: comment.type === 'internal' ? 'admin' : 'seller' as 'admin' | 'seller',
         userName: comment.user_name || 'Admin',
         content: comment.content,
-        commentType: comment.comment_type || 'feedback',
+        commentType: (comment.comment_type || 'feedback') as 'feedback' | 'response' | 'general',
         parentCommentId: comment.parentComment,
-        status: comment.status || 'active',
+        status: (comment.status || 'active') as 'active' | 'resolved' | 'addressed',
         createdAt: new Date(comment.created_at || Date.now()),
         updatedAt: new Date(comment.updated_at || Date.now()),
       }));
@@ -168,7 +184,7 @@ class AdminService {
 
   async addProductComment(productId: string, content: string, commentType: string = 'feedback', parentId?: string): Promise<ProductComment> {
     try {
-      const response = await apiService.addComment(productId, content, 'Product', 'internal');
+      const response = await apiService.addComment(productId, content, 'Product', 'internal') as CommentApiResponse;
       
       return {
         id: response._id || Date.now().toString(),
@@ -177,7 +193,7 @@ class AdminService {
         userRole: 'admin',
         userName: 'Admin',
         content: content,
-        commentType: commentType as any,
+        commentType: commentType as 'feedback' | 'response' | 'general',
         parentCommentId: parentId,
         status: 'active',
         createdAt: new Date(),
@@ -191,7 +207,7 @@ class AdminService {
 
   async replyToProductComment(parentCommentId: string, content: string): Promise<ProductComment> {
     try {
-      const response = await apiService.replyToComment(parentCommentId, content);
+      const response = await apiService.replyToComment(parentCommentId, content) as CommentApiResponse;
       
       return {
         id: response._id || Date.now().toString(),
