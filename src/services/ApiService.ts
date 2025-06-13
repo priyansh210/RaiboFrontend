@@ -183,15 +183,34 @@ class ApiService {
     });
   }
 
-  async addComment(productId: string, comment: string) {
+  async getAllPendingProducts() {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.ADMIN.PENDING}`, {
+      method: 'GET',
+    });
+  }
+
+  async approveProductByAdmin(productId: string) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.ADMIN.APPROVE}/${productId}`, {
+      method: 'PUT',
+    });
+  }
+
+  async rejectProductByAdmin(productId: string, reason?: string) {
+    return this.request(`${API_ENDPOINTS.PRODUCTS.ADMIN.REJECT}/${productId}`, {
+      method: 'PUT',
+      body: JSON.stringify(reason ? { reason } : {}),
+    });
+  }
+
+  async addComment(referenceId: string, comment: string, onModel: 'Product' | 'KYC' = 'Product', type: 'external' | 'internal' = 'external') {
     return this.request(`${API_ENDPOINTS.PRODUCTS.COMMENT}`, {
       method: 'POST',
       body: JSON.stringify({
         content: comment,
-        reference: productId,   // ID of the referenced entity (e.g., product)
-        onModel: "Product",                      // Name of the referenced model
-        type: "external",                        // or "internal"
-        parentComment: null                      // or parent comment ID for a reply
+        reference: referenceId,   
+        onModel: onModel,                   
+        type: type,                      
+        parentComment: null                     
       }),
     });
   }

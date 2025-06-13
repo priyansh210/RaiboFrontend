@@ -45,8 +45,7 @@ export interface ProductVerification {
   id: string;
   productId: string;
   companyId: string;
-  status: 'pending' | 'approved' | 'rejected';
-  comments?: string;
+  status: string;
   reviewedBy?: string;
   reviewedAt?: Date;
   createdAt: Date;

@@ -1,4 +1,5 @@
 
+import { ExternalProductResponse } from '@/models/external/ProductModels';
 import { 
   ExternalCompanyResponse, 
   ExternalUserResponse, 
@@ -64,18 +65,21 @@ export class AdminMapper {
     };
   }
 
-  static mapExternalProductVerificationToInternal(external: ExternalProductVerificationResponse): ProductVerification {
+  static mapExternalProductVerificationToInternal(external: ExternalProductResponse): ProductVerification {
     return {
       id: external._id,
-      productId: external.product_id,
-      companyId: external.company_id,
+      productId: external._id,
+      companyId: external.company_id._id,
       status: external.status,
-      comments: external.comments,
-      reviewedBy: external.reviewed_by,
-      reviewedAt: external.reviewed_at ? new Date(external.reviewed_at) : undefined,
-      createdAt: new Date(external.created_at),
+      reviewedBy: undefined,
+      reviewedAt: undefined,
+      createdAt: new Date(),
     };
-  }
+    }
+
+    static mapExternalProductToVerificationToInternalArray(externals: ExternalProductResponse[]): ProductVerification[] {
+    return externals.map(this.mapExternalProductVerificationToInternal);
+    }
 
   static mapExternalKycVerificationToInternal(external: ExternalKycVerificationResponse): KycVerification {
     return {

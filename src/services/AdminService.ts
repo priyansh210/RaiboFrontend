@@ -18,6 +18,7 @@ import {
   ExternalKycVerificationResponse,
   ExternalCategoryResponse
 } from '../models/external/AdminModels';
+import { ExternalProductResponse } from '@/models/external/ProductModels';
 
 class AdminService {
   // Dashboard Stats
@@ -121,20 +122,22 @@ class AdminService {
   // Product Verification
   async getPendingProductVerifications(): Promise<ProductVerification[]> {
     try {
-      const response = await apiService.request<{ verifications: ExternalProductVerificationResponse[] }>('/api/v1/admin/product-verifications/pending');
-      return response.verifications.map(AdminMapper.mapExternalProductVerificationToInternal);
+      const response = await apiService.getAllPendingProducts() as { products: ExternalProductResponse[] };
+      return AdminMapper.mapExternalProductToVerificationToInternalArray(response.products);
     } catch (error) {
       console.error('Failed to get pending product verifications:', error);
       throw new Error('Failed to get pending product verifications');
     }
   }
 
-  async verifyProduct(verificationId: string, status: 'approved' | 'rejected', comments?: string): Promise<void> {
+  async verifyProduct(product_id: string, status: 'approved' | 'rejected'): Promise<void> {
     try {
-      await apiService.request(`/api/v1/admin/product-verifications/${verificationId}`, {
-        method: 'PUT',
-        body: JSON.stringify({ status, comments }),
-      });
+      if(status === 'rejected') {
+        await apiService.rejectProductByAdmin(product_id)
+      }
+      else{
+        await apiService.approveProductByAdmin(product_id);
+      }
     } catch (error) {
       console.error('Failed to verify product:', error);
       throw new Error('Failed to verify product');
@@ -144,12 +147,25 @@ class AdminService {
   // KYC Verification
   async getPendingKycVerifications(): Promise<KycVerification[]> {
     try {
-      const response = await apiService.request<{ verifications: ExternalKycVerificationResponse[] }>('/api/v1/admin/kyc-verifications/pending');
-      return response.verifications.map(AdminMapper.mapExternalKycVerificationToInternal);
+      return [this.getDummyKycVerification()];
     } catch (error) {
       console.error('Failed to get pending KYC verifications:', error);
       throw new Error('Failed to get pending KYC verifications');
     }
+  }
+
+  // Dummy KYC Verification object for testing or placeholder purposes
+  getDummyKycVerification(): KycVerification {
+    return {
+      id: 'dummy-kyc-id',
+      companyId: 'dummy-company-id',
+      status: 'pending',
+      documents: ['doc1.pdf', 'doc2.pdf'],
+      comments: 'Awaiting review',
+      reviewedBy: undefined,
+      reviewedAt: undefined,
+      createdAt: new Date(),
+    };
   }
 
   async verifyKyc(verificationId: string, status: 'approved' | 'rejected', comments?: string): Promise<void> {
@@ -164,6 +180,23 @@ class AdminService {
     }
   }
 
+  async addComment(referenceId: string, comment: string, onModel: 'Product' | 'KYC' = 'Product'): Promise<any> {
+    try {
+      return await apiService.addComment(referenceId, comment, onModel, 'internal');
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+      throw new Error('Failed to add comment');
+    }
+  }
+
+  async replyToComment(parentCommentId: string, reply: string): Promise<any> {
+    try {
+      return await apiService.replyToComment(parentCommentId, reply);
+    } catch (error) {
+      console.error('Failed to reply to comment:', error);
+      throw new Error('Failed to reply to comment');
+    }
+  }
   // Category Management
   async getAllCategories(): Promise<AdminCategory[]> {
     try {

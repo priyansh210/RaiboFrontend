@@ -45,7 +45,7 @@ const AdminRequests: React.FC = () => {
 
   const handleProductVerification = async (verificationId: string, status: 'approved' | 'rejected') => {
     try {
-      await adminService.verifyProduct(verificationId, status, comments);
+      await adminService.verifyProduct(verificationId, status);
       await fetchVerifications();
       setComments('');
       setSelectedVerification(null);

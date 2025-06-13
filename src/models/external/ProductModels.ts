@@ -23,6 +23,7 @@ export interface ExternalProductResponse {
   average_rating: number;
   total_ratings: number;
   __v: number;
+  status: string;
   likesCount: number;
   isLikedByUser: boolean;
   comments: {
