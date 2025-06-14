@@ -87,6 +87,24 @@ export const API_ENDPOINTS = {
     UPDATE: '/api/v1/company', // Will append /:id
     DELETE: '/api/v1/company', // Will append /:id
   },
+
+  // RaiBoard
+  BOARDS: {
+    CREATE: '/api/v1/board',
+    GET_ALL: '/api/v1/board',
+    GET_BY_ID: '/api/v1/board', // Will append /:id
+    UPDATE: '/api/v1/board', // Will append /:id
+    DELETE: '/api/v1/board', // Will append /:id
+  },
+
+  ROOMS: {
+    CREATE: '/api/v1/room',
+    PRODUCT: '/api/v1/room/product',
+    GET_ALL: '/api/v1/room',
+    GET_BY_ID: '/api/v1/room', // Will append /:id
+    UPDATE: '/api/v1/room', // Will append /:id
+    DELETE: '/api/v1/room', // Will append /:id
+  },
 };
 
 // Local storage keys

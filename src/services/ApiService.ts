@@ -8,6 +8,7 @@ import {
   CreatePaymentIntentRequest,
   CreateCheckoutSessionRequest
 } from '../models/external/StripeModels';
+import { RaiBoard } from '@/models/internal/RaiBoard';
 
 class ApiService {
   private baseURL: string;
@@ -162,7 +163,7 @@ class ApiService {
   }
 
   async getAllProducts() {
-    const response = await this.request<{ products: any[] }>(`${API_ENDPOINTS.PRODUCTS.GET_ALL}`);
+    const response = await this.request<{ products: ExternalProductResponse[] }>(`${API_ENDPOINTS.PRODUCTS.GET_ALL}`);
     return response.products;
   }
 
@@ -207,15 +208,15 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({
         content: comment,
-        reference: referenceId,   
-        onModel: onModel,                   
-        type: type,                      
-        parentComment: null                     
+        reference: referenceId,
+        onModel: onModel,
+        type: type,
+        parentComment: null
       }),
     });
   }
 
-  async replyToComment(commentId: string, reply: string ) {
+  async replyToComment(commentId: string, reply: string) {
     return this.request(`${API_ENDPOINTS.PRODUCTS.COMMENT}/${commentId}/reply`, {
       method: 'POST',
       body: JSON.stringify({
@@ -523,7 +524,7 @@ class ApiService {
   }
 
   // Room API methods
-  async createRoom(roomData: {
+  async createDummyRoom(roomData: {
     name: string;
     description?: string;
     room_type: string;
@@ -538,12 +539,46 @@ class ApiService {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    
+
     console.log('Creating room:', roomData);
     return Promise.resolve(dummyRoom);
   }
 
   async getUserRooms() {
+    return this.request(`${API_ENDPOINTS.ROOMS.GET_ALL}`);
+  }
+
+  async createRoom(roomData: {
+    name: string;
+    description?: string;
+    room_type: string;
+  }) {
+    return this.request(`${API_ENDPOINTS.ROOMS.CREATE}`, {
+      method: 'POST',
+      body: JSON.stringify(roomData),
+    });
+  }
+
+  async addProductToRoom(roomId: string, productId: string) {
+    return this.request(`${API_ENDPOINTS.ROOMS.PRODUCT}/${roomId}`, {
+      method: 'POST',
+      body: JSON.stringify({ productId, quantity : 1 }),
+    });
+  }
+
+  async removeProductFromRoom(roomId: string, productId: string) {
+    return this.request(`${API_ENDPOINTS.ROOMS.PRODUCT}/${roomId}`, {
+      method: 'POST',
+      body: JSON.stringify({ productId }),
+    });
+  }
+
+  async deleteRoom(roomId: string) {
+    return this.request(`${API_ENDPOINTS.ROOMS.DELETE}/${roomId}`, {
+      method: 'DELETE',
+    });
+  }
+  async getDummyUserRooms() {
     // Return dummy rooms data
     const dummyRooms = [
       {
@@ -579,7 +614,7 @@ class ApiService {
         updated_at: '2024-01-03T00:00:00Z',
       },
     ];
-    
+
     console.log('Fetching user rooms');
     return Promise.resolve({ rooms: dummyRooms });
   }
@@ -592,16 +627,16 @@ class ApiService {
       description: 'Main living area with sofa and TV',
       room_type: 'living_room',
       items: [
-        { 
-          id: '1', 
-          name: 'Modern Sofa', 
+        {
+          id: '1',
+          name: 'Modern Sofa',
           image: 'https://picsum.photos/300/300?random=1',
           price: 899,
           description: 'Comfortable modern sofa'
         },
-        { 
-          id: '2', 
-          name: 'Coffee Table', 
+        {
+          id: '2',
+          name: 'Coffee Table',
           image: 'https://picsum.photos/300/300?random=2',
           price: 299,
           description: 'Elegant coffee table'
@@ -610,7 +645,7 @@ class ApiService {
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
     };
-    
+
     console.log('Fetching room by ID:', roomId);
     return Promise.resolve(dummyRoom);
   }
@@ -634,9 +669,43 @@ class ApiService {
     return Promise.resolve({ success: true });
   }
 
-  async deleteRoom(roomId: string) {
+  async deleteDummyRoom(roomId: string) {
     console.log('Deleting room:', roomId);
     return Promise.resolve({ success: true });
+  }
+
+  // Board API methods
+  async createBoard(boardData: {
+    name: string,
+    description: string,
+    isPublic: boolean
+  }
+  ) {
+    return this.request(`${API_ENDPOINTS.BOARDS.CREATE}`, {
+      method: 'POST',
+      body: JSON.stringify(boardData),
+    });
+  }
+
+  async getBoards() {
+    return this.request(`${API_ENDPOINTS.BOARDS.GET_ALL}`);
+  }
+
+  async getBoardById(boardId: string) {
+    return this.request(`${API_ENDPOINTS.BOARDS.GET_BY_ID}/${boardId}`);
+  }
+
+  async updateBoard(boardId: string, boardData: RaiBoard) {
+    return this.request(`${API_ENDPOINTS.BOARDS.UPDATE}/${boardId}`, {
+      method: 'PUT',
+      body: JSON.stringify(boardData),
+    });
+  }
+
+  async deleteBoard(boardId: string) {
+    return this.request(`${API_ENDPOINTS.BOARDS.DELETE}/${boardId}`, {
+      method: 'DELETE',
+    });
   }
 }
 

@@ -37,7 +37,6 @@ export interface RaiBoardTextElement {
 
 export interface RaiBoardCollaborator {
   id: string;
-  userId: string;
   userName: string;
   userAvatar?: string;
   role: 'owner' | 'editor' | 'viewer';
@@ -58,8 +57,8 @@ export interface RaiBoard {
     gridSize: number;
     showGrid: boolean;
     allowOverlap: boolean;
-    maxZoom: number;
-    minZoom: number;
+    maxZoom: number | 3;
+    minZoom: number | 0.5;
   };
   createdAt: Date;
   updatedAt: Date;

@@ -48,6 +48,8 @@ export const TRANSLATIONS = {
     myAccount: 'My Account',
     orders: 'Orders',
     wishlist: 'Wishlist',
+    raiboards: 'Raiboards',
+    my_rooms: 'My Rooms',
     addresses: 'Addresses',
     paymentMethods: 'Payment Methods',
     settings: 'Settings',

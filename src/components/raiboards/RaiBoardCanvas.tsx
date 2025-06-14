@@ -35,31 +35,51 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [selectedTextElement, setSelectedTextElement] = useState<string | null>(null);
+  
+  const panRef = useRef(pan);
+  const lastPanPointRef = useRef({ x: 0, y: 0 });
+  const animationFrameRef = useRef<number | null>(null);
 
+  useEffect(() => {
+    panRef.current = pan;
+  }, [pan]);
+  
   const canEdit = userRole === 'owner' || userRole === 'editor';
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button === 1 || (e.button === 0 && e.ctrlKey)) { // Middle mouse or Ctrl+Left
       setIsPanning(true);
-      setLastPanPoint({ x: e.clientX, y: e.clientY });
+      lastPanPointRef.current = { x: e.clientX, y: e.clientY };
       e.preventDefault();
     }
   }, []);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (isPanning) {
-      const deltaX = e.clientX - lastPanPoint.x;
-      const deltaY = e.clientY - lastPanPoint.y;
-      setPan(prev => ({
-        x: prev.x + deltaX,
-        y: prev.y + deltaY,
-      }));
-      setLastPanPoint({ x: e.clientX, y: e.clientY });
+   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isPanning) return;
+
+    const deltaX = e.clientX - lastPanPointRef.current.x;
+    const deltaY = e.clientY - lastPanPointRef.current.y;
+    lastPanPointRef.current = { x: e.clientX, y: e.clientY };
+
+    // Use requestAnimationFrame for smoother updates
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
     }
-  }, [isPanning, lastPanPoint]);
+    animationFrameRef.current = requestAnimationFrame(() => {
+      setPan(prev => {
+        const newPan = { x: prev.x + deltaX, y: prev.y + deltaY };
+        panRef.current = newPan;
+        return newPan;
+      });
+    });
+  }, [isPanning]);
 
   const handleMouseUp = useCallback(() => {
     setIsPanning(false);
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
   }, []);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -108,9 +128,9 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
       {/* Grid Background */}
       {board.settings.showGrid && (
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-30"
           style={{
-            backgroundImage: `radial-gradient(circle, #666 1px, transparent 1px)`,
+            backgroundImage: `radial-gradient(circle, #666 1px, transparent 2px)`,
             backgroundSize: `${gridSize}px ${gridSize}px`,
             backgroundPosition: `${gridOffsetX}px ${gridOffsetY}px`,
           }}

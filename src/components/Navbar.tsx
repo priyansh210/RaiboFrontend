@@ -250,7 +250,7 @@ const Navbar: React.FC = () => {
               <DropdownMenuTrigger className="focus:outline-none">
                 {isAuthenticated ? (
                   <Avatar className="h-8 w-8 cursor-pointer">
-                    <AvatarFallback className="bg-terracotta text-white">
+                    <AvatarFallback className="placeholder-white/80 text-white">
                       {getUserInitials()}
                     </AvatarFallback>
                   </Avatar>
@@ -295,6 +295,12 @@ const Navbar: React.FC = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/wishlist" className="cursor-pointer w-full">{t('wishlist')}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/raiboards" className="cursor-pointer w-full">{t('raiboards')}</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-rooms" className="cursor-pointer w-full">{t('my_rooms')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">

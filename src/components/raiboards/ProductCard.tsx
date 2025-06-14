@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { RaiBoardProduct } from '@/models/internal/RaiBoard';
 import { X } from 'lucide-react';
@@ -31,6 +30,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [localPosition, setLocalPosition] = useState(product.position);
   const cardRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>();
+
+  // Dynamic font size based on card height (min 12px, max 28px)
+  const baseHeight = 180; // base design height
+  const fontScale = product.size.height / baseHeight;
+  const nameFontSize = Math.max(12, Math.min(22, 14 * fontScale));
+  const priceFontSize = Math.max(12, Math.min(28, 16 * fontScale));
+  const categoryFontSize = Math.max(10, Math.min(18, 12 * fontScale));
+  const padding = Math.max(6, Math.round(12 * fontScale));
 
   // Update local position when product position changes
   useEffect(() => {
@@ -115,25 +122,62 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       onClick={handleClick}
     >
       {/* Product Card Content */}
-      <div className="w-full h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow">
+      <div
+        className="w-full h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow relative flex flex-col"
+        style={{ fontSize: nameFontSize }}
+      >
         {/* Product Image */}
-        <div className="w-full h-3/4 bg-gray-100 overflow-hidden">
+        <div className="w-full" style={{ height: `${Math.round(product.size.height * 0.6)}px`, background: "#f3f4f6" }}>
           <img
             src={product.productImage}
             alt={product.productName}
             className="w-full h-full object-cover"
             draggable={false}
+            style={{ borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
           />
         </div>
         
         {/* Product Info */}
-        <div className="p-2 h-1/4 flex flex-col justify-between">
-          <h4 className="font-medium text-sm text-gray-900 truncate">
+        <div
+          className="flex flex-col justify-between"
+          style={{
+            padding: `${padding}px`,
+            height: `${Math.round(product.size.height * 0.4)}px`,
+            background: "rgba(255,255,255,0.92)",
+            backdropFilter: "blur(2px)",
+          }}
+        >
+          <h4
+            className="font-medium truncate"
+            style={{
+              fontSize: nameFontSize,
+              lineHeight: 1.2,
+              marginBottom: 2,
+              color: "#22223b",
+            }}
+          >
             {product.productName}
           </h4>
-          <p className="text-sm font-semibold text-green-600">
-            ${product.productPrice.toFixed(2)}
-          </p>
+          <div className="flex items-center justify-between">
+            <span
+              className="font-semibold"
+              style={{
+                fontSize: priceFontSize,
+                color: "#16a34a",
+              }}
+            >
+              ${product.productPrice.toFixed(2)}
+            </span>
+            <span
+              className="text-gray-400"
+              style={{
+                fontSize: categoryFontSize,
+                marginLeft: 8,
+              }}
+            >
+              {"Product Category"} {/* Replace with actual category if available */}
+            </span>
+          </div>
         </div>
 
         {/* Remove Button - Only show when selected and can edit */}
@@ -143,6 +187,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             variant="destructive"
             className="absolute -top-2 -right-2 w-6 h-6 p-0 rounded-full"
             onClick={handleRemove}
+            style={{ fontSize: Math.max(10, nameFontSize * 0.8) }}
           >
             <X className="w-3 h-3" />
           </Button>
@@ -150,7 +195,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Drag Indicator */}
         {canEdit && (
-          <div className="absolute top-1 left-1 w-2 h-2 bg-gray-400 rounded-full opacity-50" />
+          <div
+            className="absolute top-1 left-1 rounded-full opacity-50"
+            style={{
+              width: Math.max(8, Math.round(12 * fontScale)),
+              height: Math.max(8, Math.round(12 * fontScale)),
+              background: "#60a5fa",
+            }}
+          />
         )}
       </div>
     </div>

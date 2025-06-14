@@ -31,7 +31,7 @@ const MyRooms = () => {
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
-      const response = await apiService.getUserRooms();
+      const response = await apiService.getDummyUserRooms();
       setRooms(response.rooms);
     } catch (error) {
       console.error('Failed to fetch rooms:', error);
@@ -57,7 +57,7 @@ const MyRooms = () => {
 
     try {
       const createdRoom = await apiService.createRoom(newRoom);
-      setRooms(prev => [...prev, createdRoom]);
+      setRooms(prev => [...prev, createdRoom as Room]);
       setIsCreateModalOpen(false);
       setNewRoom({ name: '', description: '', room_type: 'living_room' });
       

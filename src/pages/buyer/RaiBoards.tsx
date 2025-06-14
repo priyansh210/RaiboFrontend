@@ -34,6 +34,7 @@ const RaiBoards: React.FC = () => {
     try {
       setLoading(true);
       const userBoards = await raiBoardService.getUserBoards('user-1');
+      console.log('Loaded boards:', userBoards);
       setBoards(userBoards);
     } catch (error) {
       toast({
