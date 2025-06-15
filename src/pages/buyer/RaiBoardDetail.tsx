@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RaiBoardTextElement } from '@/models/internal/RaiBoard';
@@ -217,7 +218,7 @@ const RaiBoardDetailContent: React.FC = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col bg-background">
       <RaiBoardHeader
         boardName={state.board.name}
         boardDescription={state.board.description}
@@ -244,7 +245,7 @@ const RaiBoardDetailContent: React.FC = () => {
                 textElements: state.board.textElements.length
             }}
         />
-        <div className="flex-1 relative bg-gray-50">
+        <div className="flex-1 relative bg-background">
           <RaiBoardCanvas
             board={state.board}
             onProductMove={handleProductMove}

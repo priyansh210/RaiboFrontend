@@ -70,28 +70,28 @@ export const RaiBoardToolbar: React.FC<RaiBoardToolbarProps> = ({
 
   return (
     <TooltipProvider delayDuration={0}>
-        <div className={cn("bg-white border-r border-gray-200 flex flex-col h-full relative transition-all duration-300 ease-in-out", isCollapsed ? "w-20" : "w-64")}>
+        <div className={cn("bg-card border-r border-border flex flex-col h-full relative transition-all duration-300 ease-in-out", isCollapsed ? "w-20" : "w-64")}>
             
             <Button 
               variant="outline"
               size="icon" 
-              className="absolute -right-4 top-8 bg-white h-8 w-8 rounded-full z-10 hover:bg-gray-100"
+              className="absolute -right-4 top-8 bg-card h-8 w-8 rounded-full z-10 hover:bg-muted"
               onClick={() => setIsCollapsed(!isCollapsed)}
             >
                 {isCollapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
                 <span className="sr-only">Toggle Toolbar</span>
             </Button>
 
-            <div className={cn("p-4 border-b border-gray-100 h-[69px]")}>
+            <div className={cn("p-4 border-b border-border h-[69px]")}>
                 <div className={cn(isCollapsed && "hidden")}>
-                    <h3 className="font-semibold text-lg text-gray-900">Tools</h3>
-                    <p className="text-sm text-gray-600">Add elements</p>
+                    <h3 className="font-semibold text-lg text-foreground">Tools</h3>
+                    <p className="text-sm text-muted-foreground">Add elements</p>
                 </div>
             </div>
 
             <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4">
                 <div className="space-y-1">
-                    {!isCollapsed && <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wider px-3 pb-2">Add Elements</h4>}
+                    {!isCollapsed && <h4 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider px-3 pb-2">Add Elements</h4>}
                     <ToolbarButton label="Add Product" icon={Square} isCollapsed={isCollapsed} onClick={onAddProduct} disabled={!canEdit} />
                     <ToolbarButton label="Add Heading" icon={Heading} isCollapsed={isCollapsed} onClick={onAddHeading} disabled={!canEdit} />
                     <ToolbarButton label="Add Paragraph" icon={Type} isCollapsed={isCollapsed} onClick={onAddParagraph} disabled={!canEdit} />
@@ -101,21 +101,21 @@ export const RaiBoardToolbar: React.FC<RaiBoardToolbarProps> = ({
                 <Separator className={cn('my-4', isCollapsed && 'mx-auto w-1/2')} />
 
                 <div className="px-3 space-y-2">
-                    {!isCollapsed && <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wider pb-2">Board Stats</h4>}
+                    {!isCollapsed && <h4 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider pb-2">Board Stats</h4>}
                     <div className="text-sm space-y-2">
                         <div className="flex justify-between items-center h-8">
                             {isCollapsed ? 
-                                <Tooltip><TooltipTrigger><Square className="w-4 h-4 text-gray-600" /></TooltipTrigger><TooltipContent side="right" sideOffset={5}><p>Products</p></TooltipContent></Tooltip>
-                                : <span className="text-gray-600">Products</span>
+                                <Tooltip><TooltipTrigger><Square className="w-4 h-4 text-muted-foreground" /></TooltipTrigger><TooltipContent side="right" sideOffset={5}><p>Products</p></TooltipContent></Tooltip>
+                                : <span className="text-muted-foreground">Products</span>
                             }
-                            <span className="font-medium bg-gray-100 rounded px-1.5 py-0.5 text-xs">{boardStats.products}</span>
+                            <span className="font-medium bg-muted text-foreground rounded px-1.5 py-0.5 text-xs">{boardStats.products}</span>
                         </div>
                         <div className="flex justify-between items-center h-8">
                             {isCollapsed ? 
-                                <Tooltip><TooltipTrigger><Type className="w-4 h-4 text-gray-600" /></TooltipTrigger><TooltipContent side="right" sideOffset={5}><p>Text Elements</p></TooltipContent></Tooltip>
-                                : <span className="text-gray-600">Text Elements</span>
+                                <Tooltip><TooltipTrigger><Type className="w-4 h-4 text-muted-foreground" /></TooltipTrigger><TooltipContent side="right" sideOffset={5}><p>Text Elements</p></TooltipContent></Tooltip>
+                                : <span className="text-muted-foreground">Text Elements</span>
                             }
-                            <span className="font-medium bg-gray-100 rounded px-1.5 py-0.5 text-xs">{boardStats.textElements}</span>
+                            <span className="font-medium bg-muted text-foreground rounded px-1.5 py-0.5 text-xs">{boardStats.textElements}</span>
                         </div>
                     </div>
                 </div>
@@ -123,17 +123,17 @@ export const RaiBoardToolbar: React.FC<RaiBoardToolbarProps> = ({
                 <Separator className={cn('my-4', isCollapsed && 'mx-auto w-1/2')} />
                 
                 <div className="space-y-1">
-                    {!isCollapsed && <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wider px-3 pb-2">Quick Actions</h4>}
+                    {!isCollapsed && <h4 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider px-3 pb-2">Quick Actions</h4>}
                     <ToolbarButton label="Change Theme" icon={Palette} isCollapsed={isCollapsed} disabled={!canEdit} />
                     <ToolbarButton label="Reset View" icon={RotateCcw} isCollapsed={isCollapsed} disabled={!canEdit} />
                 </div>
             </div>
 
             {!isCollapsed && (
-              <div className="mt-auto p-4 border-t border-gray-100">
-                <div className="bg-blue-50 rounded-lg p-3">
-                  <h4 className="text-sm font-medium text-blue-900 mb-1">Quick Tips</h4>
-                  <ul className="text-xs text-blue-700 space-y-1">
+              <div className="mt-auto p-4 border-t border-border">
+                <div className="bg-primary/10 rounded-lg p-3">
+                  <h4 className="text-sm font-medium text-primary mb-1">Quick Tips</h4>
+                  <ul className="text-xs text-primary/80 space-y-1">
                     <li>• Double-click text to edit</li>
                     <li>• Drag to move elements</li>
                     <li>• Use corner handles to resize</li>
