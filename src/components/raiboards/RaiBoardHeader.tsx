@@ -30,7 +30,7 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
   collaboratorCount,
 }) => {
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+    <div className="bg-card text-card-foreground border-b border-border px-4 py-3 flex items-center justify-between">
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
@@ -48,7 +48,7 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
             )}
           </div>
           {boardDescription && (
-            <p className="text-sm text-gray-600">{boardDescription}</p>
+            <p className="text-sm text-muted-foreground">{boardDescription}</p>
           )}
         </div>
         

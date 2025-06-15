@@ -63,7 +63,7 @@ export const ProductSearchDialog: React.FC<ProductSearchDialogProps> = ({
         
         <div className="space-y-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               placeholder="Search for products..."
               value={searchTerm}
@@ -76,7 +76,7 @@ export const ProductSearchDialog: React.FC<ProductSearchDialogProps> = ({
             {searchResults.map((product) => (
               <div
                 key={product.id}
-                className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-muted cursor-pointer"
                 onClick={() => handleAddProduct(product)}
               >
                 <img
@@ -85,15 +85,15 @@ export const ProductSearchDialog: React.FC<ProductSearchDialogProps> = ({
                   className="w-12 h-12 object-cover rounded"
                 />
                 <div className="flex-1">
-                  <h4 className="font-medium">{product.name}</h4>
-                  <p className="text-sm text-gray-600">${product.price.toFixed(2)}</p>
+                  <h4 className="font-medium text-card-foreground">{product.name}</h4>
+                  <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
                 </div>
                 <Button size="sm">Add</Button>
               </div>
             ))}
             
             {searchTerm && searchResults.length === 0 && (
-              <p className="text-center text-gray-500 py-8">
+              <p className="text-center text-muted-foreground py-8">
                 No products found for "{searchTerm}"
               </p>
             )}

@@ -28,7 +28,7 @@ export const SaveConfirmationDialog: React.FC<SaveConfirmationDialogProps> = ({
         </DialogHeader>
         
         <div className="py-4">
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             You have unsaved changes. What would you like to do?
           </p>
         </div>
