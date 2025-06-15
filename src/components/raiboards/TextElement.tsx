@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { CanvasItem } from './CanvasItem';
@@ -67,7 +66,7 @@ export const TextElement: React.FC<TextElementProps> = ({
       className="group"
     >
       {isEditing ? (
-        <div className="w-full h-full bg-white rounded-lg shadow-lg border-2 border-blue-500 p-3">
+        <div className="w-full h-full bg-card rounded-lg shadow-lg border-2 border-blue-500 p-3">
           {element.type === 'heading' ? (
             <Input
               value={editContent}
@@ -92,7 +91,7 @@ export const TextElement: React.FC<TextElementProps> = ({
           </div>
         </div>
       ) : (
-        <div className="w-full h-full bg-white/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 p-3 overflow-hidden group-hover:shadow-md transition-shadow duration-200">
+        <div className="w-full h-full bg-card/95 backdrop-blur-sm rounded-lg shadow-sm border border-border p-3 overflow-hidden group-hover:shadow-md transition-shadow duration-200">
           {element.type === 'heading' ? (
             <h2
               style={{

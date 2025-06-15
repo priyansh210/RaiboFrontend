@@ -42,32 +42,32 @@ const BuyerNavbar = () => {
       <div className="container-custom">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="font-playfair text-2xl text-charcoal">
+          <Link to="/" className="font-playfair text-2xl text-foreground">
             RAIBO
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/browse/all" className="text-earth hover:text-charcoal transition-colors">
+            <Link to="/browse/all" className="text-muted-foreground hover:text-foreground transition-colors">
               All Products
             </Link>
-            <Link to="/browse/living-room" className="text-earth hover:text-charcoal transition-colors">
+            <Link to="/browse/living-room" className="text-muted-foreground hover:text-foreground transition-colors">
               Living Room
             </Link>
-            <Link to="/browse/bedroom" className="text-earth hover:text-charcoal transition-colors">
+            <Link to="/browse/bedroom" className="text-muted-foreground hover:text-foreground transition-colors">
               Bedroom
             </Link>
-            <Link to="/browse/dining" className="text-earth hover:text-charcoal transition-colors">
+            <Link to="/browse/dining" className="text-muted-foreground hover:text-foreground transition-colors">
               Dining
             </Link>
-            <Link to="/browse/office" className="text-earth hover:text-charcoal transition-colors">
+            <Link to="/browse/office" className="text-muted-foreground hover:text-foreground transition-colors">
               Office
             </Link>
-            <Link to="/raiboards" className="text-earth hover:text-charcoal transition-colors flex items-center gap-1">
+            <Link to="/raiboards" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
               <Grid3X3 size={16} />
               RaiBoards
             </Link>
-            <Link to="/search" className="text-earth hover:text-charcoal transition-colors">
+            <Link to="/search" className="text-muted-foreground hover:text-foreground transition-colors">
               <Search size={20} />
             </Link>
           </div>
@@ -75,17 +75,17 @@ const BuyerNavbar = () => {
           {/* User Actions */}
           <div className="flex items-center space-x-4">
             {/* Wishlist */}
-            <Link to="/wishlist" className="text-earth hover:text-charcoal transition-colors">
+            <Link to="/wishlist" className="text-muted-foreground hover:text-foreground transition-colors">
               <Heart size={20} />
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="relative text-earth hover:text-charcoal transition-colors">
+            <Link to="/cart" className="relative text-muted-foreground hover:text-foreground transition-colors">
               <ShoppingCart size={20} />
               {cartItemCount > 0 && (
                 <Badge 
                   variant="secondary" 
-                  className="absolute -top-2 -right-2 bg-terracotta text-white text-xs h-5 w-5 flex items-center justify-center rounded-full"
+                  className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs h-5 w-5 flex items-center justify-center rounded-full"
                 >
                   {cartItemCount}
                 </Badge>
@@ -96,7 +96,7 @@ const BuyerNavbar = () => {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-earth hover:text-charcoal">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                     <User size={20} className="mr-2" />
                     <span className="hidden sm:inline">
                       {user?.firstName || 'Account'}
@@ -126,12 +126,12 @@ const BuyerNavbar = () => {
             ) : (
               <div className="flex items-center space-x-2">
                 <Link to="/login">
-                  <Button variant="ghost" size="sm" className="text-earth hover:text-charcoal">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/register">
-                  <Button size="sm" className="bg-terracotta hover:bg-umber text-white">
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     Sign Up
                   </Button>
                 </Link>
@@ -156,49 +156,49 @@ const BuyerNavbar = () => {
             <div className="space-y-2">
               <Link 
                 to="/browse/all" 
-                className="block px-4 py-2 text-earth hover:text-charcoal hover:bg-sand/20 transition-colors"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 All Products
               </Link>
               <Link 
                 to="/browse/living-room" 
-                className="block px-4 py-2 text-earth hover:text-charcoal hover:bg-sand/20 transition-colors"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Living Room
               </Link>
               <Link 
                 to="/browse/bedroom" 
-                className="block px-4 py-2 text-earth hover:text-charcoal hover:bg-sand/20 transition-colors"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Bedroom
               </Link>
               <Link 
                 to="/browse/dining" 
-                className="block px-4 py-2 text-earth hover:text-charcoal hover:bg-sand/20 transition-colors"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Dining
               </Link>
               <Link 
                 to="/browse/office" 
-                className="block px-4 py-2 text-earth hover:text-charcoal hover:bg-sand/20 transition-colors"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Office
               </Link>
               <Link 
                 to="/raiboards" 
-                className="block px-4 py-2 text-earth hover:text-charcoal hover:bg-sand/20 transition-colors"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 RaiBoards
               </Link>
               <Link 
                 to="/search" 
-                className="block px-4 py-2 text-earth hover:text-charcoal hover:bg-sand/20 transition-colors"
+                className="block px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Search

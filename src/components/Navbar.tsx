@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User } from 'lucide-react';
@@ -165,14 +164,14 @@ const Navbar: React.FC = () => {
               placeholder={isSeller ? "Search products, orders..." : t('searchForFurniture')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full rounded-md border-none pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-terracotta/50 ${
-                isScrolled ? 'bg-white text-charcoal placeholder-gray-500' : 'bg-terracotta/90 text-white placeholder-white/80'
+              className={`w-full rounded-md border-none pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-ring ${
+                isScrolled ? 'bg-background text-foreground placeholder:text-muted-foreground' : 'bg-terracotta/90 text-white placeholder-white/80'
               }`}
             />
             <button 
               type="submit"
-              className={`absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-terracotta transition-colors ${
-                isScrolled ? 'text-gray-500' : 'text-white/80'
+              className={`absolute right-3 top-1/2 transform -translate-y-1/2 hover:text-primary transition-colors ${
+                isScrolled ? 'text-muted-foreground' : 'text-white/80'
               }`}
             >
               <Search size={18} />
@@ -189,7 +188,7 @@ const Navbar: React.FC = () => {
               <>
                 <Link 
                   to="/seller/dashboard" 
-                  className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                  className={`flex items-center space-x-1 ${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
                 >
                   <BarChart3 size={16} />
                   <span>{t('dashboard')}</span>
@@ -197,7 +196,7 @@ const Navbar: React.FC = () => {
                 
                 <Link 
                   to="/seller/products" 
-                  className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                  className={`flex items-center space-x-1 ${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
                 >
                   <Package size={16} />
                   <span>{t('products')}</span>
@@ -205,7 +204,7 @@ const Navbar: React.FC = () => {
                 
                 <Link 
                   to="/seller/payments" 
-                  className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                  className={`flex items-center space-x-1 ${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
                 >
                   <CreditCard size={16} />
                   <span>{t('payments')}</span>
@@ -213,7 +212,7 @@ const Navbar: React.FC = () => {
                 
                 <Link 
                   to="/seller/logistics" 
-                  className={`flex items-center space-x-1 ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                  className={`flex items-center space-x-1 ${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
                 >
                   <Truck size={16} />
                   <span>{t('logistics')}</span>
@@ -222,7 +221,7 @@ const Navbar: React.FC = () => {
             ) : (
               <Link 
                 to="/for-you" 
-                className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                className={`${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
                 onClick={(e) => {
                   if (isGuest) {
                     e.preventDefault();
@@ -256,7 +255,7 @@ const Navbar: React.FC = () => {
                   </Avatar>
                 ) : (
                   <button 
-                    className={`flex items-center ${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors`}
+                    className={`flex items-center ${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
                   >
                     <User size={16} className="mr-1" />
                     {t('account')} <ChevronDown size={16} className="ml-1" />
@@ -332,7 +331,7 @@ const Navbar: React.FC = () => {
             {!isSeller && (
               <Link 
                 to="/cart" 
-                className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors relative`}
+                className={`${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors relative`}
                 onClick={(e) => {
                   if (isGuest && cartItems.length === 0) {
                     e.preventDefault();
@@ -359,7 +358,7 @@ const Navbar: React.FC = () => {
             {!isSeller && (
               <Link 
                 to="/cart" 
-                className={`${isScrolled ? 'text-charcoal' : 'text-white'} hover:text-terracotta/80 transition-colors relative mr-4`}
+                className={`${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors relative mr-4`}
               >
                 <ShoppingCart size={20} />
                 {cartItems.length > 0 && (
@@ -370,15 +369,11 @@ const Navbar: React.FC = () => {
               </Link>
             )}
             <button 
-              className="text-white p-1"
+              className={`${isScrolled ? 'text-foreground' : 'text-white'} p-1`}
               onClick={toggleMenu}
               aria-label="Toggle menu"
             >
-              {isMenuOpen ? (
-                <X size={24} color={isScrolled ? '#373737' : 'white'} />
-              ) : (
-                <Menu size={24} color={isScrolled ? '#373737' : 'white'} />
-              )}
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -386,14 +381,14 @@ const Navbar: React.FC = () => {
 
       {/* Categories Navigation for desktop - only show for non-sellers */}
       {!isSeller && (
-        <nav className={`bg-linen hidden md:block border-t border-taupe/20 transition-all ${isScrolled ? 'py-2' : 'py-3'}`}>
+        <nav className={`bg-secondary hidden md:block border-t border-border transition-all ${isScrolled ? 'py-2' : 'py-3'}`}>
           <div className="container-custom">
             <ul className="flex items-center justify-between flex-wrap">
               {categories.map((category) => (
                 <li key={category.name}>
                   <Link 
                     to={category.path} 
-                    className="text-charcoal text-xs hover:text-terracotta transition-colors"
+                    className="text-foreground text-xs hover:text-primary transition-colors"
                   >
                     {category.name}
                   </Link>
@@ -406,7 +401,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       <div 
-        className={`md:hidden fixed inset-0 bg-white z-40 transition-transform duration-300 ease-in-out ${
+        className={`md:hidden fixed inset-0 bg-background z-40 transition-transform duration-300 ease-in-out ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -419,11 +414,11 @@ const Navbar: React.FC = () => {
                 placeholder={isSeller ? "Search products, orders..." : t('searchForFurniture')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-md border border-gray-200 bg-white pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-terracotta/50"
+                className="w-full rounded-md border bg-background pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <button 
                 type="submit"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-terracotta"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-primary"
               >
                 <Search size={18} />
               </button>
@@ -432,40 +427,40 @@ const Navbar: React.FC = () => {
           
           <div className="space-y-6">
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-gray-500">Account</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground">Account</h3>
               <ul className="space-y-3">
                 {isAuthenticated ? (
                   <>
                     <li className="flex items-center space-x-2">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-terracotta text-white">
+                        <AvatarFallback className="bg-primary text-primary-foreground">
                           {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-charcoal">{user?.firstName} {user?.lastName}</span>
+                      <span className="text-foreground">{user?.firstName} {user?.lastName}</span>
                     </li>
                     {isSeller ? (
                       <>
                         <li>
-                          <Link to="/seller/dashboard" className="text-charcoal hover:text-terracotta flex items-center">
+                          <Link to="/seller/dashboard" className="text-foreground hover:text-primary flex items-center">
                             <BarChart3 size={16} className="mr-2" />
                             Dashboard
                           </Link>
                         </li>
                         <li>
-                          <Link to="/seller/products" className="text-charcoal hover:text-terracotta flex items-center">
+                          <Link to="/seller/products" className="text-foreground hover:text-primary flex items-center">
                             <Package size={16} className="mr-2" />
                             Products
                           </Link>
                         </li>
                         <li>
-                          <Link to="/seller/payments" className="text-charcoal hover:text-terracotta flex items-center">
+                          <Link to="/seller/payments" className="text-foreground hover:text-primary flex items-center">
                             <CreditCard size={16} className="mr-2" />
                             Payments
                           </Link>
                         </li>
                         <li>
-                          <Link to="/seller/logistics" className="text-charcoal hover:text-terracotta flex items-center">
+                          <Link to="/seller/logistics" className="text-foreground hover:text-primary flex items-center">
                             <Truck size={16} className="mr-2" />
                             Logistics
                           </Link>
@@ -474,12 +469,12 @@ const Navbar: React.FC = () => {
                     ) : (
                       <>
                         <li>
-                          <Link to="/account" className="text-charcoal hover:text-terracotta">
+                          <Link to="/account" className="text-foreground hover:text-primary">
                             My Account
                           </Link>
                         </li>
                         <li>
-                          <Link to="/for-you" className="text-charcoal hover:text-terracotta">
+                          <Link to="/for-you" className="text-foreground hover:text-primary">
                             For You
                           </Link>
                         </li>
@@ -488,7 +483,7 @@ const Navbar: React.FC = () => {
                     <li>
                       <button 
                         onClick={handleLogout}
-                        className="text-charcoal hover:text-terracotta flex items-center"
+                        className="text-foreground hover:text-primary flex items-center"
                       >
                         <LogOut size={16} className="mr-2" />
                         Sign Out
@@ -498,22 +493,22 @@ const Navbar: React.FC = () => {
                 ) : (
                   <>
                     <li>
-                      <Link to="/login" className="text-charcoal hover:text-terracotta">
+                      <Link to="/login" className="text-foreground hover:text-primary">
                         Sign In
                       </Link>
                     </li>
                     <li>
-                      <Link to="/register" className="text-charcoal hover:text-terracotta">
+                      <Link to="/register" className="text-foreground hover:text-primary">
                         Register
                       </Link>
                     </li>
                     <li>
-                      <Link to="/seller/login" className="text-charcoal hover:text-terracotta">
+                      <Link to="/seller/login" className="text-foreground hover:text-primary">
                         Seller Sign In
                       </Link>
                     </li>
                     <li>
-                      <Link to="/seller/register" className="text-charcoal hover:text-terracotta">
+                      <Link to="/seller/register" className="text-foreground hover:text-primary">
                         Seller Register
                       </Link>
                     </li>
@@ -521,7 +516,7 @@ const Navbar: React.FC = () => {
                 )}
                 {!isSeller && (
                   <li>
-                    <Link to="/cart" className="text-charcoal hover:text-terracotta flex items-center">
+                    <Link to="/cart" className="text-foreground hover:text-primary flex items-center">
                       <ShoppingCart size={18} className="mr-2" />
                       Cart ({cartItems.length})
                     </Link>
@@ -533,10 +528,10 @@ const Navbar: React.FC = () => {
             {!isSeller && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-semibold text-gray-500">Categories</h3>
+                  <h3 className="text-sm font-semibold text-muted-foreground">Categories</h3>
                   <button 
                     onClick={toggleCategories}
-                    className="text-charcoal p-1"
+                    className="text-foreground p-1"
                   >
                     {isCategoriesOpen ? (
                       <ChevronDown size={18} className="transform rotate-180" />
@@ -552,7 +547,7 @@ const Navbar: React.FC = () => {
                       <li key={category.name}>
                         <Link 
                           to={category.path} 
-                          className="text-charcoal hover:text-terracotta"
+                          className="text-foreground hover:text-primary"
                         >
                           {category.name}
                         </Link>
