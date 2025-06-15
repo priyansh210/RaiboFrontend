@@ -123,15 +123,15 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   const gridOffsetY = (pan.y % gridSize);
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-background to-secondary">
       {/* Enhanced Grid Background */}
       {board.settings.showGrid && (
         <div
           className="absolute inset-0 opacity-20"
           style={{
             backgroundImage: `
-              linear-gradient(to right, #e5e7eb 1px, transparent 1px),
-              linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
+              linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)
             `,
             backgroundSize: `${gridSize}px ${gridSize}px`,
             backgroundPosition: `${gridOffsetX}px ${gridOffsetY}px`,

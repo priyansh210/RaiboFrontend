@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -188,7 +187,7 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
     <div
       ref={itemRef}
       className={`absolute select-none cursor-pointer transition-all duration-150 ${
-        isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+        isSelected ? 'ring-2 ring-primary ring-offset-2' : ''
       } ${isDragging || isResizing ? 'opacity-80 z-50' : ''} ${className}`}
       style={{
         transform: `translate(${localPosition.x}px, ${localPosition.y}px)`,
@@ -218,14 +217,14 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
       {/* Resize Handle */}
       {isSelected && canEdit && resizable && onResize && (
         <div
-          className="absolute bottom-0 right-0 w-3 h-3 bg-blue-500 cursor-se-resize rounded-tl-md shadow-sm hover:bg-blue-600 transition-colors"
+          className="absolute bottom-0 right-0 w-3 h-3 bg-primary cursor-se-resize rounded-tl-md shadow-sm hover:bg-primary/90 transition-colors"
           onMouseDown={handleResizeMouseDown}
         />
       )}
 
       {/* Drag Indicator */}
       {canEdit && !isDragging && !isResizing && (
-        <div className="absolute top-1 left-1 w-3 h-3 bg-blue-400 rounded-full opacity-60" />
+        <div className="absolute top-1 left-1 w-3 h-3 bg-primary/70 rounded-full opacity-60" />
       )}
     </div>
   );

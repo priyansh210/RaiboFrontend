@@ -55,7 +55,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       resizable={true}
     >
       <div
-        className="w-full h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-200 group-hover:scale-[1.02]"
+        className="w-full h-full bg-card rounded-lg shadow-lg border overflow-hidden hover:shadow-xl transition-all duration-200 group-hover:scale-[1.02]"
         style={{ fontSize: nameFontSize }}
       >
         {/* Product Image */}
@@ -71,14 +71,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         
         {/* Product Info */}
         <div
-          className="flex flex-col justify-between bg-white"
+          className="flex flex-col justify-between bg-card"
           style={{
             padding: `${padding}px`,
             height: `${Math.round(product.size.height * 0.4)}px`,
           }}
         >
           <h4
-            className="font-medium truncate text-gray-800"
+            className="font-medium truncate text-card-foreground"
             style={{
               fontSize: nameFontSize,
               lineHeight: 1.2,
@@ -89,7 +89,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </h4>
           <div className="flex items-center justify-between">
             <span
-              className="font-semibold text-green-600"
+              className="font-semibold text-green-600 dark:text-green-400"
               style={{ fontSize: priceFontSize }}
             >
               ${product.productPrice.toFixed(2)}
