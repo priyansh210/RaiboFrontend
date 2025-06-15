@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Settings, Save, Users } from 'lucide-react';
+import { ArrowLeft, Save, Users } from 'lucide-react';
 
 interface RaiBoardHeaderProps {
   boardName: string;
@@ -14,7 +14,6 @@ interface RaiBoardHeaderProps {
   onNavigateBack: () => void;
   onSave: () => void;
   onShare: () => void;
-  onSettings?: () => void;
 }
 
 export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
@@ -27,7 +26,6 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
   onNavigateBack,
   onSave,
   onShare,
-  onSettings,
 }) => {
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
@@ -71,10 +69,6 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
         <Button variant="outline" size="sm" onClick={onShare}>
           <Users className="w-4 h-4 mr-2" />
           Share
-        </Button>
-        
-        <Button variant="outline" size="sm">
-            <Settings className="w-4 h-4" />
         </Button>
       </div>
     </div>
