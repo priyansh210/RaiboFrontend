@@ -6,12 +6,14 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { Heart, MessageSquare, Plus, Share } from 'lucide-react';
 import AddProductDialog from './AddProductDialog';
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+
 interface InstagramStylePostProps {
   product: Product;
   onLike: (productId: string) => void;
   onShare: (productId: string) => void;
   onComment: (productId: string) => void;
 }
+
 const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
   product,
   onLike,
@@ -22,6 +24,7 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
   const [lastTap, setLastTap] = useState(0);
   const [showLikeAnimation, setShowLikeAnimation] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+
   const handleDoubleClick = () => {
     // Only trigger like if the user hasn't liked it yet
     if (!product.interactions?.userHasLiked) {
@@ -30,6 +33,7 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
     setShowLikeAnimation(true);
     setTimeout(() => setShowLikeAnimation(false), 1000);
   };
+
   const handleTouchEnd = (e: React.TouchEvent) => {
     // This handler is for detecting double-taps on touch devices
     const currentTime = new Date().getTime();
@@ -40,9 +44,11 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
     }
     setLastTap(currentTime);
   };
+
   const handleAddClick = () => {
     setShowAddDialog(true);
   };
+
   return <>
       <div className="relative w-full h-full bg-black overflow-hidden">
         {/* Full Screen Image Carousel */}
@@ -51,11 +57,23 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
             <CarouselContent className="h-full -ml-0">
               {product.images && product.images.length > 0 ? product.images.map((image, index) => <CarouselItem key={index} className="h-full pl-0">
                   <div className="h-full w-full">
-                    <img src={image} alt={`${product.name} ${index + 1}`} draggable={false} className="w-full h-full object-center object-contain" />
+                    <img 
+                      src={image} 
+                      alt={`${product.name} ${index + 1}`} 
+                      draggable={false} 
+                      className="w-full h-full object-cover" 
+                      style={{ objectPosition: 'center' }}
+                    />
                   </div>
                 </CarouselItem>) : <CarouselItem className="h-full pl-0">
                   <div className="h-full w-full">
-                    <img src={'https://picsum.photos/400/600'} alt={product.name} className="w-full h-full object-cover object-center" draggable={false} />
+                    <img 
+                      src={'https://picsum.photos/400/600'} 
+                      alt={product.name} 
+                      className="w-full h-full object-cover" 
+                      draggable={false} 
+                      style={{ objectPosition: 'center' }}
+                    />
                   </div>
                 </CarouselItem>}
             </CarouselContent>
@@ -192,4 +210,5 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
       <AddProductDialog isOpen={showAddDialog} onClose={() => setShowAddDialog(false)} product={product} />
     </>;
 };
+
 export default InstagramStylePost;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
@@ -11,6 +12,7 @@ import { useIsMobile } from '../../hooks/use-mobile';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import InstagramStylePost from '../../components/InstagramStylePost';
+import Navbar from '../../components/Navbar';
 
 const ForYou = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -204,11 +206,12 @@ const ForYou = () => {
   if (isMobile) {
     return (
       <>
-        {/* Mobile Reels View - No Layout wrapper for full screen */}
-        <div className="fixed inset-0 w-full h-full bg-black overflow-hidden">
-          <div className="h-full w-full overflow-y-auto snap-y snap-mandatory">
+        {/* Mobile Reels View with Navbar */}
+        <div className="fixed inset-0 w-full h-full bg-black">
+          <Navbar />
+          <div className="pt-16 h-full w-full overflow-y-auto snap-y snap-mandatory">
             {products.map((product) => (
-              <div key={product.id} className="h-screen w-full snap-start">
+              <div key={product.id} className="h-[calc(100vh-4rem)] w-full snap-start">
                 <InstagramStylePost
                   product={product}
                   onLike={handleLike}
