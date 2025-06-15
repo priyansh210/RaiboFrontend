@@ -15,10 +15,6 @@ interface AddToRoomModalProps {
   productName: string;
 }
 
-interface GetUserRoomsResponse {
-  rooms: Room[];
-}
-
 const AddToRoomModal: React.FC<AddToRoomModalProps> = ({
   isOpen,
   onClose,
@@ -38,8 +34,21 @@ const AddToRoomModal: React.FC<AddToRoomModalProps> = ({
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
-      const response = await apiService.getUserRooms() as GetUserRoomsResponse;
-      setRooms(response.rooms);
+      const response: any = await apiService.getUserRooms();
+      if (response && Array.isArray(response.rooms)) {
+        const mappedRooms: Room[] = response.rooms.map((apiRoom: any) => ({
+          id: apiRoom._id,
+          name: apiRoom.name,
+          description: apiRoom.description,
+          room_type: apiRoom.room_type,
+          items: apiRoom.products || [],
+          created_at: apiRoom.created_at || new Date().toISOString(),
+          updated_at: apiRoom.updated_at || new Date().toISOString(),
+        }));
+        setRooms(mappedRooms);
+      } else {
+        setRooms([]);
+      }
     } catch (error) {
       console.error('Failed to fetch rooms:', error);
       toast({
@@ -80,7 +89,7 @@ const AddToRoomModal: React.FC<AddToRoomModalProps> = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Add to Room</DialogTitle>
-          <p className="text-sm text-earth">Choose a room to add "{productName}"</p>
+          <p className="text-sm text-muted-foreground dark:text-gray-400">Choose a room to add "{productName}"</p>
         </DialogHeader>
         
         <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -91,21 +100,21 @@ const AddToRoomModal: React.FC<AddToRoomModalProps> = ({
           ) : rooms.length === 0 ? (
             <div className="text-center py-8">
               <Home size={32} className="mx-auto text-gray-400 mb-2" />
-              <p className="text-earth text-sm">No rooms found</p>
+              <p className="text-muted-foreground text-sm">No rooms found</p>
               <p className="text-xs text-gray-500 mt-1">Create a room first to add items</p>
             </div>
           ) : (
             rooms.map((room) => (
               <Card 
                 key={room.id} 
-                className="cursor-pointer hover:shadow-md transition-shadow"
+                className="cursor-pointer hover:shadow-md transition-shadow dark:bg-gray-800"
                 onClick={() => handleAddToRoom(room.id)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-medium text-charcoal">{room.name}</h3>
-                      <p className="text-sm text-earth capitalize">
+                      <h3 className="font-medium text-foreground">{room.name}</h3>
+                      <p className="text-sm text-muted-foreground capitalize">
                         {room.room_type.replace('_', ' ')} • {room.items.length} items
                       </p>
                     </div>
