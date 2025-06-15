@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
@@ -204,24 +203,24 @@ const ForYou = () => {
 
   if (isMobile) {
     return (
-      <Layout>
-        {/* Negative margins to break out of layout padding for a full-screen feel */}
-        <div className="h-full -mx-4 sm:-mx-6 lg:-mx-8 -my-8">
+      <>
+        {/* Mobile Reels View - No Layout wrapper for full screen */}
+        <div className="fixed inset-0 w-full h-full bg-black overflow-hidden">
           <div className="h-full w-full overflow-y-auto snap-y snap-mandatory">
             {products.map((product) => (
-              <div key={product.id} className="h-full w-full snap-start flex items-center justify-center bg-black">
-                <div className="w-full h-full">
-                  <InstagramStylePost
-                    product={product}
-                    onLike={handleLike}
-                    onShare={handleShare}
-                    onComment={handleComment}
-                  />
-                </div>
+              <div key={product.id} className="h-screen w-full snap-start">
+                <InstagramStylePost
+                  product={product}
+                  onLike={handleLike}
+                  onShare={handleShare}
+                  onComment={handleComment}
+                />
               </div>
             ))}
           </div>
         </div>
+        
+        {/* Comments Modal */}
         {commentsModal.isOpen && (
           <CommentsModal
             isOpen={commentsModal.isOpen}
@@ -233,7 +232,7 @@ const ForYou = () => {
             productName={commentsModal.productName}
           />
         )}
-      </Layout>
+      </>
     );
   }
 
