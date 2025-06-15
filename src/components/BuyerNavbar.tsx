@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, Heart, Search, Menu, X, Grid3X3 } from 'lucide-react';
@@ -30,7 +29,7 @@ const BuyerNavbar = () => {
 
   const buyerMenuItems = [
     { label: 'My Account', path: '/account' },
-    { label: 'Order History', path: '/orders' },
+    { label: 'Order History', path: '/my-orders' },
     { label: 'Wishlist', path: '/wishlist' },
     { label: 'Addresses', path: '/addresses' },
     { label: 'Payment Methods', path: '/payment-methods' },

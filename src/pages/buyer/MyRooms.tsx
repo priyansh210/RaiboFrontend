@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
@@ -97,10 +96,10 @@ const MyRooms = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta mb-4"></div>
-            <h2 className="text-xl text-charcoal">Loading rooms...</h2>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+            <h2 className="text-xl text-foreground">Loading rooms...</h2>
           </div>
         </div>
       </Layout>
@@ -109,18 +108,18 @@ const MyRooms = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 py-6 md:py-10">
+      <div className="min-h-screen bg-background py-6 md:py-10">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-charcoal mb-2">My Rooms</h1>
-              <p className="text-earth">Organize your favorite products by room</p>
+              <h1 className="text-3xl font-bold text-foreground mb-2">My Rooms</h1>
+              <p className="text-muted-foreground">Organize your favorite products by room</p>
             </div>
             
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-terracotta hover:bg-umber text-white">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   <Plus size={20} className="mr-2" />
                   Create Room
                 </Button>
@@ -173,7 +172,7 @@ const MyRooms = () => {
                   <div className="flex gap-2">
                     <Button 
                       onClick={handleCreateRoom}
-                      className="flex-1 bg-terracotta hover:bg-umber text-white"
+                      className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                       Create Room
                     </Button>
@@ -194,12 +193,12 @@ const MyRooms = () => {
           {rooms.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
-                <Home size={48} className="mx-auto text-gray-400 mb-4" />
-                <h3 className="text-xl font-medium text-charcoal mb-2">No rooms yet</h3>
-                <p className="text-earth mb-6">Create your first room to start organizing your favorite products</p>
+                <Home size={48} className="mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-xl font-medium text-foreground mb-2">No rooms yet</h3>
+                <p className="text-muted-foreground mb-6">Create your first room to start organizing your favorite products</p>
                 <Button 
                   onClick={() => setIsCreateModalOpen(true)}
-                  className="bg-terracotta hover:bg-umber text-white"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   <Plus size={20} className="mr-2" />
                   Create Your First Room
@@ -213,8 +212,8 @@ const MyRooms = () => {
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-lg text-charcoal">{room.name}</CardTitle>
-                        <p className="text-sm text-earth capitalize">{room.room_type.replace('_', ' ')}</p>
+                        <CardTitle className="text-lg text-foreground">{room.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground capitalize">{room.room_type.replace('_', ' ')}</p>
                       </div>
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
@@ -231,7 +230,7 @@ const MyRooms = () => {
                       </div>
                     </div>
                     {room.description && (
-                      <p className="text-sm text-earth mt-2">{room.description}</p>
+                      <p className="text-sm text-muted-foreground mt-2">{room.description}</p>
                     )}
                   </CardHeader>
                   
@@ -239,7 +238,7 @@ const MyRooms = () => {
                     <div className="space-y-4">
                       {/* Room Items Preview */}
                       <div>
-                        <p className="text-sm font-medium text-charcoal mb-2">
+                        <p className="text-sm font-medium text-foreground mb-2">
                           {room.items.length} items
                         </p>
                         {room.items.length > 0 ? (
@@ -249,18 +248,18 @@ const MyRooms = () => {
                                 key={item.id}
                                 src={item.image}
                                 alt={item.name}
-                                className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                                className="w-8 h-8 rounded-full border-2 border-background object-cover"
                                 style={{ zIndex: 10 - index }}
                               />
                             ))}
                             {room.items.length > 4 && (
-                              <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-600">
+                              <div className="w-8 h-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs font-medium text-muted-foreground">
                                 +{room.items.length - 4}
                               </div>
                             )}
                           </div>
                         ) : (
-                          <p className="text-xs text-gray-500">No items added yet</p>
+                          <p className="text-xs text-muted-foreground">No items added yet</p>
                         )}
                       </div>
                       
@@ -268,7 +267,7 @@ const MyRooms = () => {
                         to={`/room/${room.id}`}
                         className="block w-full"
                       >
-                        <Button className="w-full bg-terracotta hover:bg-umber text-white">
+                        <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                           View Room
                         </Button>
                       </Link>
