@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -51,18 +52,29 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
   const [isResizing, setIsResizing] = useState(false);
   const [localPosition, setLocalPosition] = useState(position);
   const [localSize, setLocalSize] = useState(size);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+
   const itemRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>();
+  
+  const localPositionRef = useRef(position);
   const localSizeRef = useRef(size);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
 
-  // Update local state when props change
+  // Update local state and refs when props change, but not during interaction
   useEffect(() => {
-    setLocalPosition(position);
-    setLocalSize(size);
-    localSizeRef.current = size;
-  }, [position, size]);
+    if (!isDragging) {
+      setLocalPosition(position);
+      localPositionRef.current = position;
+    }
+  }, [position, isDragging]);
+
+  useEffect(() => {
+    if (!isResizing) {
+      setLocalSize(size);
+      localSizeRef.current = size;
+    }
+  }, [size, isResizing]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!canEdit || isResizing) return;
@@ -71,37 +83,39 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
     e.stopPropagation();
     
     setIsDragging(true);
-    setDragStart({
-      x: e.clientX - localPosition.x * zoom,
-      y: e.clientY - localPosition.y * zoom,
-    });
+    dragStartRef.current = {
+      x: e.clientX - localPositionRef.current.x * zoom,
+      y: e.clientY - localPositionRef.current.y * zoom,
+    };
     onSelect(id);
 
     const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       
       rafRef.current = requestAnimationFrame(() => {
-        const newX = (e.clientX - dragStart.x) / zoom;
-        const newY = (e.clientY - dragStart.y) / zoom;
-        setLocalPosition({ x: newX, y: newY });
+        const newX = (e.clientX - dragStartRef.current.x) / zoom;
+        const newY = (e.clientY - dragStartRef.current.y) / zoom;
+        localPositionRef.current = { x: newX, y: newY };
+        if (itemRef.current) {
+          itemRef.current.style.transform = `translate(${newX}px, ${newY}px)`;
+        }
       });
     };
 
     const handleGlobalMouseUp = () => {
-      setIsDragging(false);
-      onMove(id, localPosition);
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      
+      setIsDragging(false);
+      onMove(id, localPositionRef.current);
+      setLocalPosition(localPositionRef.current);
     };
 
     document.addEventListener('mousemove', handleGlobalMouseMove);
     document.addEventListener('mouseup', handleGlobalMouseUp);
-  }, [canEdit, isResizing, localPosition, id, onSelect, onMove, zoom, dragStart.x, dragStart.y]);
+  }, [canEdit, isResizing, id, onSelect, onMove, zoom]);
 
   const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
     if (!canEdit || !resizable || !onResize) return;
@@ -109,42 +123,43 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setIsResizing(true);
-    setResizeStart({
+    resizeStartRef.current = {
       x: e.clientX,
       y: e.clientY,
-      width: localSize.width,
-      height: localSize.height,
-    });
+      width: localSizeRef.current.width,
+      height: localSizeRef.current.height,
+    };
 
     const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       
       rafRef.current = requestAnimationFrame(() => {
-        const deltaX = e.clientX - resizeStart.x;
-        const deltaY = e.clientY - resizeStart.y;
-        const newWidth = Math.max(100, resizeStart.width + deltaX / zoom);
-        const newHeight = Math.max(50, resizeStart.height + deltaY / zoom);
-        const newSize = { width: newWidth, height: newHeight };
-        setLocalSize(newSize);
-        localSizeRef.current = newSize;
+        const deltaX = e.clientX - resizeStartRef.current.x;
+        const deltaY = e.clientY - resizeStartRef.current.y;
+        const newWidth = Math.max(100, resizeStartRef.current.width + deltaX / zoom);
+        const newHeight = Math.max(50, resizeStartRef.current.height + deltaY / zoom);
+        localSizeRef.current = { width: newWidth, height: newHeight };
+        if (itemRef.current) {
+          itemRef.current.style.width = `${newWidth}px`;
+          itemRef.current.style.height = `${newHeight}px`;
+        }
       });
     };
 
     const handleGlobalMouseUp = () => {
-      setIsResizing(false);
-      onResize(id, localSizeRef.current);
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      
+      setIsResizing(false);
+      onResize(id, localSizeRef.current);
+      setLocalSize(localSizeRef.current);
     };
 
     document.addEventListener('mousemove', handleGlobalMouseMove);
     document.addEventListener('mouseup', handleGlobalMouseUp);
-  }, [canEdit, resizable, onResize, localSize, id, zoom, resizeStart.x, resizeStart.y, resizeStart.width, resizeStart.height]);
+  }, [canEdit, resizable, onResize, id, zoom]);
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -163,6 +178,12 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
     onRemove(id);
   }, [id, onRemove]);
 
+  const getWillChangeValue = () => {
+    if (isDragging) return 'transform';
+    if (isResizing) return 'width, height';
+    return 'auto';
+  };
+
   return (
     <div
       ref={itemRef}
@@ -170,12 +191,11 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
         isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
       } ${isDragging || isResizing ? 'opacity-80 z-50' : ''} ${className}`}
       style={{
-        left: localPosition.x,
-        top: localPosition.y,
+        transform: `translate(${localPosition.x}px, ${localPosition.y}px)`,
         width: localSize.width,
         height: localSize.height,
         zIndex: zIndex + (isSelected ? 1000 : 0),
-        willChange: isDragging || isResizing ? 'transform' : 'auto',
+        willChange: getWillChangeValue(),
       }}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
