@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Heart, Home } from 'lucide-react';
+import { ShoppingCart, Heart, Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { Product, ProductColor } from '../models/internal/Product';
 import { toast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { useIsMobile } from '../hooks/use-mobile';
-import AddToRoomModal from './AddToRoomModal';
+import AddProductDialog from './AddProductDialog';
 
 interface ProductCardProps {
   product: Product;
@@ -20,7 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
   const [selectedColor, setSelectedColor] = useState<ProductColor>(
     product.userPreferences?.preferredColors?.[0] || { name: 'Default', code: '#000000' }
   );
-  const [showAddToRoomModal, setShowAddToRoomModal] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const { addToCart } = useCart();
   const { isAuthenticated, isGuest } = useAuth();
   const navigate = useNavigate();
@@ -76,14 +76,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
     }
   };
 
-  const handleAddToRoom = (e: React.MouseEvent) => {
+  const handleAddClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (isGuest) {
       toast({
         title: "Sign in required",
-        description: "Please sign in to add items to rooms.",
+        description: "Please sign in to add items to rooms and boards.",
         action: (
           <ToastAction 
             altText="Sign In" 
@@ -94,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
         ),
       });
     } else {
-      setShowAddToRoomModal(true);
+      setShowAddDialog(true);
     }
   };
 
@@ -135,11 +135,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
               <div className="absolute inset-0 bg-black/20 flex items-end justify-end p-3">
                 <div className="flex gap-2">
                   <button
-                    onClick={handleAddToRoom}
+                    onClick={handleAddClick}
                     className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
-                    title="Add to Room"
+                    title="Add to Room or Board"
                   >
-                    <Home size={16} className="text-terracotta" />
+                    <Plus size={16} className="text-terracotta" />
                   </button>
                   <button
                     onClick={handleWishlistClick}
@@ -200,11 +200,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
         </div>
       </div>
 
-      <AddToRoomModal
-        isOpen={showAddToRoomModal}
-        onClose={() => setShowAddToRoomModal(false)}
-        productId={product.id}
-        productName={product.name}
+      <AddProductDialog
+        isOpen={showAddDialog}
+        onClose={() => setShowAddDialog(false)}
+        product={product}
       />
     </>
   );
