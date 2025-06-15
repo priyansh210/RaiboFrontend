@@ -38,7 +38,7 @@ const BuyerNavbar = () => {
   ];
 
   return (
-    <nav className="bg-white shadow-sm border-b border-sand sticky top-0 z-50">
+    <nav className="bg-white dark:bg-charcoal shadow-sm border-b border-sand dark:border-gray-700 sticky top-0 z-50">
       <div className="container-custom">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -152,7 +152,7 @@ const BuyerNavbar = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-sand bg-white py-4">
+          <div className="md:hidden border-t border-sand dark:border-gray-700 bg-white dark:bg-charcoal py-4">
             <div className="space-y-2">
               <Link 
                 to="/browse/all" 
