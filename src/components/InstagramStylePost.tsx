@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import ProductInteractions from './ProductInteractions';
@@ -62,8 +61,8 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
       style={{ backgroundColor: theme.background }}
     >
       {/* Header */}
-      <div className="flex items-center p-3 border-b border-gray-100">
-        <div className="w-8 h-8 rounded-full bg-gray-300 mr-3"></div>
+      <div className="flex items-center p-3 border-b border-gray-100 dark:border-border/50">
+        <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-muted mr-3"></div>
         <div>
           <h3 className="font-medium text-sm" style={{ color: theme.foreground }}>
             {product.company.name}
@@ -155,7 +154,7 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
       )}
 
       {/* View product link */}
-      <div className="p-3 border-t border-gray-100">
+      <div className="p-3 border-t border-gray-100 dark:border-border/50">
         <Link 
           to={`/product/${product.id}`}
           className="text-sm font-medium hover:underline"

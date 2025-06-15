@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
@@ -307,10 +308,10 @@ const ProductDetail = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta mb-4"></div>
-            <h2 className="text-xl text-charcoal">Loading product...</h2>
+            <h2 className="text-xl text-foreground">Loading product...</h2>
           </div>
         </div>
       </Layout>
@@ -320,13 +321,13 @@ const ProductDetail = () => {
   if (!product) {
     return (
       <Layout>
-        <div className="min-h-screen bg-gray-50 py-10">
+        <div className="min-h-screen bg-background py-10">
           <div className="container mx-auto px-4">
-            <div className="bg-white p-8 text-center rounded-lg">
-              <h2 className="text-2xl text-charcoal mb-4">Product Not Found</h2>
-              <p className="text-earth mb-6">The product you're looking for doesn't exist or has been removed.</p>
-              <Link 
-                to="/browse" 
+            <div className="bg-card p-8 text-center rounded-lg">
+              <h2 className="text-2xl text-foreground mb-4">Product Not Found</h2>
+              <p className="text-muted-foreground mb-6">The product you're looking for doesn't exist or has been removed.</p>
+              <Link
+                to="/browse"
                 className="bg-terracotta text-white py-2 px-6 inline-block hover:bg-umber transition-colors rounded-lg"
               >
                 Browse Products
@@ -340,11 +341,11 @@ const ProductDetail = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 py-6 md:py-10">
+      <div className="min-h-screen bg-background py-6 md:py-10">
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Breadcrumb Navigation */}
           <nav className="mb-6">
-            <Link to="/browse" className="text-earth hover:text-terracotta flex items-center text-sm">
+            <Link to="/browse" className="text-muted-foreground hover:text-primary flex items-center text-sm">
               <ArrowLeft size={16} className="mr-1" />
               Back to Browse
             </Link>
@@ -353,26 +354,26 @@ const ProductDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
             {/* Product Images */}
             <div className="space-y-4">
-              <div className="aspect-square bg-white rounded-2xl overflow-hidden relative group">
-                <img 
-                  src={selectedImage} 
-                  alt={product.name} 
+              <div className="aspect-square bg-card rounded-2xl overflow-hidden relative group">
+                <img
+                  src={selectedImage}
+                  alt={product.name}
                   className="w-full h-full object-cover"
                 />
-                
+
                 {/* Image navigation arrows */}
                 {product.images && product.images.length > 1 && (
                   <>
                     <button
                       onClick={prevImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-card/80 hover:bg-card p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       disabled={currentImageIndex === 0}
                     >
                       <ChevronLeft size={20} />
                     </button>
                     <button
                       onClick={nextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-card/80 hover:bg-card p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       disabled={currentImageIndex === product.images.length - 1}
                     >
                       <ChevronRight size={20} />
@@ -380,19 +381,19 @@ const ProductDetail = () => {
                   </>
                 )}
               </div>
-              
+
               {/* Thumbnail Gallery */}
               {product.images && product.images.length > 1 && (
                 <div className="flex space-x-3 overflow-x-auto pb-2">
                   {product.images.map((image, index) => (
-                    <button 
+                    <button
                       key={index}
                       onClick={() => {
                         setSelectedImage(image);
                         setCurrentImageIndex(index);
                       }}
                       className={`w-20 h-20 flex-shrink-0 border-2 rounded-lg overflow-hidden transition-all ${
-                        selectedImage === image ? 'border-terracotta' : 'border-gray-200'
+                        selectedImage === image ? 'border-terracotta' : 'border-border'
                       }`}
                     >
                       <img src={image} alt={`${product.name} thumbnail ${index}`} className="w-full h-full object-cover" />
@@ -401,50 +402,50 @@ const ProductDetail = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Product Info */}
             <div className="flex flex-col">
-              <div className="bg-white rounded-2xl p-6 md:p-8">
-                <h1 className="font-playfair text-3xl md:text-4xl text-charcoal mb-2">{product.name}</h1>
-                <p className="text-earth text-lg mb-4">{product.company.name}</p>
-                
+              <div className="bg-card rounded-2xl p-6 md:p-8">
+                <h1 className="font-playfair text-3xl md:text-4xl text-foreground mb-2">{product.name}</h1>
+                <p className="text-muted-foreground text-lg mb-4">{product.company.name}</p>
+
                 <div className="flex items-center mb-6">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        size={20} 
-                        className={i < Math.floor(product.averageRating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                      <Star
+                        key={i}
+                        size={20}
+                        className={i < Math.floor(product.averageRating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}
                       />
                     ))}
                   </div>
-                  <span className="text-earth text-sm ml-3">
+                  <span className="text-muted-foreground text-sm ml-3">
                     {product.averageRating?.toFixed(1) || '0.0'} ({product.totalRatings || 0} reviews)
                   </span>
                 </div>
 
                 <div className="flex items-center mb-6">
-                  <span className="text-3xl font-bold text-charcoal">${product.price}</span>
+                  <span className="text-3xl font-bold text-foreground">${product.price}</span>
                   {product.discount > 0 && (
-                    <span className="ml-3 bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium">
+                    <span className="ml-3 bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-400 px-3 py-1 rounded-full text-sm font-medium">
                       {product.discount}% OFF
                     </span>
                   )}
                 </div>
 
-                <p className="text-earth mb-8 leading-relaxed">{product.description}</p>
+                <p className="text-muted-foreground mb-8 leading-relaxed">{product.description}</p>
 
                 {/* Color Selection */}
                 {product.userPreferences?.preferredColors && product.userPreferences.preferredColors.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="text-lg font-medium text-charcoal mb-3">Color Options</h3>
+                    <h3 className="text-lg font-medium text-foreground mb-3">Color Options</h3>
                     <div className="flex space-x-3">
                       {product.userPreferences.preferredColors.map((color) => (
                         <button
                           key={color.name}
                           onClick={() => setSelectedColor(color)}
                           className={`w-12 h-12 rounded-full border-4 transition-all ${
-                            selectedColor?.code === color.code ? 'border-terracotta scale-110' : 'border-gray-200'
+                            selectedColor?.code === color.code ? 'border-terracotta scale-110' : 'border-border'
                           }`}
                           style={{ backgroundColor: color.code }}
                           title={color.name}
@@ -456,22 +457,22 @@ const ProductDetail = () => {
 
                 {/* Quantity Selection */}
                 <div className="mb-8">
-                  <h3 className="text-lg font-medium text-charcoal mb-3">Quantity</h3>
+                  <h3 className="text-lg font-medium text-foreground mb-3">Quantity</h3>
                   <div className="flex items-center space-x-4">
                     <button
                       onClick={() => handleQuantityChange(quantity - 1)}
-                      className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                      className="w-10 h-10 rounded-lg border border-border flex items-center justify-center hover:bg-accent"
                     >
                       -
                     </button>
                     <span className="text-xl font-medium w-8 text-center">{quantity}</span>
                     <button
                       onClick={() => handleQuantityChange(quantity + 1)}
-                      className="w-10 h-10 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50"
+                      className="w-10 h-10 rounded-lg border border-border flex items-center justify-center hover:bg-accent"
                     >
                       +
                     </button>
-                    <span className="text-sm text-earth ml-4">{product.quantity} available</span>
+                    <span className="text-sm text-muted-foreground ml-4">{product.quantity} available</span>
                   </div>
                 </div>
 
@@ -484,7 +485,7 @@ const ProductDetail = () => {
                     <ShoppingCart size={20} className="mr-2" />
                     Add to Cart
                   </button>
-                  <button 
+                  <button
                     onClick={handleAddToRoom}
                     className="flex-1 border border-terracotta text-terracotta py-3 px-6 rounded-lg hover:bg-terracotta hover:text-white transition-colors flex items-center justify-center text-lg font-medium"
                   >
@@ -498,16 +499,16 @@ const ProductDetail = () => {
                 </div>
 
                 {/* Product Features */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-gray-100">
-                  <div className="flex items-center text-sm text-earth">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-border/50">
+                  <div className="flex items-center text-sm text-muted-foreground">
                     <Truck size={20} className="mr-2 text-terracotta" />
                     Free Delivery
                   </div>
-                  <div className="flex items-center text-sm text-earth">
+                  <div className="flex items-center text-sm text-muted-foreground">
                     <ShieldCheck size={20} className="mr-2 text-terracotta" />
                     2 Year Warranty
                   </div>
-                  <div className="flex items-center text-sm text-earth">
+                  <div className="flex items-center text-sm text-muted-foreground">
                     <RefreshCw size={20} className="mr-2 text-terracotta" />
                     Easy Returns
                   </div>
@@ -555,14 +556,14 @@ const ProductDetail = () => {
           {/* Comparison Table */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle className="text-2xl text-charcoal">Product Comparison</CardTitle>
+              <CardTitle className="text-2xl text-foreground">Product Comparison</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Feature</TableHead>
-                    <TableHead className="text-terracotta font-medium">Our Product</TableHead>
+                    <TableHead className="text-primary font-medium">Our Product</TableHead>
                     <TableHead>Competitor</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -570,8 +571,8 @@ const ProductDetail = () => {
                   {comparisonData.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="font-medium">{item.feature}</TableCell>
-                      <TableCell className="text-terracotta font-medium">{item.value}</TableCell>
-                      <TableCell className="text-gray-600">{item.competitor}</TableCell>
+                      <TableCell className="text-primary font-medium">{item.value}</TableCell>
+                      <TableCell className="text-muted-foreground">{item.competitor}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -582,47 +583,47 @@ const ProductDetail = () => {
           {/* Reviews Section */}
           <Card className="mb-12">
             <CardHeader>
-              <CardTitle className="text-2xl text-charcoal">Customer Reviews</CardTitle>
+              <CardTitle className="text-2xl text-foreground">Customer Reviews</CardTitle>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      size={20} 
-                      className={i < Math.floor(product.averageRating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                    <Star
+                      key={i}
+                      size={20}
+                      className={i < Math.floor(product.averageRating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}
                     />
                   ))}
                 </div>
                 <span className="text-lg font-medium">{product.averageRating?.toFixed(1) || '0.0'}</span>
-                <span className="text-earth">based on {product.totalRatings || 0} reviews</span>
+                <span className="text-muted-foreground">based on {product.totalRatings || 0} reviews</span>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 {dummyReviews.map((review) => (
-                  <div key={review.id} className="border-b border-gray-100 pb-6 last:border-b-0">
+                  <div key={review.id} className="border-b border-border/50 pb-6 last:border-b-0">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h4 className="font-medium text-charcoal">{review.userName}</h4>
+                        <h4 className="font-medium text-foreground">{review.userName}</h4>
                         <div className="flex items-center mt-1">
                           {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              size={16} 
-                              className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                            <Star
+                              key={i}
+                              size={16}
+                              className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}
                             />
                           ))}
                         </div>
                       </div>
-                      <span className="text-sm text-earth">{review.createdAt.toLocaleDateString()}</span>
+                      <span className="text-sm text-muted-foreground">{review.createdAt.toLocaleDateString()}</span>
                     </div>
-                    <p className="text-earth mb-3">{review.comment}</p>
-                    <div className="flex items-center space-x-4 text-sm text-earth">
-                      <button className="flex items-center space-x-1 hover:text-terracotta">
+                    <p className="text-muted-foreground mb-3">{review.comment}</p>
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <button className="flex items-center space-x-1 hover:text-primary">
                         <Heart size={14} />
                         <span>{review.likes}</span>
                       </button>
-                      <button className="hover:text-terracotta">Reply</button>
+                      <button className="hover:text-primary">Reply</button>
                     </div>
                   </div>
                 ))}
@@ -634,26 +635,26 @@ const ProductDetail = () => {
           {similarProducts.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl text-charcoal">Similar Products</CardTitle>
+                <CardTitle className="text-2xl text-foreground">Similar Products</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {similarProducts.slice(0, 4).map((similarProduct) => (
-                    <Link 
-                      key={similarProduct.id} 
+                    <Link
+                      key={similarProduct.id}
                       to={`/product/${similarProduct.id}`}
                       className="group"
                     >
-                      <div className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                        <img 
-                          src={similarProduct.images?.[0] || 'https://picsum.photos/200/200'} 
+                      <div className="bg-accent rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                        <img
+                          src={similarProduct.images?.[0] || 'https://picsum.photos/200/200'}
                           alt={similarProduct.name}
                           className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="p-4">
-                          <h3 className="font-medium text-charcoal mb-1 line-clamp-2">{similarProduct.name}</h3>
-                          <p className="text-sm text-earth mb-2">{similarProduct.company.name}</p>
-                          <p className="text-lg font-bold text-terracotta">${similarProduct.price}</p>
+                          <h3 className="font-medium text-foreground mb-1 line-clamp-2">{similarProduct.name}</h3>
+                          <p className="text-sm text-muted-foreground mb-2">{similarProduct.company.name}</p>
+                          <p className="text-lg font-bold text-primary">${similarProduct.price}</p>
                         </div>
                       </div>
                     </Link>

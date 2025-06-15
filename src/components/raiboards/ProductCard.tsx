@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RaiBoardProduct } from '@/models/internal/RaiBoard';
 import { CanvasItem } from './CanvasItem';
@@ -55,7 +54,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       resizable={true}
     >
       <div
-        className="w-full h-full bg-card rounded-lg shadow-lg border overflow-hidden hover:shadow-xl transition-all duration-200 group-hover:scale-[1.02]"
+        className="w-full h-full bg-card rounded-lg shadow-lg border border-border overflow-hidden hover:shadow-xl transition-all duration-200 group-hover:scale-[1.02]"
         style={{ fontSize: nameFontSize }}
       >
         {/* Product Image */}

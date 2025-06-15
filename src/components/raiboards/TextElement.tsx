@@ -118,7 +118,7 @@ export const TextElement: React.FC<TextElementProps> = ({
 
           {/* Edit Indicator */}
           {canEdit && !isEditing && (
-            <div className="absolute top-2 right-2 w-5 h-5 bg-gray-400 rounded-full opacity-0 group-hover:opacity-70 flex items-center justify-center transition-opacity duration-200">
+            <div className="absolute top-2 right-2 w-5 h-5 bg-gray-400 dark:bg-gray-600 rounded-full opacity-0 group-hover:opacity-70 flex items-center justify-center transition-opacity duration-200">
               <Edit3 className="w-3 h-3 text-white" />
             </div>
           )}

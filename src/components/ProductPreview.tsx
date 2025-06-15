@@ -62,8 +62,8 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
   return (
     <div className="max-w-6xl mx-auto p-6">
       {isPreview && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-blue-800 font-medium">
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 dark:bg-blue-950 dark:border-blue-800 rounded-lg">
+          <p className="text-blue-800 dark:text-blue-300 font-medium">
             Preview Mode - This is how the product will appear to users
           </p>
         </div>
@@ -72,7 +72,7 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Product Images */}
         <div className="space-y-4">
-          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+          <div className="aspect-square bg-gray-100 dark:bg-accent rounded-lg overflow-hidden">
             <img
               src={product.imageUrls[selectedImage] || product.displayImage || '/placeholder.svg'}
               alt={product.name}
@@ -85,8 +85,8 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`aspect-square bg-gray-100 rounded-md overflow-hidden border-2 ${
-                    selectedImage === index ? 'border-blue-500' : 'border-transparent'
+                  className={`aspect-square bg-gray-100 dark:bg-accent rounded-md overflow-hidden border-2 ${
+                    selectedImage === index ? 'border-blue-500 dark:border-primary' : 'border-transparent'
                   }`}
                 >
                   <img
@@ -103,22 +103,22 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
         {/* Product Details */}
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-            <p className="text-gray-600 mt-2">{product.company.name}</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-foreground">{product.name}</h1>
+            <p className="text-gray-600 dark:text-muted-foreground mt-2">{product.company.name}</p>
           </div>
 
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
               <Star className="h-5 w-5 text-yellow-400 fill-current" />
               <span className="font-medium">{product.averageRating}</span>
-              <span className="text-gray-500">({product.totalRatings} reviews)</span>
+              <span className="text-gray-500 dark:text-muted-foreground">({product.totalRatings} reviews)</span>
             </div>
             <Badge variant="secondary">{product.category.name}</Badge>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
-              <span className="text-3xl font-bold text-gray-900">
+              <span className="text-3xl font-bold text-gray-900 dark:text-foreground">
                 ${product.price.toFixed(2)}
               </span>
               {product.discount > 0 && (
@@ -130,14 +130,14 @@ const ProductPreview: React.FC<ProductPreviewProps> = ({
             </p>
           </div>
 
-          <div className="border-t border-gray-200 pt-6">
+          <div className="border-t border-gray-200 dark:border-border pt-6">
             <h3 className="text-lg font-semibold mb-2">Description</h3>
-            <p className="text-gray-700 leading-relaxed">{product.description}</p>
+            <p className="text-gray-700 dark:text-muted-foreground leading-relaxed">{product.description}</p>
           </div>
 
           {/* Interactions Preview */}
-          <div className="border-t border-gray-200 pt-4">
-            <div className="flex items-center space-x-6 text-sm text-gray-600">
+          <div className="border-t border-gray-200 dark:border-border pt-4">
+            <div className="flex items-center space-x-6 text-sm text-gray-600 dark:text-muted-foreground">
               <div className="flex items-center space-x-1">
                 <Heart className="h-4 w-4" />
                 <span>{product.interactions.likes}</span>
