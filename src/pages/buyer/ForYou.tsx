@@ -1,134 +1,26 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import ProductCard from '../../components/ProductCard';
 import CommentsModal from '../../components/CommentsModal';
-import { fetchProducts, addComment, replyToComment } from '../../services/ProductService';
-import { Product } from '../../models/internal/Product';
-import { apiService } from '../../services/ApiService';
-import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '../../hooks/use-mobile';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import InstagramStylePost from '../../components/InstagramStylePost';
 import Navbar from '../../components/Navbar';
+import { useProducts } from '../../hooks/useProducts';
+import { ProductReview } from '@/models/internal/Product';
 
 const ForYou = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { products, isLoading, handleLike, handleShare, handleAddComment, handleReplyToComment } = useProducts();
   const isMobile = useIsMobile();
   const [commentsModal, setCommentsModal] = useState<{
     isOpen: boolean;
     productId: string;
     productName: string;
-    comments: any[];
+    comments: ProductReview[];
   }>({ isOpen: false, productId: '', productName: '', comments: [] });
-
-  useEffect(() => {
-    fetchProductsData();
-  }, []);
-
-  const fetchProductsData = async () => {
-    setIsLoading(true);
-    try {
-      const productsData = await fetchProducts();
-      
-      // Generate interactions for each product
-      const productsWithInteractions = productsData.map(product => ({
-        ...product,
-        interactions: {
-          likes: Math.floor(Math.random() * 500) + 10,
-          shares: Math.floor(Math.random() * 100) + 5,
-          comments: [
-            {
-              id: `${product.id}-comment-1`,
-              userId: 'user1',
-              userName: 'Sarah Chen',
-              rating: 5,
-              comment: 'Absolutely love this! Quality is amazing and arrived quickly.',
-              createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-              likes: Math.floor(Math.random() * 20),
-              userHasLiked: false,
-            },
-            {
-              id: `${product.id}-comment-2`,
-              userId: 'user2',
-              userName: 'Mike Johnson',
-              rating: 4,
-              comment: 'Great product, exactly as described. Highly recommend!',
-              createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-              likes: Math.floor(Math.random() * 15),
-              userHasLiked: false,
-            },
-          ],
-          userHasLiked: false,
-          userHasShared: false,
-        }
-      }));
-      
-      setProducts(productsWithInteractions);
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load products',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLike = async (productId: string) => {
-    try {
-      // We are not calling the API to make the UI feel faster
-      // await apiService.handleLike(productId);
-      
-      setProducts(prevProducts => prevProducts.map(product => {
-        if (product.id === productId) {
-          const currentLikes = product.interactions?.likes || 0;
-          const userHasLiked = product.interactions?.userHasLiked || false;
-          return {
-            ...product,
-            interactions: {
-              ...product.interactions!,
-              likes: userHasLiked ? currentLikes - 1 : currentLikes + 1,
-              userHasLiked: !userHasLiked,
-            }
-          };
-        }
-        return product;
-      }));
-      
-    } catch (error) {
-      console.error('Failed to like product:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update like status",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleShare = (productId: string) => {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: product.name,
-        text: `Check out this ${product.name}`,
-        url: `${window.location.origin}/product/${productId}`,
-      });
-    } else {
-      navigator.clipboard.writeText(`${window.location.origin}/product/${productId}`);
-      toast({
-        title: "Link copied!",
-        description: "Product link copied to clipboard.",
-      });
-    }
-  };
 
   const handleComment = (productId: string) => {
     const product = products.find(p => p.id === productId);
@@ -142,51 +34,13 @@ const ForYou = () => {
     }
   };
 
-  const handleAddComment = async (productId: string, comment: string) => {
-    try {
-      const response = await addComment(productId, comment);
-      
-      const newComment = {
-        id: response.id || Date.now().toString(),
-        userId: 'current-user',
-        userName: 'You',
-        rating: 5,
-        comment: comment,
-        createdAt: new Date(),
-        likes: 0,
-        userHasLiked: false,
-      };
-      
-      setProducts(prevProducts => prevProducts.map(product => {
-        if (product.id === productId) {
-          return {
-            ...product,
-            interactions: {
-              ...product.interactions!,
-              comments: [newComment, ...product.interactions!.comments],
-            }
-          };
-        }
-        return product;
-      }));
-      
+  const handleAddCommentForModal = async (productId: string, comment: string) => {
+    const newComment = await handleAddComment(productId, comment);
+    if (newComment) {
       setCommentsModal(prev => ({
         ...prev,
         comments: [newComment, ...prev.comments],
       }));
-      
-    } catch (error) {
-      console.error('Failed to add comment:', error);
-      throw error;
-    }
-  };
-
-  const handleReplyToComment = async (commentId: string, reply: string) => {
-    try {
-      await replyToComment(commentId, reply);
-    } catch (error) {
-      console.error('Failed to reply to comment:', error);
-      throw error;
     }
   };
 
@@ -230,7 +84,7 @@ const ForYou = () => {
             onClose={() => setCommentsModal({ isOpen: false, productId: '', productName: '', comments: [] })}
             productId={commentsModal.productId}
             comments={commentsModal.comments}
-            onAddComment={handleAddComment}
+            onAddComment={handleAddCommentForModal}
             onReplyToComment={handleReplyToComment}
             productName={commentsModal.productName}
           />
@@ -273,7 +127,7 @@ const ForYou = () => {
               onClose={() => setCommentsModal({ isOpen: false, productId: '', productName: '', comments: [] })}
               productId={commentsModal.productId}
               comments={commentsModal.comments}
-              onAddComment={handleAddComment}
+              onAddComment={handleAddCommentForModal}
               onReplyToComment={handleReplyToComment}
               productName={commentsModal.productName}
             />
