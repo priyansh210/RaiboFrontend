@@ -32,7 +32,6 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
-  const [lastPanPoint, setLastPanPoint] = useState({ x: 0, y: 0 });
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [selectedTextElement, setSelectedTextElement] = useState<string | null>(null);
   
@@ -47,21 +46,20 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   const canEdit = userRole === 'owner' || userRole === 'editor';
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button === 1 || (e.button === 0 && e.ctrlKey)) { // Middle mouse or Ctrl+Left
+    if (e.button === 1 || (e.button === 0 && e.ctrlKey)) {
       setIsPanning(true);
       lastPanPointRef.current = { x: e.clientX, y: e.clientY };
       e.preventDefault();
     }
   }, []);
 
-   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isPanning) return;
 
     const deltaX = e.clientX - lastPanPointRef.current.x;
     const deltaY = e.clientY - lastPanPointRef.current.y;
     lastPanPointRef.current = { x: e.clientX, y: e.clientY };
 
-    // Use requestAnimationFrame for smoother updates
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -118,19 +116,22 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
     }
   };
 
-  // Grid pattern for background
+  // Enhanced grid pattern
   const gridSize = board.settings.gridSize * zoom;
   const gridOffsetX = (pan.x % gridSize);
   const gridOffsetY = (pan.y % gridSize);
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-gray-50">
-      {/* Grid Background */}
+    <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Enhanced Grid Background */}
       {board.settings.showGrid && (
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `radial-gradient(circle, #666 1px, transparent 2px)`,
+            backgroundImage: `
+              linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+              linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
+            `,
             backgroundSize: `${gridSize}px ${gridSize}px`,
             backgroundPosition: `${gridOffsetX}px ${gridOffsetY}px`,
           }}
@@ -140,7 +141,7 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
       {/* Canvas */}
       <div
         ref={canvasRef}
-        className="w-full h-full cursor-grab active:cursor-grabbing"
+        className={`w-full h-full ${isPanning ? 'cursor-grabbing' : 'cursor-grab'} transition-all duration-150`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -193,14 +194,6 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
         minZoom={board.settings.minZoom}
         maxZoom={board.settings.maxZoom}
       />
-
-      {/* Info Panel */}
-      <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 text-sm">
-        <div className="font-medium">{board.name}</div>
-        <div className="text-gray-500">Zoom: {Math.round(zoom * 100)}%</div>
-        <div className="text-gray-500">Products: {board.products.length}</div>
-        <div className="text-gray-500">Text Elements: {board.textElements.length}</div>
-      </div>
     </div>
   );
 };
