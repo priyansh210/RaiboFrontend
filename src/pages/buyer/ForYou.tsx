@@ -190,10 +190,10 @@ const ForYou = () => {
   if (isLoading) {
     return (
       <Layout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta mb-4"></div>
-            <h2 className="text-xl text-charcoal">Loading your feed...</h2>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+            <h2 className="text-xl text-foreground">Loading your feed...</h2>
           </div>
         </div>
       </Layout>
@@ -202,16 +202,16 @@ const ForYou = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-50 py-6 md:py-10">
+      <div className="min-h-screen bg-background py-6 md:py-10">
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-charcoal mb-2">For You</h1>
-              <p className="text-earth">Discover products curated just for you</p>
+              <h1 className="text-3xl font-bold text-foreground mb-2">For You</h1>
+              <p className="text-muted-foreground">Discover products curated just for you</p>
             </div>
             <Link to="/my-rooms">
-              <Button className="bg-terracotta hover:bg-umber text-white">
+              <Button>
                 <Home size={20} className="mr-2" />
                 My Rooms
               </Button>
