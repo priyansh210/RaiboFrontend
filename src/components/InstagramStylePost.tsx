@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductInteractions from './ProductInteractions';
@@ -69,7 +70,7 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
                   <img 
                     src={image} 
                     alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-center"
                     draggable={false}
                   />
                 </CarouselItem>
@@ -78,7 +79,7 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
                   <img 
                     src={'https://picsum.photos/400/600'} 
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-center"
                     draggable={false}
                   />
                 </CarouselItem>
@@ -86,8 +87,14 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
             </CarouselContent>
           </Carousel>
 
-          {/* Top Header with Company Info - Translucent Gradient */}
-          <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 via-black/30 to-transparent p-4 pt-8">
+          {/* Top Gradient Overlay */}
+          <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/60 via-black/30 to-transparent pointer-events-none"></div>
+
+          {/* Bottom Gradient Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none"></div>
+
+          {/* Top Header with Company Info - Now positioned over gradient */}
+          <div className="absolute top-0 left-0 right-0 p-4 pt-8 z-10">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm mr-3 flex-shrink-0">
@@ -103,7 +110,7 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
 
           {/* Right Side Actions */}
           {isMobile && (
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col items-center space-y-6">
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex flex-col items-center space-y-6 z-10">
               {/* Like Button */}
               <button
                 onClick={() => onLike(product.id)}
@@ -154,8 +161,8 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
             </div>
           )}
 
-          {/* Bottom Content - Translucent Gradient */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pb-8">
+          {/* Bottom Content - Now positioned over gradient */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 pb-8 z-10">
             <div className="text-white">
               <h4 className="font-bold text-xl mb-1">{product.name}</h4>
               <p className="text-white/90 text-sm mb-3 line-clamp-2">{product.description}</p>
@@ -173,7 +180,7 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
 
           {/* Like Animation */}
           {showLikeAnimation && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
               <div className="text-white text-8xl animate-ping">
                 ❤️
               </div>
