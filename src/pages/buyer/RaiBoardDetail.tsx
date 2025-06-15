@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { RaiBoardTextElement } from '@/models/internal/RaiBoard';
@@ -226,7 +225,18 @@ const RaiBoardDetailContent: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-row overflow-hidden">
-        <div className="flex-1 relative">
+        <RaiBoardToolbar
+            onAddProduct={() => setShowProductSearch(true)}
+            onAddHeading={() => handleAddTextElement('heading')}
+            onAddParagraph={() => handleAddTextElement('paragraph')}
+            onAddImage={() => toast({ title: 'Coming Soon', description: 'This feature is not yet implemented.'})}
+            userRole={userRole}
+            boardStats={{
+                products: state.board.products.length,
+                textElements: state.board.textElements.length
+            }}
+        />
+        <div className="flex-1 relative bg-gray-50">
           <RaiBoardCanvas
             board={state.board}
             onProductMove={handleProductMove}
@@ -247,18 +257,6 @@ const RaiBoardDetailContent: React.FC = () => {
             onToggle={() => setShowCollaborators(!showCollaborators)}
           />
         </div>
-        
-        <RaiBoardToolbar
-            onAddProduct={() => setShowProductSearch(true)}
-            onAddHeading={() => handleAddTextElement('heading')}
-            onAddParagraph={() => handleAddTextElement('paragraph')}
-            onAddImage={() => toast({ title: 'Coming Soon', description: 'This feature is not yet implemented.'})}
-            userRole={userRole}
-            boardStats={{
-                products: state.board.products.length,
-                textElements: state.board.textElements.length
-            }}
-        />
       </div>
 
       <ProductSearchDialog
