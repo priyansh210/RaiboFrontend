@@ -207,9 +207,9 @@ const ForYou = () => {
     return (
       <>
         {/* Mobile Reels View with Navbar */}
-        <div className="h-screen w-screen overflow-hidden bg-black">
+        <div className="h-screen w-screen overflow-hidden">
           <Navbar />
-          <div className="fixed top-16 bottom-0 left-0 right-0 overflow-y-auto snap-y snap-mandatory">
+          <div className="fixed top-16 bottom-0 left-0 right-0 overflow-y-auto snap-y snap-mandatory bg-black">
             {products.map((product) => (
               <div key={product.id} className="h-full w-full snap-start flex-shrink-0">
                 <InstagramStylePost
