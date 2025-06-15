@@ -221,6 +221,7 @@ const RaiBoardDetailContent: React.FC = () => {
         onNavigateBack={() => handleNavigateWithConfirmation('/raiboards')}
         onSave={handleSaveBoard}
         onShare={() => setShowCollaborators(true)}
+        collaboratorCount={state.board.collaborators.length}
       />
 
       {/* Main Content */}

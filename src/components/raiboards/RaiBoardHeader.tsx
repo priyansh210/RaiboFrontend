@@ -14,6 +14,7 @@ interface RaiBoardHeaderProps {
   onNavigateBack: () => void;
   onSave: () => void;
   onShare: () => void;
+  collaboratorCount: number;
 }
 
 export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
@@ -26,6 +27,7 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
   onNavigateBack,
   onSave,
   onShare,
+  collaboratorCount,
 }) => {
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
@@ -69,6 +71,9 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
         <Button variant="outline" size="sm" onClick={onShare}>
           <Users className="w-4 h-4 mr-2" />
           Share
+          {collaboratorCount > 0 && (
+            <Badge variant="secondary" className="ml-2">{collaboratorCount}</Badge>
+          )}
         </Button>
       </div>
     </div>

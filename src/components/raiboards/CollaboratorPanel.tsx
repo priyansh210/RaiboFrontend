@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { RaiBoardCollaborator, RaiBoardInvite } from '@/models/internal/RaiBoard';
 import { Button } from '@/components/ui/button';
@@ -54,17 +53,7 @@ export const CollaboratorPanel: React.FC<CollaboratorPanelProps> = ({
   };
 
   if (!isOpen) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onToggle}
-        className="fixed top-4 right-4 z-50"
-      >
-        <Users className="w-4 h-4 mr-2" />
-        {collaborators.length}
-      </Button>
-    );
+    return null;
   }
 
   return (
