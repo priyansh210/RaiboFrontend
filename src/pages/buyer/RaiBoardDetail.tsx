@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '@/models/internal/Product';
@@ -109,7 +108,7 @@ const RaiBoardDetailContent: React.FC = () => {
             onInviteCollaborator={handleInviteCollaborator}
             userRole={userRole}
             isOpen={showCollaborators}
-            onToggle={() => setShowCollaborators(!showCollaborators)}
+            onOpenChange={setShowCollaborators}
           />
         </div>
       </div>
