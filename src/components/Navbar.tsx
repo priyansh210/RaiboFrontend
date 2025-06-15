@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User } from 'lucide-react';
+import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User, ArrowLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -137,6 +138,10 @@ const Navbar: React.FC = () => {
     } else {
       navigate('/account');
     }
+  };
+
+  const handleBackButton = () => {
+    navigate(-1);
   };
 
   return (
@@ -354,7 +359,6 @@ const Navbar: React.FC = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            <ThemeLanguageToggle />
             {!isSeller && (
               <Link 
                 to="/cart" 
@@ -406,6 +410,17 @@ const Navbar: React.FC = () => {
         }`}
       >
         <div className="pt-20 px-6 pb-6 h-full overflow-y-auto">
+          {/* Back Button */}
+          <div className="mb-6">
+            <button 
+              onClick={handleBackButton}
+              className="flex items-center text-foreground hover:text-primary transition-colors"
+            >
+              <ArrowLeft size={20} className="mr-2" />
+              Back
+            </button>
+          </div>
+
           {/* Mobile Search Bar */}
           <form onSubmit={handleSearch} className="mb-6">
             <div className="relative">
