@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { RaiBoard } from '@/models/internal/RaiBoard';
@@ -75,8 +76,8 @@ const RaiBoards: React.FC = () => {
       <Layout>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading your boards...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading your boards...</p>
           </div>
         </div>
       </Layout>
@@ -89,11 +90,11 @@ const RaiBoards: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Grid3X3 className="w-8 h-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+              <Grid3X3 className="w-8 h-8 text-primary" />
               RaiBoards
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-muted-foreground mt-2">
               Design and collaborate on your room layouts with drag-and-drop product boards
             </p>
           </div>
@@ -147,7 +148,7 @@ const RaiBoards: React.FC = () => {
 
         {/* Search */}
         <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
             placeholder="Search your boards..."
             value={searchTerm}
@@ -159,11 +160,11 @@ const RaiBoards: React.FC = () => {
         {/* Boards Grid */}
         {filteredBoards.length === 0 ? (
           <div className="text-center py-12">
-            <Grid3X3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <Grid3X3 className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">
               {searchTerm ? 'No boards found' : 'No boards yet'}
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               {searchTerm
                 ? 'Try adjusting your search terms'
                 : 'Create your first board to start designing your space'
@@ -180,7 +181,7 @@ const RaiBoards: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBoards.map((board) => (
               <Link key={board.id} to={`/raiboards/${board.id}`}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <span className="truncate">{board.name}</span>
@@ -189,14 +190,14 @@ const RaiBoards: React.FC = () => {
                       )}
                     </CardTitle>
                     {board.description && (
-                      <p className="text-sm text-gray-600 line-clamp-2">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
                         {board.description}
                       </p>
                     )}
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm text-gray-600">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Users className="w-4 h-4" />
                           {board.collaborators.length} collaborators
@@ -207,7 +208,7 @@ const RaiBoards: React.FC = () => {
                         </div>
                       </div>
                       
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-muted-foreground">
                         {board.products.length} products
                       </div>
 
@@ -215,7 +216,7 @@ const RaiBoards: React.FC = () => {
                       {board.products.length > 0 && (
                         <div className="flex gap-1 overflow-hidden">
                           {board.products.slice(0, 4).map((product) => (
-                            <div key={product.id} className="w-8 h-8 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                            <div key={product.id} className="w-8 h-8 bg-muted rounded overflow-hidden flex-shrink-0">
                               <img
                                 src={product.productImage}
                                 alt={product.productName}
@@ -224,7 +225,7 @@ const RaiBoards: React.FC = () => {
                             </div>
                           ))}
                           {board.products.length > 4 && (
-                            <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-600">
+                            <div className="w-8 h-8 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
                               +{board.products.length - 4}
                             </div>
                           )}
