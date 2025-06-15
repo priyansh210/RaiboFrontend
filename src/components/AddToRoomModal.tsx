@@ -15,6 +15,10 @@ interface AddToRoomModalProps {
   productName: string;
 }
 
+interface GetUserRoomsResponse {
+  rooms: Room[];
+}
+
 const AddToRoomModal: React.FC<AddToRoomModalProps> = ({
   isOpen,
   onClose,
@@ -34,7 +38,7 @@ const AddToRoomModal: React.FC<AddToRoomModalProps> = ({
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
-      const response = await apiService.getUserRooms();
+      const response = await apiService.getUserRooms() as GetUserRoomsResponse;
       setRooms(response.rooms);
     } catch (error) {
       console.error('Failed to fetch rooms:', error);

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { RaiBoardTextElement } from '@/models/internal/RaiBoard';
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Search, Settings, Share2, Save } from 'lucide-react';
+import { ArrowLeft, Search, Settings, Share2, Save, Heading, Type, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const RaiBoardDetailContent: React.FC = () => {
