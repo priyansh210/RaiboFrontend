@@ -64,24 +64,28 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
           onTouchEnd={handleTouchEnd}
         >
           <Carousel className="w-full h-full">
-            <CarouselContent className="h-full">
+            <CarouselContent className="h-full -ml-0">
               {(product.images && product.images.length > 0) ? product.images.map((image, index) => (
-                <CarouselItem key={index} className="h-full">
-                  <img 
-                    src={image} 
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover object-center"
-                    draggable={false}
-                  />
+                <CarouselItem key={index} className="h-full pl-0">
+                  <div className="h-full w-full">
+                    <img 
+                      src={image} 
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full h-full object-cover object-center"
+                      draggable={false}
+                    />
+                  </div>
                 </CarouselItem>
               )) : (
-                <CarouselItem className="h-full">
-                  <img 
-                    src={'https://picsum.photos/400/600'} 
-                    alt={product.name}
-                    className="w-full h-full object-cover object-center"
-                    draggable={false}
-                  />
+                <CarouselItem className="h-full pl-0">
+                  <div className="h-full w-full">
+                    <img 
+                      src={'https://picsum.photos/400/600'} 
+                      alt={product.name}
+                      className="w-full h-full object-cover object-center"
+                      draggable={false}
+                    />
+                  </div>
                 </CarouselItem>
               )}
             </CarouselContent>
