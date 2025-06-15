@@ -103,7 +103,7 @@ const BuyerNavbar = () => {
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-white z-50">
+                <DropdownMenuContent align="end" className="w-56 z-50">
                   <DropdownMenuLabel>
                     Hello, {user?.firstName || 'Buyer'}!
                   </DropdownMenuLabel>

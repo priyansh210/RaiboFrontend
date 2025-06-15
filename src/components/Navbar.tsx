@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User } from 'lucide-react';
@@ -263,7 +262,7 @@ const Navbar: React.FC = () => {
                   </button>
                 )}
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 mt-1 z-50 bg-white">
+              <DropdownMenuContent align="end" className="w-48 mt-1 z-50 ">
                 {isAuthenticated ? (
                   <>
                     <DropdownMenuItem className="cursor-default font-medium">
