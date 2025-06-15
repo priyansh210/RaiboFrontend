@@ -37,24 +37,41 @@ export class OrderService {
           product: {
             id: item.product_id,
             name: `Product ${item.product_id}`,
-            brand: 'Brand',
-            price: item.price,
             description: 'Product description',
-            category: 'furniture',
-            subcategory: 'chairs',
-            images: ['/placeholder.svg'],
+            price: item.price,
+            quantity: 10, // Default stock quantity
+            category: {
+              id: 'furniture',
+              name: 'Furniture'
+            },
+            company: {
+              id: 'company-1',
+              name: 'Default Company',
+              email: 'contact@company.com',
+              address: '123 Company St'
+            },
+            images: ['/placeholder.svg'], // Legacy field
+            imageUrls: ['/placeholder.svg'], // New field
+            displayImage: '/placeholder.svg',
+            discount: 0,
+            discountValidUntil: null,
+            averageRating: 4.5,
+            totalRatings: 100,
+            version: 1,
+            interactions: {
+              likes: 0,
+              shares: 0,
+              comments: [],
+              userHasLiked: false,
+              userHasShared: false
+            },
+            // Legacy compatibility properties
+            brand: 'Brand',
             colors: [],
-            material: 'Wood',
-            dimensions: { width: 50, height: 80, depth: 50, unit: 'cm' },
-            weight: { value: 10, unit: 'kg' },
-            ratings: { average: 4.5, count: 100 },
-            stock: 10,
+            subcategory: 'chairs',
             featured: false,
             bestSeller: false,
-            new: false,
-            deliveryInfo: '3-5 business days',
-            createdAt: new Date(),
-            updatedAt: new Date()
+            new: false
           },
           quantity: item.quantity,
           price: item.price,
