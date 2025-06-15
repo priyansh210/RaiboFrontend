@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { RaiBoard } from '@/models/internal/RaiBoard';
@@ -12,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Users, Calendar, Search, Grid3X3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import BuyerNavbar from '@/components/BuyerNavbar';
+import Layout from '@/components/Layout';
 
 const RaiBoards: React.FC = () => {
   const [boards, setBoards] = useState<RaiBoard[]>([]);
@@ -73,22 +72,19 @@ const RaiBoards: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <BuyerNavbar />
+      <Layout>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading your boards...</p>
           </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <BuyerNavbar />
-      
+    <Layout>
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -242,7 +238,7 @@ const RaiBoards: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   );
 };
 
