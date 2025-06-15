@@ -1,4 +1,3 @@
-
 import { SIMULATED_DELAY, STORAGE_KEYS } from './config';
 import { ApiResponse, AuthUser, LoginCredentials, RegisterCredentials, ApiProduct, Order } from './types';
 import { mockUsers, mockProducts, mockOrders } from './mockData';
@@ -16,6 +15,92 @@ const delay = (ms: number): Promise<void> => {
 const createResponse = <T>(data: T | null = null, error: string | null = null, status: number = 200): ApiResponse<T> => {
   return { data, error, status };
 };
+
+// Enhanced mock orders with more realistic data
+const enhancedMockOrders: Order[] = [
+  {
+    id: 'order-001',
+    buyer_id: 'user-123',
+    total_amount: 1249.97,
+    shipping_address: 'John Doe, 123 Main St, Anytown, CA 94107',
+    status: 'delivered',
+    created_at: '2025-05-15T10:30:00Z',
+    items: [
+      {
+        product_id: 'prod-001',
+        quantity: 1,
+        price: 849.99,
+        color: 'Oak'
+      },
+      {
+        product_id: 'prod-002',
+        quantity: 2,
+        price: 199.99,
+        color: 'Black'
+      }
+    ]
+  },
+  {
+    id: 'order-002',
+    buyer_id: 'user-123',
+    total_amount: 599.98,
+    shipping_address: 'John Doe, 123 Main St, Anytown, CA 94107',
+    status: 'shipped',
+    created_at: '2025-06-01T14:15:00Z',
+    items: [
+      {
+        product_id: 'prod-003',
+        quantity: 1,
+        price: 299.99,
+        color: 'White'
+      },
+      {
+        product_id: 'prod-004',
+        quantity: 1,
+        price: 299.99,
+        color: 'Gray'
+      }
+    ]
+  },
+  {
+    id: 'order-003',
+    buyer_id: 'user-123',
+    total_amount: 899.99,
+    shipping_address: 'John Doe, 123 Main St, Anytown, CA 94107',
+    status: 'processing',
+    created_at: '2025-06-10T09:20:00Z',
+    items: [
+      {
+        product_id: 'prod-005',
+        quantity: 1,
+        price: 899.99,
+        color: 'Walnut'
+      }
+    ]
+  },
+  {
+    id: 'order-004',
+    buyer_id: 'user-123',
+    total_amount: 1799.96,
+    shipping_address: 'John Doe, 123 Main St, Anytown, CA 94107',
+    status: 'pending',
+    created_at: '2025-06-14T16:45:00Z',
+    items: [
+      {
+        product_id: 'prod-006',
+        quantity: 2,
+        price: 549.99,
+        color: 'Beige'
+      },
+      {
+        product_id: 'prod-007',
+        quantity: 1,
+        price: 699.98,
+        color: 'Navy'
+      }
+    ]
+  }
+];
 
 /**
  * Mock authentication API methods
@@ -197,19 +282,9 @@ export const ordersApi = {
     
     const user = JSON.parse(userJson) as AuthUser;
     
-    // For buyers, return their orders
-    if (user.roles.includes('buyer')) {
-      const userOrders = mockOrders.filter(order => order.buyer_id === user.id);
-      return createResponse(userOrders);
-    }
-    
-    // For sellers, would return orders for their products
-    // This is a simplified implementation
-    if (user.roles.includes('seller')) {
-      return createResponse(mockOrders);
-    }
-    
-    return createResponse([], 'Unauthorized', 403);
+    // Return enhanced mock orders for the user
+    const userOrders = enhancedMockOrders.filter(order => order.buyer_id === user.id || order.buyer_id === 'user-123');
+    return createResponse(userOrders);
   },
   
   /**

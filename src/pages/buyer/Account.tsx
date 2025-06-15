@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -5,37 +6,13 @@ import Layout from '../../components/Layout';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { Phone, Mail, MapPin, User, Package, LogOut, Save, AlertCircle, Store } from 'lucide-react';
+import { Phone, Mail, MapPin, User, Package, LogOut, Save, AlertCircle, Store, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ordersApi } from '../../api/mockApi';
-
-// Mock user data to extend the profile
-const mockOrderHistory = [
-  {
-    id: 'order-123',
-    date: '2025-04-10',
-    total: 599.97,
-    status: 'delivered',
-    items: [
-      { id: 'item-1', name: 'Elegant Wooden Chair', price: 249.99, quantity: 1 },
-      { id: 'item-2', name: 'Modern Coffee Table', price: 349.98, quantity: 1 }
-    ]
-  },
-  {
-    id: 'order-456',
-    date: '2025-05-05',
-    total: 1299.95,
-    status: 'processing',
-    items: [
-      { id: 'item-3', name: 'Scandinavian Bed Frame', price: 899.99, quantity: 1 },
-      { id: 'item-4', name: 'Memory Foam Mattress', price: 399.96, quantity: 1 }
-    ]
-  }
-];
+import { Card, CardContent } from '@/components/ui/card';
 
 const Account = () => {
-  const { user, isAuthenticated, logout, isBuyer, isSeller, isAdmin } = useAuth();
+  const { user, isAuthenticated, logout, isBuyer, isSeller } = useAuth();
   const navigate = useNavigate();
   
   // Profile state
@@ -113,22 +90,22 @@ const Account = () => {
 
   return (
     <Layout>
-      <div className="page-transition min-h-screen bg-cream py-20">
+      <div className="page-transition min-h-screen bg-background py-20">
         <div className="container-custom">
-          <div className="bg-white p-8 rounded-sm shadow-sm">
+          <div className="bg-card p-8 rounded-sm shadow-sm border border-border">
             <div className="flex flex-col md:flex-row md:items-center justify-between md:space-x-4 mb-6">
               <div className="flex items-center space-x-4 mb-4 md:mb-0">
                 <Avatar className="h-16 w-16">
-                  <AvatarFallback className="bg-terracotta text-white text-xl">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xl">
                     {getUserInitials()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h1 className="font-playfair text-2xl text-charcoal">
+                  <h1 className="font-playfair text-2xl text-foreground">
                     {user.firstName} {user.lastName}
                   </h1>
-                  <p className="text-earth">{user.email}</p>
-                  <span className="inline-block bg-terracotta/10 text-terracotta text-xs px-2 py-1 rounded-sm mt-1">
+                  <p className="text-muted-foreground">{user.email}</p>
+                  <span className="inline-block bg-primary/10 text-primary text-xs px-2 py-1 rounded-sm mt-1">
                     Buyer Account
                   </span>
                 </div>
@@ -136,7 +113,7 @@ const Account = () => {
               
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2 border-terracotta text-terracotta hover:bg-terracotta/10"
+                className="flex items-center gap-2 border-primary text-primary hover:bg-primary/10"
                 onClick={handleLogout}
               >
                 <LogOut size={16} />
@@ -144,25 +121,58 @@ const Account = () => {
               </Button>
             </div>
 
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <Card className="border border-border hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/my-orders')}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Package className="w-8 h-8 text-primary" />
+                      <div>
+                        <h3 className="font-medium text-foreground">My Orders</h3>
+                        <p className="text-sm text-muted-foreground">View order history and track shipments</p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border border-border hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/my-rooms')}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Store className="w-8 h-8 text-primary" />
+                      <div>
+                        <h3 className="font-medium text-foreground">My Rooms</h3>
+                        <p className="text-sm text-muted-foreground">Manage your virtual room designs</p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Seller Portal Promotion */}
-            <div className="mb-6 p-4 bg-gradient-to-r from-terracotta/5 to-olive/5 rounded-sm border border-terracotta/20">
+            <div className="mb-6 p-4 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-sm border border-primary/20">
               <div className="flex items-start gap-3">
-                <Store size={24} className="text-terracotta flex-shrink-0 mt-1" />
+                <Store size={24} className="text-primary flex-shrink-0 mt-1" />
                 <div className="flex-grow">
-                  <h3 className="text-charcoal font-medium mb-1">Interested in selling?</h3>
-                  <p className="text-earth text-sm mb-3">
+                  <h3 className="text-foreground font-medium mb-1">Interested in selling?</h3>
+                  <p className="text-muted-foreground text-sm mb-3">
                     Turn your passion into profit. Join our marketplace as a seller and reach thousands of buyers.
                   </p>
                   <div className="flex gap-2">
                     <Link
                       to="/seller/register"
-                      className="bg-terracotta text-white px-4 py-2 text-sm hover:bg-umber transition-colors"
+                      className="bg-primary text-primary-foreground px-4 py-2 text-sm hover:bg-primary/90 transition-colors"
                     >
                       Become a Seller
                     </Link>
                     <Link
                       to="/seller/login"
-                      className="border border-terracotta text-terracotta px-4 py-2 text-sm hover:bg-terracotta/10 transition-colors"
+                      className="border border-primary text-primary px-4 py-2 text-sm hover:bg-primary/10 transition-colors"
                     >
                       Seller Login
                     </Link>
@@ -172,14 +182,13 @@ const Account = () => {
             </div>
 
             <Tabs defaultValue="profile" className="mt-4">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
-                <TabsTrigger value="profile" className="text-base">Profile</TabsTrigger>
-                <TabsTrigger value="orders" className="text-base">Order History</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-1 mb-8">
+                <TabsTrigger value="profile" className="text-base">Profile Settings</TabsTrigger>
               </TabsList>
               
               <TabsContent value="profile">
                 {error && (
-                  <div className="mb-6 p-3 bg-red-50 text-red-700 rounded-sm flex items-center">
+                  <div className="mb-6 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-sm flex items-center">
                     <AlertCircle size={18} className="mr-2 flex-shrink-0" />
                     <span>{error}</span>
                   </div>
@@ -187,7 +196,7 @@ const Account = () => {
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="font-medium text-lg text-charcoal">Personal Information</h2>
+                    <h2 className="font-medium text-lg text-foreground">Personal Information</h2>
                     {!isEditing && (
                       <Button 
                         type="button"
@@ -201,11 +210,11 @@ const Account = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-earth mb-1" htmlFor="firstName">
+                      <label className="block text-sm text-muted-foreground mb-1" htmlFor="firstName">
                         First Name
                       </label>
                       <div className="flex items-center">
-                        <User size={18} className="text-earth mr-2" />
+                        <User size={18} className="text-muted-foreground mr-2" />
                         <input
                           id="firstName"
                           name="firstName"
@@ -213,17 +222,17 @@ const Account = () => {
                           value={formData.firstName}
                           onChange={handleFormChange}
                           disabled={!isEditing}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50 disabled:bg-sand/10 disabled:text-charcoal"
+                          className="w-full py-2 px-3 border border-border bg-background text-foreground focus:outline-none focus:border-primary/50 disabled:bg-muted/10 disabled:text-muted-foreground"
                         />
                       </div>
                     </div>
                     
                     <div>
-                      <label className="block text-sm text-earth mb-1" htmlFor="lastName">
+                      <label className="block text-sm text-muted-foreground mb-1" htmlFor="lastName">
                         Last Name
                       </label>
                       <div className="flex items-center">
-                        <User size={18} className="text-earth mr-2" />
+                        <User size={18} className="text-muted-foreground mr-2" />
                         <input
                           id="lastName"
                           name="lastName"
@@ -231,17 +240,17 @@ const Account = () => {
                           value={formData.lastName}
                           onChange={handleFormChange}
                           disabled={!isEditing}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50 disabled:bg-sand/10 disabled:text-charcoal"
+                          className="w-full py-2 px-3 border border-border bg-background text-foreground focus:outline-none focus:border-primary/50 disabled:bg-muted/10 disabled:text-muted-foreground"
                         />
                       </div>
                     </div>
                     
                     <div>
-                      <label className="block text-sm text-earth mb-1" htmlFor="email">
+                      <label className="block text-sm text-muted-foreground mb-1" htmlFor="email">
                         Email
                       </label>
                       <div className="flex items-center">
-                        <Mail size={18} className="text-earth mr-2" />
+                        <Mail size={18} className="text-muted-foreground mr-2" />
                         <input
                           id="email"
                           name="email"
@@ -249,17 +258,17 @@ const Account = () => {
                           value={formData.email}
                           onChange={handleFormChange}
                           disabled={!isEditing}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50 disabled:bg-sand/10 disabled:text-charcoal"
+                          className="w-full py-2 px-3 border border-border bg-background text-foreground focus:outline-none focus:border-primary/50 disabled:bg-muted/10 disabled:text-muted-foreground"
                         />
                       </div>
                     </div>
                     
                     <div>
-                      <label className="block text-sm text-earth mb-1" htmlFor="phone">
+                      <label className="block text-sm text-muted-foreground mb-1" htmlFor="phone">
                         Phone
                       </label>
                       <div className="flex items-center">
-                        <Phone size={18} className="text-earth mr-2" />
+                        <Phone size={18} className="text-muted-foreground mr-2" />
                         <input
                           id="phone"
                           name="phone"
@@ -267,17 +276,17 @@ const Account = () => {
                           value={formData.phone}
                           onChange={handleFormChange}
                           disabled={!isEditing}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50 disabled:bg-sand/10 disabled:text-charcoal"
+                          className="w-full py-2 px-3 border border-border bg-background text-foreground focus:outline-none focus:border-primary/50 disabled:bg-muted/10 disabled:text-muted-foreground"
                         />
                       </div>
                     </div>
                     
                     <div className="md:col-span-2">
-                      <label className="block text-sm text-earth mb-1" htmlFor="address">
+                      <label className="block text-sm text-muted-foreground mb-1" htmlFor="address">
                         Address
                       </label>
                       <div className="flex items-center">
-                        <MapPin size={18} className="text-earth mr-2" />
+                        <MapPin size={18} className="text-muted-foreground mr-2" />
                         <input
                           id="address"
                           name="address"
@@ -285,7 +294,7 @@ const Account = () => {
                           value={formData.address}
                           onChange={handleFormChange}
                           disabled={!isEditing}
-                          className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50 disabled:bg-sand/10 disabled:text-charcoal"
+                          className="w-full py-2 px-3 border border-border bg-background text-foreground focus:outline-none focus:border-primary/50 disabled:bg-muted/10 disabled:text-muted-foreground"
                         />
                       </div>
                     </div>
@@ -303,7 +312,7 @@ const Account = () => {
                       <Button 
                         type="submit" 
                         disabled={isSubmitting}
-                        className="bg-terracotta hover:bg-umber text-white"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
                         {isSubmitting ? 'Saving...' : 'Save Changes'}
                         <Save size={16} className="ml-2" />
@@ -311,63 +320,6 @@ const Account = () => {
                     </div>
                   )}
                 </form>
-              </TabsContent>
-              
-              <TabsContent value="orders">
-                <h2 className="font-medium text-lg text-charcoal mb-4">Order History</h2>
-                
-                {mockOrderHistory.length === 0 ? (
-                  <div className="text-center py-10 border border-taupe/20 rounded-sm">
-                    <Package size={48} className="mx-auto text-earth" />
-                    <p className="mt-4 text-charcoal font-medium">No orders yet</p>
-                    <p className="text-earth">You haven't placed any orders yet.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {mockOrderHistory.map((order) => (
-                      <div key={order.id} className="border border-taupe/20 rounded-sm overflow-hidden">
-                        <div className="bg-sand/20 p-4 flex flex-col sm:flex-row justify-between">
-                          <div>
-                            <p className="font-medium text-charcoal">Order #{order.id}</p>
-                            <p className="text-sm text-earth">Placed on {new Date(order.date).toLocaleDateString()}</p>
-                          </div>
-                          <div className="mt-2 sm:mt-0">
-                            <span className={`inline-block px-2 py-1 rounded-sm text-xs uppercase font-medium ${
-                              order.status === 'delivered' ? 'bg-olive/20 text-olive' : 
-                              order.status === 'processing' ? 'bg-terracotta/20 text-terracotta' :
-                              'bg-taupe/20 text-taupe'
-                            }`}>
-                              {order.status}
-                            </span>
-                            <p className="text-sm font-medium mt-1 text-charcoal">Total: ${order.total.toFixed(2)}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="p-4">
-                          <h3 className="text-sm text-earth mb-2">Items</h3>
-                          <div className="space-y-2">
-                            {order.items.map((item) => (
-                              <div key={item.id} className="flex justify-between text-charcoal">
-                                <p>{item.name} × {item.quantity}</p>
-                                <p>${item.price.toFixed(2)}</p>
-                              </div>
-                            ))}
-                          </div>
-                          
-                          <div className="mt-4 flex justify-end">
-                            <Button 
-                              variant="outline"
-                              size="sm"
-                              className="text-sm"
-                            >
-                              View Details
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </TabsContent>
             </Tabs>
           </div>

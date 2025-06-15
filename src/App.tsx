@@ -17,6 +17,7 @@ import Search from './pages/buyer/Search';
 import Cart from './pages/buyer/Cart';
 import Checkout from './pages/buyer/Checkout';
 import Account from './pages/buyer/Account';
+import MyOrders from './pages/buyer/MyOrders';
 import ForYou from './pages/buyer/ForYou';
 import MyRooms from './pages/buyer/MyRooms';
 import RoomDetail from './pages/buyer/RoomDetail';
@@ -105,6 +106,7 @@ const AppContent = () => {
 
                 {/* User Account */}
                 <Route path="/account" element={<Account />} />
+                <Route path="/my-orders" element={<MyOrders />} />
 
                 {/* Seller Routes */}
                 <Route path="/seller/dashboard" element={<SellerDashboard />} />
