@@ -11,6 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { useIsMobile } from '../../hooks/use-mobile';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import InstagramStylePost from '../../components/InstagramStylePost';
 
 const ForYou = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -80,7 +81,8 @@ const ForYou = () => {
 
   const handleLike = async (productId: string) => {
     try {
-      await apiService.handleLike(productId);
+      // We are not calling the API to make the UI feel faster
+      // await apiService.handleLike(productId);
       
       setProducts(prevProducts => prevProducts.map(product => {
         if (product.id === productId) {
@@ -196,6 +198,41 @@ const ForYou = () => {
             <h2 className="text-xl text-foreground">Loading your feed...</h2>
           </div>
         </div>
+      </Layout>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <Layout>
+        {/* Negative margins to break out of layout padding for a full-screen feel */}
+        <div className="h-full -mx-4 sm:-mx-6 lg:-mx-8 -my-8">
+          <div className="h-full w-full overflow-y-auto snap-y snap-mandatory">
+            {products.map((product) => (
+              <div key={product.id} className="h-full w-full snap-start flex items-center justify-center bg-black">
+                <div className="w-full h-full">
+                  <InstagramStylePost
+                    product={product}
+                    onLike={handleLike}
+                    onShare={handleShare}
+                    onComment={handleComment}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {commentsModal.isOpen && (
+          <CommentsModal
+            isOpen={commentsModal.isOpen}
+            onClose={() => setCommentsModal({ isOpen: false, productId: '', productName: '', comments: [] })}
+            productId={commentsModal.productId}
+            comments={commentsModal.comments}
+            onAddComment={handleAddComment}
+            onReplyToComment={handleReplyToComment}
+            productName={commentsModal.productName}
+          />
+        )}
       </Layout>
     );
   }
