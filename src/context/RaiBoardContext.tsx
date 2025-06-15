@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { RaiBoard, RaiBoardProduct, RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { Product } from '@/models/internal/Product';
@@ -14,6 +13,7 @@ type RaiBoardAction =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'ADD_PRODUCT'; payload: RaiBoardProduct }
   | { type: 'UPDATE_PRODUCT_POSITION'; payload: { productId: string; position: { x: number; y: number }; zIndex?: number } }
+  | { type: 'UPDATE_PRODUCT_SIZE'; payload: { productId: string; size: { width: number; height: number } } }
   | { type: 'REMOVE_PRODUCT'; payload: string }
   | { type: 'ADD_TEXT_ELEMENT'; payload: RaiBoardTextElement }
   | { type: 'UPDATE_TEXT_ELEMENT_POSITION'; payload: { elementId: string; position: { x: number; y: number }; zIndex?: number } }
@@ -64,6 +64,20 @@ function raiBoardReducer(state: RaiBoardState, action: RaiBoardAction): RaiBoard
                   position: action.payload.position,
                   ...(action.payload.zIndex !== undefined && { zIndex: action.payload.zIndex }),
                 }
+              : p
+          ),
+        },
+        hasUnsavedChanges: true,
+      };
+    case 'UPDATE_PRODUCT_SIZE':
+      if (!state.board) return state;
+      return {
+        ...state,
+        board: {
+          ...state.board,
+          products: state.board.products.map(p =>
+            p.id === action.payload.productId
+              ? { ...p, size: action.payload.size }
               : p
           ),
         },

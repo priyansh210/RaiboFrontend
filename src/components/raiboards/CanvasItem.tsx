@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -56,11 +55,13 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const itemRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>();
+  const localSizeRef = useRef(size);
 
   // Update local state when props change
   useEffect(() => {
     setLocalPosition(position);
     setLocalSize(size);
+    localSizeRef.current = size;
   }, [position, size]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -125,13 +126,15 @@ export const CanvasItem: React.FC<CanvasItemProps> = ({
         const deltaY = e.clientY - resizeStart.y;
         const newWidth = Math.max(100, resizeStart.width + deltaX / zoom);
         const newHeight = Math.max(50, resizeStart.height + deltaY / zoom);
-        setLocalSize({ width: newWidth, height: newHeight });
+        const newSize = { width: newWidth, height: newHeight };
+        setLocalSize(newSize);
+        localSizeRef.current = newSize;
       });
     };
 
     const handleGlobalMouseUp = () => {
       setIsResizing(false);
-      onResize(id, localSize);
+      onResize(id, localSizeRef.current);
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
       if (rafRef.current) {

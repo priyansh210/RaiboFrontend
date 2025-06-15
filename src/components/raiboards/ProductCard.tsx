@@ -8,6 +8,7 @@ interface ProductCardProps {
   isSelected: boolean;
   canEdit: boolean;
   onMove: (productId: string, position: { x: number; y: number }, zIndex?: number) => void;
+  onResize: (productId: string, size: { width: number; height: number }) => void;
   onRemove: (productId: string) => void;
   onDoubleClick: (productId: string) => void;
   onSelect: (productId: string) => void;
@@ -19,6 +20,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isSelected,
   canEdit,
   onMove,
+  onResize,
   onRemove,
   onDoubleClick,
   onSelect,
@@ -44,11 +46,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       isSelected={isSelected}
       canEdit={canEdit}
       onMove={onMove}
+      onResize={onResize}
       onRemove={onRemove}
       onSelect={onSelect}
       onDoubleClick={handleDoubleClick}
       zoom={zoom}
       className="group"
+      resizable={true}
     >
       <div
         className="w-full h-full bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-200 group-hover:scale-[1.02]"

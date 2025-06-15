@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { RaiBoard, RaiBoardProduct, RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { ProductCard } from './ProductCard';
@@ -8,6 +7,7 @@ import { ZoomControls } from './ZoomControls';
 interface RaiBoardCanvasProps {
   board: RaiBoard;
   onProductMove: (productId: string, position: { x: number; y: number }, zIndex?: number) => void;
+  onProductResize: (productId: string, size: { width: number; height: number }) => void;
   onProductRemove: (productId: string) => void;
   onProductDoubleClick: (productId: string) => void;
   onTextElementMove: (elementId: string, position: { x: number; y: number }, zIndex?: number) => void;
@@ -20,6 +20,7 @@ interface RaiBoardCanvasProps {
 export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   board,
   onProductMove,
+  onProductResize,
   onProductRemove,
   onProductDoubleClick,
   onTextElementMove,
@@ -161,6 +162,7 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
             isSelected={selectedProduct === product.id}
             canEdit={canEdit}
             onMove={onProductMove}
+            onResize={onProductResize}
             onRemove={onProductRemove}
             onDoubleClick={onProductDoubleClick}
             onSelect={handleProductSelect}

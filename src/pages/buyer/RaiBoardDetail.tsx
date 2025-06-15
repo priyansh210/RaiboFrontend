@@ -162,6 +162,13 @@ const RaiBoardDetailContent: React.FC = () => {
     });
   };
 
+  const handleProductResize = (productId: string, size: { width: number; height: number }) => {
+    dispatch({
+      type: 'UPDATE_PRODUCT_SIZE',
+      payload: { productId, size },
+    });
+  };
+
   const handleProductRemove = (productId: string) => {
     dispatch({ type: 'REMOVE_PRODUCT', payload: productId });
     toast({
@@ -241,6 +248,7 @@ const RaiBoardDetailContent: React.FC = () => {
           <RaiBoardCanvas
             board={state.board}
             onProductMove={handleProductMove}
+            onProductResize={handleProductResize}
             onProductRemove={handleProductRemove}
             onProductDoubleClick={handleProductDoubleClick}
             onTextElementMove={handleTextElementMove}
