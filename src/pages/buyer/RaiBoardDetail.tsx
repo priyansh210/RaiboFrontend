@@ -1,25 +1,23 @@
+
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { Product } from '@/models/internal/Product';
 import { raiBoardService } from '@/services/RaiBoardService';
-import { searchProducts } from '@/services/ProductService';
 import { RaiBoardCanvas } from '@/components/raiboards/RaiBoardCanvas';
 import { RaiBoardToolbar } from '@/components/raiboards/RaiBoardToolbar';
 import { CollaboratorPanel } from '@/components/raiboards/CollaboratorPanel';
 import { SaveConfirmationDialog } from '@/components/raiboards/SaveConfirmationDialog';
 import { RaiBoardProvider, useRaiBoard } from '@/context/RaiBoardContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Search, Settings, Save, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { RaiBoardHeader } from '@/components/raiboards/RaiBoardHeader';
+import { ProductSearchDialog } from '@/components/raiboards/ProductSearchDialog';
+import { RaiBoardLoading } from '@/components/raiboards/RaiBoardLoading';
+import { RaiBoardNotFound } from '@/components/raiboards/RaiBoardNotFound';
 
 const RaiBoardDetailContent: React.FC = () => {
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   const { state, dispatch, addProductLocally, addTextElementLocally } = useRaiBoard();
 
@@ -28,8 +26,6 @@ const RaiBoardDetailContent: React.FC = () => {
   const [showProductSearch, setShowProductSearch] = useState(false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [userRole] = useState<'owner' | 'editor' | 'viewer'>('owner');
 
   useEffect(() => {
@@ -197,114 +193,36 @@ const RaiBoardDetailContent: React.FC = () => {
     }
   };
 
-  const handleSearchProducts = async (term: string) => {
-    if (!term.trim()) {
-      setSearchResults([]);
-      return;
-    }
-    
-    try {
-      const results = await searchProducts(term);
-      setSearchResults(results);
-    } catch (error) {
-      console.error('Failed to search products:', error);
-    }
-  };
-
   const handleAddProductToBoard = (product: Product) => {
     addProductLocally(product, { x: 100, y: 100 });
     setShowProductSearch(false);
-    setSearchTerm('');
-    setSearchResults([]);
     toast({
       title: 'Success',
       description: 'Product added to board',
     });
   };
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      handleSearchProducts(searchTerm);
-    }, 300);
-    
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm]);
-
   if (state.isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading board...</p>
-        </div>
-      </div>
-    );
+    return <RaiBoardLoading />;
   }
 
   if (!state.board) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Board not found</p>
-          <Button onClick={() => navigate('/raiboards')} className="mt-4">
-            Back to Boards
-          </Button>
-        </div>
-      </div>
-    );
+    return <RaiBoardNotFound onNavigateBack={() => navigate('/raiboards')} />;
   }
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleNavigateWithConfirmation('/raiboards')}
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-semibold text-lg">{state.board.name}</h1>
-              {state.hasUnsavedChanges && (
-                <div className="w-2 h-2 bg-orange-500 rounded-full" title="Unsaved changes" />
-              )}
-            </div>
-            {state.board.description && (
-              <p className="text-sm text-gray-600">{state.board.description}</p>
-            )}
-          </div>
-          
-          {state.board.isPublic && (
-            <Badge variant="secondary">Public</Badge>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant={state.hasUnsavedChanges ? "default" : "outline"}
-            size="sm"
-            onClick={handleSaveBoard}
-            disabled={saving || userRole === 'viewer'}
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? 'Saving...' : state.hasUnsavedChanges ? 'Save*' : 'Save'}
-          </Button>
-          
-          <Button variant="outline" size="sm" onClick={() => setShowCollaborators(true)}>
-            <Users className="w-4 h-4 mr-2" />
-            Share
-          </Button>
-          
-          <Button variant="outline" size="sm">
-            <Settings className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
+      <RaiBoardHeader
+        boardName={state.board.name}
+        boardDescription={state.board.description}
+        isPublic={state.board.isPublic}
+        hasUnsavedChanges={state.hasUnsavedChanges}
+        saving={saving}
+        userRole={userRole}
+        onNavigateBack={() => handleNavigateWithConfirmation('/raiboards')}
+        onSave={handleSaveBoard}
+        onShare={() => setShowCollaborators(true)}
+      />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-row overflow-hidden">
@@ -343,53 +261,11 @@ const RaiBoardDetailContent: React.FC = () => {
         />
       </div>
 
-      {/* Product Search Dialog */}
-      <Dialog open={showProductSearch} onOpenChange={setShowProductSearch}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Add Products to Board</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search for products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <div className="max-h-96 overflow-y-auto space-y-2">
-              {searchResults.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                  onClick={() => handleAddProductToBoard(product)}
-                >
-                  <img
-                    src={product.displayImage || product.imageUrls[0] || '/placeholder.svg'}
-                    alt={product.name}
-                    className="w-12 h-12 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-medium">{product.name}</h4>
-                    <p className="text-sm text-gray-600">${product.price.toFixed(2)}</p>
-                  </div>
-                  <Button size="sm">Add</Button>
-                </div>
-              ))}
-              
-              {searchTerm && searchResults.length === 0 && (
-                <p className="text-center text-gray-500 py-8">
-                  No products found for "{searchTerm}"
-                </p>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ProductSearchDialog
+        isOpen={showProductSearch}
+        onOpenChange={setShowProductSearch}
+        onAddProduct={handleAddProductToBoard}
+      />
 
       {/* Save Confirmation Dialog */}
       <SaveConfirmationDialog
