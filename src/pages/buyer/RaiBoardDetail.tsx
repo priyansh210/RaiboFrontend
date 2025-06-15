@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { RaiBoardTextElement } from '@/models/internal/RaiBoard';
@@ -14,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Search, Settings, Share2, Save, Heading, Type, Plus } from 'lucide-react';
+import { ArrowLeft, Search, Settings, Save, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const RaiBoardDetailContent: React.FC = () => {
@@ -287,36 +286,6 @@ const RaiBoardDetailContent: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleAddTextElement('heading')}
-            disabled={userRole === 'viewer'}
-          >
-            <Heading className="w-4 h-4 mr-2" />
-            Add Heading
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleAddTextElement('paragraph')}
-            disabled={userRole === 'viewer'}
-          >
-            <Type className="w-4 h-4 mr-2" />
-            Add Paragraph
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowProductSearch(true)}
-            disabled={userRole === 'viewer'}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Product
-          </Button>
-          
-          <Button
             variant={state.hasUnsavedChanges ? "default" : "outline"}
             size="sm"
             onClick={handleSaveBoard}
@@ -326,8 +295,8 @@ const RaiBoardDetailContent: React.FC = () => {
             {saving ? 'Saving...' : state.hasUnsavedChanges ? 'Save*' : 'Save'}
           </Button>
           
-          <Button variant="outline" size="sm">
-            <Share2 className="w-4 h-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={() => setShowCollaborators(true)}>
+            <Users className="w-4 h-4 mr-2" />
             Share
           </Button>
           
@@ -337,27 +306,40 @@ const RaiBoardDetailContent: React.FC = () => {
         </div>
       </div>
 
-      {/* Canvas */}
-      <div className="flex-1 relative">
-        <RaiBoardCanvas
-          board={state.board}
-          onProductMove={handleProductMove}
-          onProductRemove={handleProductRemove}
-          onProductDoubleClick={handleProductDoubleClick}
-          onTextElementMove={handleTextElementMove}
-          onTextElementResize={handleTextElementResize}
-          onTextElementUpdate={handleTextElementUpdate}
-          onTextElementRemove={handleTextElementRemove}
-          userRole={userRole}
-        />
+      {/* Main Content */}
+      <div className="flex-1 flex flex-row overflow-hidden">
+        <div className="flex-1 relative">
+          <RaiBoardCanvas
+            board={state.board}
+            onProductMove={handleProductMove}
+            onProductRemove={handleProductRemove}
+            onProductDoubleClick={handleProductDoubleClick}
+            onTextElementMove={handleTextElementMove}
+            onTextElementResize={handleTextElementResize}
+            onTextElementUpdate={handleTextElementUpdate}
+            onTextElementRemove={handleTextElementRemove}
+            userRole={userRole}
+          />
+          
+          <CollaboratorPanel
+            collaborators={state.board.collaborators}
+            onInviteCollaborator={handleInviteCollaborator}
+            userRole={userRole}
+            isOpen={showCollaborators}
+            onToggle={() => setShowCollaborators(!showCollaborators)}
+          />
+        </div>
         
-        {/* Collaborator Panel */}
-        <CollaboratorPanel
-          collaborators={state.board.collaborators}
-          onInviteCollaborator={handleInviteCollaborator}
-          userRole={userRole}
-          isOpen={showCollaborators}
-          onToggle={() => setShowCollaborators(!showCollaborators)}
+        <RaiBoardToolbar
+            onAddProduct={() => setShowProductSearch(true)}
+            onAddHeading={() => handleAddTextElement('heading')}
+            onAddParagraph={() => handleAddTextElement('paragraph')}
+            onAddImage={() => toast({ title: 'Coming Soon', description: 'This feature is not yet implemented.'})}
+            userRole={userRole}
+            boardStats={{
+                products: state.board.products.length,
+                textElements: state.board.textElements.length
+            }}
         />
       </div>
 
