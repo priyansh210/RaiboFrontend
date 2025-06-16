@@ -3,7 +3,7 @@
  */
 
 // Base API URL - Updated to use your hosted backend
-export const API_BASE_URL = "https://raibo-service-394365731654.asia-south1.run.app/";
+export const API_BASE_URL = "https://raibo-service-394365731654.asia-south1.run.app";
 
 // API endpoints
 export const API_ENDPOINTS = {
