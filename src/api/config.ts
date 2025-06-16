@@ -3,8 +3,8 @@
  */
 
 // Base API URL - Updated to use your hosted backend
-export const API_BASE_URL = 'https://3000-firebase-raibobackend-1748292729909.cluster-c23mj7ubf5fxwq6nrbev4ugaxa.cloudworkstations.dev';
-// export const API_BASE_URL = "http://localhost:3000";
+export const API_BASE_URL = "https://raibo-service-394365731654.asia-south1.run.app/";
+
 // API endpoints
 export const API_ENDPOINTS = {
   // Authentication

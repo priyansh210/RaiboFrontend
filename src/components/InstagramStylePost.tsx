@@ -55,27 +55,31 @@ const InstagramStylePost: React.FC<InstagramStylePostProps> = ({
         <div className="absolute inset-0 w-full h-full" onDoubleClick={handleDoubleClick} onTouchEnd={handleTouchEnd}>
           <Carousel className="w-full h-full">
             <CarouselContent className="h-full -ml-0">
-              {product.images && product.images.length > 0 ? product.images.map((image, index) => <CarouselItem key={index} className="h-full pl-0">
+              {product.images && product.images.length > 0 ? product.images.map((image, index) => (
+                <CarouselItem key={index} className="h-full pl-0">
                   <div className="h-full w-full">
-                    <img 
-                      src={image} 
-                      alt={`${product.name} ${index + 1}`} 
-                      draggable={false} 
-                      className="w-full h-full object-cover" 
-                      style={{ objectPosition: 'center' }}
+                    <img
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      draggable={false}
+                      className="w-full h-full object-cover"
+                      style={{ objectPosition: 'center', height: '100%', width: '100%' }}
                     />
                   </div>
-                </CarouselItem>) : <CarouselItem className="h-full pl-0">
+                </CarouselItem>
+              )) : (
+                <CarouselItem className="h-full pl-0">
                   <div className="h-full w-full">
-                    <img 
-                      src={'https://picsum.photos/400/600'} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover" 
-                      draggable={false} 
-                      style={{ objectPosition: 'center' }}
+                    <img
+                      src={'https://picsum.photos/400/600'}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      draggable={false}
+                      style={{ objectPosition: 'center', height: '100%', width: '100%' }}
                     />
                   </div>
-                </CarouselItem>}
+                </CarouselItem>
+              )}
             </CarouselContent>
           </Carousel>
 

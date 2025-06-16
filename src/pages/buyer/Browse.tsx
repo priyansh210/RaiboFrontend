@@ -32,7 +32,7 @@ const Browse = () => {
         
         if (query) {
           // Use search function if there's a query
-          productsData = await searchProducts(query);
+          productsData = await fetchProducts();
         } else {
           // Otherwise fetch all products
           productsData = await fetchProducts();

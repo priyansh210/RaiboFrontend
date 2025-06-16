@@ -28,7 +28,7 @@ export class ProductMapper {
         email: external.company_id.email,
         address: external.company_id.address,
       },
-      images: external.imageUrls || [], // Legacy field
+      images: external.imageUrls, // Legacy field
       imageUrls, // New field for storing image URLs
       displayImage, // First image from imageUrls
       discount: external.discount || 0,
