@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User, ArrowLeft } from 'lucide-react';
@@ -141,7 +140,12 @@ const Navbar: React.FC = () => {
   };
 
   const handleBackButton = () => {
-    navigate(-1);
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
+    setIsMenuOpen(false);
   };
 
   return (
@@ -457,25 +461,25 @@ const Navbar: React.FC = () => {
                     {isSeller ? (
                       <>
                         <li>
-                          <Link to="/seller/dashboard" className="text-foreground hover:text-primary flex items-center">
+                          <Link to="/seller/dashboard" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
                             <BarChart3 size={16} className="mr-2" />
                             Dashboard
                           </Link>
                         </li>
                         <li>
-                          <Link to="/seller/products" className="text-foreground hover:text-primary flex items-center">
+                          <Link to="/seller/products" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
                             <Package size={16} className="mr-2" />
                             Products
                           </Link>
                         </li>
                         <li>
-                          <Link to="/seller/payments" className="text-foreground hover:text-primary flex items-center">
+                          <Link to="/seller/payments" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
                             <CreditCard size={16} className="mr-2" />
                             Payments
                           </Link>
                         </li>
                         <li>
-                          <Link to="/seller/logistics" className="text-foreground hover:text-primary flex items-center">
+                          <Link to="/seller/logistics" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
                             <Truck size={16} className="mr-2" />
                             Logistics
                           </Link>
@@ -484,13 +488,46 @@ const Navbar: React.FC = () => {
                     ) : (
                       <>
                         <li>
-                          <Link to="/account" className="text-foreground hover:text-primary">
+                          <Link to="/account" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                             My Account
                           </Link>
                         </li>
                         <li>
-                          <Link to="/for-you" className="text-foreground hover:text-primary">
+                          <Link 
+                            to="/for-you" 
+                            className="text-foreground hover:text-primary"
+                            onClick={(e) => {
+                              if (isGuest) {
+                                e.preventDefault();
+                                setIsMenuOpen(false);
+                                toast({
+                                  title: "Sign in for personalized recommendations",
+                                  description: "Create an account to get recommendations tailored just for you.",
+                                  action: (
+                                    <ToastAction 
+                                      altText={t('signIn')}
+                                      onClick={() => navigate('/login')}
+                                    >
+                                      {t('signIn')}
+                                    </ToastAction>
+                                  ),
+                                });
+                              } else {
+                                setIsMenuOpen(false);
+                              }
+                            }}
+                          >
                             For You
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/my-rooms" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
+                            My Rooms
+                          </Link>
+                        </li>
+                        <li>
+                          <Link to="/raiboards" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
+                            RaiBoards
                           </Link>
                         </li>
                       </>
@@ -508,22 +545,22 @@ const Navbar: React.FC = () => {
                 ) : (
                   <>
                     <li>
-                      <Link to="/login" className="text-foreground hover:text-primary">
+                      <Link to="/login" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                         Sign In
                       </Link>
                     </li>
                     <li>
-                      <Link to="/register" className="text-foreground hover:text-primary">
+                      <Link to="/register" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                         Register
                       </Link>
                     </li>
                     <li>
-                      <Link to="/seller/login" className="text-foreground hover:text-primary">
+                      <Link to="/seller/login" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                         Seller Sign In
                       </Link>
                     </li>
                     <li>
-                      <Link to="/seller/register" className="text-foreground hover:text-primary">
+                      <Link to="/seller/register" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
                         Seller Register
                       </Link>
                     </li>
@@ -531,7 +568,7 @@ const Navbar: React.FC = () => {
                 )}
                 {!isSeller && (
                   <li>
-                    <Link to="/cart" className="text-foreground hover:text-primary flex items-center">
+                    <Link to="/cart" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
                       <ShoppingCart size={18} className="mr-2" />
                       Cart ({cartItems.length})
                     </Link>
@@ -563,6 +600,7 @@ const Navbar: React.FC = () => {
                         <Link 
                           to={category.path} 
                           className="text-foreground hover:text-primary"
+                          onClick={() => setIsMenuOpen(false)}
                         >
                           {category.name}
                         </Link>
