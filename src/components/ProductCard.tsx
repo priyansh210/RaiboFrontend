@@ -13,9 +13,10 @@ import AddProductDialog from './AddProductDialog';
 interface ProductCardProps {
   product: Product;
   badge?: string;
+  onLike?: (productId: string) => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, badge, onLike }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [selectedColor, setSelectedColor] = useState<ProductColor>(
     product.userPreferences?.preferredColors?.[0] || { name: 'Default', code: '#000000' }
@@ -69,6 +70,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
         ),
       });
     } else {
+      // Handle like if onLike is provided
+      if (onLike) {
+        onLike(product.id);
+      }
       toast({
         title: "Added to wishlist",
         description: `${product.name} has been added to your wishlist.`,
@@ -146,7 +151,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, badge }) => {
                     className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors shadow-lg"
                     title="Add to Wishlist"
                   >
-                    <Heart size={16} className="text-terracotta" />
+                    <Heart 
+                      size={16} 
+                      className={`text-terracotta ${product.interactions?.userHasLiked ? 'fill-current' : ''}`} 
+                    />
                   </button>
                   <button
                     onClick={handleAddToCart}
