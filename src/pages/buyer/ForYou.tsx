@@ -63,7 +63,7 @@ const ForYou = () => {
         {/* Mobile Reels View with Navbar */}
         <div className="h-screen w-screen overflow-hidden">
           <Navbar />
-          <div className="fixed top-16 bottom-0 left-0 right-0 overflow-y-auto snap-y snap-mandatory bg-black">
+          <div className="fixed top-16 bottom-0 left-0 right-0 overflow-y-auto snap-y snap-mandatory">
             {products.map((product) => (
               <div key={product.id} className="h-full w-full snap-start flex-shrink-0">
                 <InstagramStylePost
@@ -115,7 +115,7 @@ const ForYou = () => {
           <div className={`columns-2 ${isMobile ? 'gap-3' : 'md:columns-3 lg:columns-4 xl:columns-5 gap-4'} space-y-4`}>
             {products.map((product) => (
               <div key={product.id} className="break-inside-avoid mb-4">
-                <ProductCard product={product} />
+                <ProductCard product={product} onLike={handleLike} />
               </div>
             ))}
           </div>
