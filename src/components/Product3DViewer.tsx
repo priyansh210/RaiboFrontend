@@ -72,8 +72,6 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
             position={[10, 10, 5]} 
             intensity={1}
             castShadow
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
           />
           <pointLight position={[-10, -10, -10]} intensity={0.3} />
           
@@ -86,7 +84,7 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
             polar={[-Math.PI / 3, Math.PI / 3]}
             azimuth={[-Math.PI / 1.4, Math.PI / 1.4]}
           >
-            <Chair scale={fullscreen ? 1.2 : 1} controlsRef={controlsRef} />
+            <Chair scale={fullscreen ? 1.2 : 1} />
           </PresentationControls>
           
           {/* Environment */}
