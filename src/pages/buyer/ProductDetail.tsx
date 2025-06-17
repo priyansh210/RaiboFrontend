@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import ProductInteractions from '../../components/ProductInteractions';
 import CommentsModal from '../../components/CommentsModal';
 import AddToRoomModal from '../../components/AddToRoomModal';
+import Product3DViewer from '../../components/Product3DViewer';
 import { useCart } from '../../context/CartContext';
 import { getProductById, getSimilarProducts, addComment, replyToComment } from '../../services/ProductService';
 import { Product } from '../../models/internal/Product';
@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -352,55 +353,68 @@ const ProductDetail = () => {
           </nav>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
-            {/* Product Images */}
+            {/* Product Images and 3D Viewer */}
             <div className="space-y-4">
-              <div className="aspect-square bg-card rounded-2xl overflow-hidden relative group">
-                <img
-                  src={selectedImage}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
+              <Tabs defaultValue="images" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="images">Photos</TabsTrigger>
+                  <TabsTrigger value="3d">3D View</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="images" className="mt-4">
+                  <div className="aspect-square bg-card rounded-2xl overflow-hidden relative group">
+                    <img
+                      src={selectedImage}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
 
-                {/* Image navigation arrows */}
-                {product.images && product.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-card/80 hover:bg-card p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      disabled={currentImageIndex === 0}
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-card/80 hover:bg-card p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      disabled={currentImageIndex === product.images.length - 1}
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  </>
-                )}
-              </div>
+                    {/* Image navigation arrows */}
+                    {product.images && product.images.length > 1 && (
+                      <>
+                        <button
+                          onClick={prevImage}
+                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-card/80 hover:bg-card p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          disabled={currentImageIndex === 0}
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+                        <button
+                          onClick={nextImage}
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-card/80 hover:bg-card p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          disabled={currentImageIndex === product.images.length - 1}
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                      </>
+                    )}
+                  </div>
 
-              {/* Thumbnail Gallery */}
-              {product.images && product.images.length > 1 && (
-                <div className="flex space-x-3 overflow-x-auto pb-2">
-                  {product.images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setSelectedImage(image);
-                        setCurrentImageIndex(index);
-                      }}
-                      className={`w-20 h-20 flex-shrink-0 border-2 rounded-lg overflow-hidden transition-all ${
-                        selectedImage === image ? 'border-terracotta' : 'border-border'
-                      }`}
-                    >
-                      <img src={image} alt={`${product.name} thumbnail ${index}`} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              )}
+                  {/* Thumbnail Gallery */}
+                  {product.images && product.images.length > 1 && (
+                    <div className="flex space-x-3 overflow-x-auto pb-2 mt-4">
+                      {product.images.map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setSelectedImage(image);
+                            setCurrentImageIndex(index);
+                          }}
+                          className={`w-20 h-20 flex-shrink-0 border-2 rounded-lg overflow-hidden transition-all ${
+                            selectedImage === image ? 'border-terracotta' : 'border-border'
+                          }`}
+                        >
+                          <img src={image} alt={`${product.name} thumbnail ${index}`} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="3d" className="mt-4">
+                  <Product3DViewer productName={product.name} />
+                </TabsContent>
+              </Tabs>
             </div>
 
             {/* Product Info */}
