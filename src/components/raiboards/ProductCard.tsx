@@ -1,6 +1,11 @@
+
 import React from 'react';
 import { RaiBoardProduct } from '@/models/internal/RaiBoard';
 import { CanvasItem } from './CanvasItem';
+import { useTempCart } from '@/context/TempCartContext';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { ShoppingCart, Plus } from 'lucide-react';
 
 interface ProductCardProps {
   product: RaiBoardProduct;
@@ -12,6 +17,7 @@ interface ProductCardProps {
   onDoubleClick: (productId: string) => void;
   onSelect: (productId: string) => void;
   zoom: number;
+  actualProduct?: any; // The actual product data for temp cart
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -24,7 +30,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onDoubleClick,
   onSelect,
   zoom,
+  actualProduct,
 }) => {
+  const { addItem, state: tempCartState } = useTempCart();
+
   // Dynamic font size based on card height
   const baseHeight = 180;
   const fontScale = product.size.height / baseHeight;
@@ -35,6 +44,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const handleDoubleClick = () => {
     onDoubleClick(product.productId);
   };
+
+  const handleAddToTempCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (actualProduct) {
+      addItem(actualProduct);
+    }
+  };
+
+  const isInTempCart = tempCartState.items.some(item => item.product.id === product.productId);
 
   return (
     <CanvasItem
@@ -54,9 +72,47 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       resizable={true}
     >
       <div
-        className="w-full h-full bg-card rounded-lg shadow-lg border border-border overflow-hidden hover:shadow-xl transition-all duration-200 group-hover:scale-[1.02]"
+        className="w-full h-full bg-card rounded-lg shadow-lg border border-border overflow-hidden hover:shadow-xl transition-all duration-200 group-hover:scale-[1.02] relative"
         style={{ fontSize: nameFontSize }}
       >
+        {/* Selection Checkbox - Top Left */}
+        {actualProduct && (
+          <div className="absolute top-2 left-2 z-10">
+            <Checkbox
+              checked={isInTempCart}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  addItem(actualProduct);
+                }
+              }}
+              className="bg-white/90 border-2"
+            />
+          </div>
+        )}
+
+        {/* Add to Bundle Button - Top Right */}
+        {actualProduct && !isInTempCart && (
+          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={handleAddToTempCart}
+              className="w-8 h-8 p-0 bg-white/90 hover:bg-white"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
+
+        {/* In Bundle Indicator */}
+        {isInTempCart && (
+          <div className="absolute top-2 right-2 z-10">
+            <div className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center">
+              <ShoppingCart className="w-4 h-4" />
+            </div>
+          </div>
+        )}
+
         {/* Product Image */}
         <div className="w-full" style={{ height: `${Math.round(product.size.height * 0.6)}px` }}>
           <img

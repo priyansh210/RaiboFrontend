@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { RaiBoard, RaiBoardProduct, RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { ProductCard } from './ProductCard';
@@ -122,6 +123,33 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   const gridOffsetX = (pan.x % gridSize);
   const gridOffsetY = (pan.y % gridSize);
 
+  // Create mock product data for temp cart functionality
+  const createMockProduct = (boardProduct: RaiBoardProduct) => ({
+    id: boardProduct.productId,
+    name: boardProduct.productName,
+    description: `${boardProduct.productName} from RaiBoard`,
+    price: boardProduct.productPrice,
+    quantity: 100,
+    category: { id: '1', name: 'Furniture' },
+    company: { id: '1', name: 'RAIBO', email: 'contact@raibo.com', address: 'RAIBO HQ' },
+    images: [boardProduct.productImage],
+    imageUrls: [boardProduct.productImage],
+    displayImage: boardProduct.productImage,
+    discount: Math.floor(Math.random() * 30), // Random discount for demo
+    discountValidUntil: null,
+    averageRating: 4.5,
+    totalRatings: 100,
+    version: 1,
+    interactions: {
+      likes: 0,
+      shares: 0,
+      comments: [],
+      userHasLiked: false,
+      userHasShared: false,
+    },
+    colors: [{ name: 'Default', code: '#000000' }],
+  });
+
   return (
     <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-background to-secondary">
       {/* Enhanced Grid Background */}
@@ -167,6 +195,7 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
             onDoubleClick={onProductDoubleClick}
             onSelect={handleProductSelect}
             zoom={zoom}
+            actualProduct={createMockProduct(product)}
           />
         ))}
 

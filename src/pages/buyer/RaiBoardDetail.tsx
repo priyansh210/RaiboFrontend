@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '@/models/internal/Product';
@@ -5,7 +6,10 @@ import { RaiBoardCanvas } from '@/components/raiboards/RaiBoardCanvas';
 import { RaiBoardToolbar } from '@/components/raiboards/RaiBoardToolbar';
 import { CollaboratorPanel } from '@/components/raiboards/CollaboratorPanel';
 import { SaveConfirmationDialog } from '@/components/raiboards/SaveConfirmationDialog';
+import { TempCartDialog } from '@/components/raiboards/TempCartDialog';
+import { BundleCartButton } from '@/components/raiboards/BundleCartButton';
 import { RaiBoardProvider } from '@/context/RaiBoardContext';
+import { TempCartProvider } from '@/context/TempCartContext';
 import { useToast } from '@/hooks/use-toast';
 import { RaiBoardHeader } from '@/components/raiboards/RaiBoardHeader';
 import { ProductSearchDialog } from '@/components/raiboards/ProductSearchDialog';
@@ -110,6 +114,9 @@ const RaiBoardDetailContent: React.FC = () => {
             isOpen={showCollaborators}
             onOpenChange={setShowCollaborators}
           />
+
+          {/* Bundle Cart Button */}
+          <BundleCartButton />
         </div>
       </div>
 
@@ -118,6 +125,9 @@ const RaiBoardDetailContent: React.FC = () => {
         onOpenChange={setShowProductSearch}
         onAddProduct={onAddProduct}
       />
+
+      {/* Temp Cart Dialog */}
+      <TempCartDialog />
 
       {/* Save Confirmation Dialog */}
       <SaveConfirmationDialog
@@ -132,9 +142,11 @@ const RaiBoardDetailContent: React.FC = () => {
 
 const RaiBoardDetail: React.FC = () => {
   return (
-    <RaiBoardProvider>
-      <RaiBoardDetailContent />
-    </RaiBoardProvider>
+    <TempCartProvider>
+      <RaiBoardProvider>
+        <RaiBoardDetailContent />
+      </RaiBoardProvider>
+    </TempCartProvider>
   );
 };
 
