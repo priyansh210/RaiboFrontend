@@ -1,11 +1,11 @@
 
 import React, { Suspense, useState, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Environment, PresentationControls } from '@react-three/drei';
+import { OrbitControls, Environment, PresentationControls } from '@react-three/drei';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Eye, Maximize2, RotateCcw, Camera } from 'lucide-react';
+import { Eye, Maximize2, Camera } from 'lucide-react';
 import * as THREE from 'three';
 
 // Default 3D model component (using a simple chair model)
@@ -14,26 +14,26 @@ function Chair(props: any) {
   
   // Auto-rotate the chair
   useFrame((state, delta) => {
-    if (chairRef.current && !props.controlsRef?.current?.getPointerLock()) {
+    if (chairRef.current && !props.controlsRef?.current?.enabled) {
       chairRef.current.rotation.y += delta * 0.2;
     }
   });
 
   return (
     <group ref={chairRef} {...props}>
-      {/* Simple chair geometry */}
-      <mesh position={[0, 0.4, 0]}>
+      {/* Chair seat */}
+      <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
         <boxGeometry args={[1, 0.1, 1]} />
         <meshStandardMaterial color="#8B4513" />
       </mesh>
       {/* Chair back */}
-      <mesh position={[0, 1, -0.4]}>
+      <mesh position={[0, 1, -0.4]} castShadow receiveShadow>
         <boxGeometry args={[1, 1, 0.1]} />
         <meshStandardMaterial color="#8B4513" />
       </mesh>
       {/* Chair legs */}
       {[[-0.4, 0, -0.4], [0.4, 0, -0.4], [-0.4, 0, 0.4], [0.4, 0, 0.4]].map((pos, i) => (
-        <mesh key={i} position={pos as [number, number, number]}>
+        <mesh key={i} position={pos as [number, number, number]} castShadow receiveShadow>
           <cylinderGeometry args={[0.05, 0.05, 0.8]} />
           <meshStandardMaterial color="#654321" />
         </mesh>
@@ -54,32 +54,29 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
   const isMobile = useIsMobile();
 
   const handleARView = () => {
-    if ('xr' in navigator) {
-      // Check if WebXR is supported
-      setShowARMessage(true);
-    } else {
-      setShowARMessage(true);
-    }
+    setShowARMessage(true);
   };
 
   const ViewerContent = ({ fullscreen = false }) => (
     <div className={`relative ${fullscreen ? 'h-[80vh]' : 'h-64 md:h-80'} w-full bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-lg overflow-hidden`}>
       <Canvas
         camera={{ position: [2, 2, 5], fov: 45 }}
-        gl={{ antialias: true, alpha: true }}
         shadows
+        dpr={[1, 2]}
+        gl={{ antialias: true, alpha: true }}
       >
         <Suspense fallback={null}>
+          {/* Lighting */}
           <ambientLight intensity={0.4} />
           <directionalLight 
             position={[10, 10, 5]} 
             intensity={1}
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
             castShadow
+            shadow-mapSize={[2048, 2048]}
           />
           <pointLight position={[-10, -10, -10]} intensity={0.3} />
           
+          {/* 3D Model with controls */}
           <PresentationControls
             global
             config={{ mass: 2, tension: 500 }}
@@ -91,8 +88,10 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
             <Chair scale={fullscreen ? 1.2 : 1} controlsRef={controlsRef} />
           </PresentationControls>
           
+          {/* Environment */}
           <Environment preset="apartment" />
           
+          {/* Orbit Controls */}
           <OrbitControls
             ref={controlsRef}
             enablePan={fullscreen}
