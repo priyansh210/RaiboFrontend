@@ -4,10 +4,10 @@ import { Link } from 'react-router-dom';
 import Layout from '../../components/Layout';
 import ProductCard from '../../components/ProductCard';
 import CommentsModal from '../../components/CommentsModal';
+import InstagramExploreGrid from '../../components/InstagramExploreGrid';
 import { useIsMobile } from '../../hooks/use-mobile';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import InstagramStylePost from '../../components/InstagramStylePost';
 import Navbar from '../../components/Navbar';
 import { useProducts } from '../../hooks/useProducts';
 import { ProductReview } from '@/models/internal/Product';
@@ -60,20 +60,18 @@ const ForYou = () => {
   if (isMobile) {
     return (
       <>
-        {/* Mobile Reels View with Navbar */}
-        <div className="h-screen w-screen overflow-hidden">
+        {/* Mobile Instagram-style Explore View */}
+        <div className="min-h-screen bg-background">
           <Navbar />
-          <div className="fixed top-16 bottom-0 left-0 right-0 overflow-y-auto snap-y snap-mandatory">
-            {products.map((product) => (
-              <div key={product.id} className="h-full w-full snap-start flex-shrink-0">
-                <InstagramStylePost
-                  product={product}
-                  onLike={handleLike}
-                  onShare={handleShare}
-                  onComment={handleComment}
-                />
-              </div>
-            ))}
+          <div className="pt-16 pb-4">
+            {/* Header */}
+            <div className="px-4 py-4 border-b border-border">
+              <h1 className="text-2xl font-bold text-foreground">Explore</h1>
+              <p className="text-sm text-muted-foreground mt-1">Discover products curated for you</p>
+            </div>
+            
+            {/* Instagram-style Grid */}
+            <InstagramExploreGrid products={products} />
           </div>
         </div>
         

@@ -19,6 +19,7 @@ import Checkout from './pages/buyer/Checkout';
 import Account from './pages/buyer/Account';
 import MyOrders from './pages/buyer/MyOrders';
 import ForYou from './pages/buyer/ForYou';
+import ForYouFeed from './pages/buyer/ForYouFeed';
 import MyRooms from './pages/buyer/MyRooms';
 import RoomDetail from './pages/buyer/RoomDetail';
 import NotFound from './pages/buyer/NotFound';
@@ -82,6 +83,7 @@ const AppContent = () => {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/stripe-checkout" element={<StripeCheckout />} />
                 <Route path="/for-you" element={<ForYou />} />
+                <Route path="/for-you/feed/:startIndex" element={<ForYouFeed />} />
                 <Route path="/my-rooms" element={<MyRooms />} />
                 <Route path="/room/:id" element={<RoomDetail />} />
 
