@@ -1,5 +1,4 @@
-
-import React, { Suspense, useState, useRef } from 'react';
+import React, { Suspense, useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Environment, PresentationControls } from '@react-three/drei';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -7,38 +6,73 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Eye, Maximize2, Camera } from 'lucide-react';
 import * as THREE from 'three';
+import { useGLTF } from '@react-three/drei';
+const DUMMY_MODEL_URL = "https://res.cloudinary.com/df4kum9dh/image/upload/v1750175561/Ramsebo_Wing_Chair_Glb_rcthto.glb"; // Use a public .glb for AR
+useGLTF.preload(DUMMY_MODEL_URL);
 
-// Default 3D model component (using a simple chair model)
-function Chair(props: any) {
-  const chairRef = useRef<THREE.Group>(null);
-  
-  // Auto-rotate the chair
-  useFrame((state, delta) => {
-    if (chairRef.current && !props.controlsRef?.current?.enabled) {
-      chairRef.current.rotation.y += delta * 0.2;
+// Import model-viewer web component for AR
+// @ts-ignore
+import '@google/model-viewer';
+
+// Add TypeScript support for <model-viewer>
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'model-viewer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & {
+        src?: string;
+        'ar'?: boolean;
+        'ar-modes'?: string;
+        'camera-controls'?: boolean;
+        'auto-rotate'?: boolean;
+        'ios-src'?: string;
+        alt?: string;
+        'shadow-intensity'?: string | number;
+        exposure?: string | number;
+        style?: React.CSSProperties;
+      };
     }
-  });
+  }
+}
+
+function CenteredGLTF({ url }: { url: string }) {
+  const { scene } = useGLTF(url);
+
+  // Defensive: if not loaded, render nothing
+  if (!scene) return null;
+
+  // Compute bounding box to center and scale the model
+  const bbox = new THREE.Box3().setFromObject(scene);
+  const size = bbox.getSize(new THREE.Vector3());
+  const center = bbox.getCenter(new THREE.Vector3());
+
+  // Desired size in your scene
+  const desiredSize = 2.5;
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = desiredSize / maxDim;
 
   return (
-    <group ref={chairRef} {...props}>
-      {/* Chair seat */}
-      <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1, 0.1, 1]} />
-        <meshStandardMaterial color="#8B4513" />
-      </mesh>
-      {/* Chair back */}
-      <mesh position={[0, 1, -0.4]} castShadow receiveShadow>
-        <boxGeometry args={[1, 1, 0.1]} />
-        <meshStandardMaterial color="#8B4513" />
-      </mesh>
-      {/* Chair legs */}
-      {[[-0.4, 0, -0.4], [0.4, 0, -0.4], [-0.4, 0, 0.4], [0.4, 0, 0.4]].map((pos, i) => (
-        <mesh key={i} position={pos as [number, number, number]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.05, 0.05, 0.8]} />
-          <meshStandardMaterial color="#654321" />
-        </mesh>
-      ))}
+    <group
+      scale={[scale, scale, scale]}
+      position={[-center.x * scale, -center.y * scale, -center.z * scale]}
+    >
+      <primitive object={scene} />
     </group>
+  );
+}
+
+function DummyCube() {
+  const ref = useRef<THREE.Mesh>(null!);
+  useFrame((_, delta) => {
+    if (ref.current) {
+      ref.current.rotation.y += delta * 0.5;
+      ref.current.rotation.x += delta * 0.2;
+    }
+  });
+  return (
+    <mesh ref={ref} castShadow receiveShadow>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="#4f46e5" metalness={0.5} roughness={0.3} />
+    </mesh>
   );
 }
 
@@ -49,59 +83,49 @@ interface Product3DViewerProps {
 
 const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, className }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showARMessage, setShowARMessage] = useState(false);
+  const [showAR, setShowAR] = useState(false);
   const controlsRef = useRef<any>();
   const isMobile = useIsMobile();
 
-  const handleARView = () => {
-    setShowARMessage(true);
-  };
+  // For AR, show <model-viewer> dialog
+  const ARContent = () => (
+    <div className="w-full flex flex-col items-center">
+      <model-viewer
+        src={DUMMY_MODEL_URL}
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        auto-rotate
+        style={{ width: '100%', height: '60vh', background: '#f3f4f6', borderRadius: 12 }}
+        ios-src={DUMMY_MODEL_URL}
+        alt="3D model"
+        shadow-intensity="1"
+        exposure="1"
+      >
+        {/* Fallback for unsupported browsers */}
+        <div className="text-center p-4">
+          <p>Your browser does not support AR view.</p>
+        </div>
+      </model-viewer>
+      <div className="mt-4 text-center text-muted-foreground text-sm">
+        {isMobile
+          ? 'Tap the AR icon in the corner to view in your space!'
+          : 'Scan the QR code on your mobile device to view in AR.'}
+      </div>
+    </div>
+  );
 
   const ViewerContent = ({ fullscreen = false }) => (
     <div className={`relative ${fullscreen ? 'h-[80vh]' : 'h-64 md:h-80'} w-full bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-lg overflow-hidden`}>
-      <Canvas
-        camera={{ position: [2, 2, 5], fov: 45 }}
-        shadows
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
-      >
-        <Suspense fallback={null}>
-          {/* Lighting */}
-          <ambientLight intensity={0.4} />
-          <directionalLight 
-            position={[10, 10, 5]} 
-            intensity={1}
-            castShadow
-          />
-          <pointLight position={[-10, -10, -10]} intensity={0.3} />
-          
-          {/* 3D Model with controls */}
-          <PresentationControls
-            global
-            config={{ mass: 2, tension: 500 }}
-            snap={{ mass: 4, tension: 1500 }}
-            rotation={[0, 0, 0]}
-            polar={[-Math.PI / 3, Math.PI / 3]}
-            azimuth={[-Math.PI / 1.4, Math.PI / 1.4]}
-          >
-            <Chair scale={fullscreen ? 1.2 : 1} />
-          </PresentationControls>
-          
-          {/* Environment */}
-          <Environment preset="apartment" />
-          
-          {/* Orbit Controls */}
-          <OrbitControls
-            ref={controlsRef}
-            enablePan={fullscreen}
-            enableZoom={true}
-            enableRotate={true}
-            maxPolarAngle={Math.PI / 1.5}
-            minDistance={2}
-            maxDistance={8}
-          />
-        </Suspense>
-      </Canvas>
+      <Canvas camera={{ position: [0, 2, 5], fov: 45 }}>
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+      <Suspense fallback={null}>
+        <CenteredGLTF url={DUMMY_MODEL_URL} />
+        <Environment preset="apartment" />
+        <OrbitControls enablePan enableZoom enableRotate />
+      </Suspense>
+    </Canvas>
       
       {/* Controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -118,7 +142,7 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
         <Button
           size="sm"
           variant="secondary"
-          onClick={handleARView}
+          onClick={() => setShowAR(true)}
           className="bg-white/80 hover:bg-white/90 text-gray-700"
         >
           <Camera size={16} />
@@ -160,25 +184,16 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
         </DialogContent>
       </Dialog>
 
-      {/* AR Message Dialog */}
-      <Dialog open={showARMessage} onOpenChange={setShowARMessage}>
-        <DialogContent className="max-w-md">
+      {/* AR Dialog */}
+      <Dialog open={showAR} onOpenChange={setShowAR}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>AR View</DialogTitle>
+            <DialogTitle>AR View - {productName}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              AR viewing is coming soon! For now, you can use the 3D preview to explore the product from all angles.
-            </p>
-            <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
-              <p className="text-sm text-blue-800 dark:text-blue-300">
-                <strong>Tip:</strong> For the best AR experience, we recommend using a device with ARCore (Android) or ARKit (iOS) support.
-              </p>
-            </div>
-            <Button onClick={() => setShowARMessage(false)} className="w-full">
-              Got it
-            </Button>
-          </div>
+          <ARContent />
+          <Button onClick={() => setShowAR(false)} className="w-full mt-4">
+            Close
+          </Button>
         </DialogContent>
       </Dialog>
     </>
