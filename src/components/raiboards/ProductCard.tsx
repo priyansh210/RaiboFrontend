@@ -3,9 +3,9 @@ import React from 'react';
 import { RaiBoardProduct } from '@/models/internal/RaiBoard';
 import { CanvasItem } from './CanvasItem';
 import { useTempCart } from '@/context/TempCartContext';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Plus } from 'lucide-react';
+import { ShoppingCart, Plus, Check } from 'lucide-react';
+import { Toggle } from '@/components/ui/toggle';
 
 interface ProductCardProps {
   product: RaiBoardProduct;
@@ -32,7 +32,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   zoom,
   actualProduct,
 }) => {
-  const { addItem, state: tempCartState } = useTempCart();
+  const { addItem, removeItem, state: tempCartState } = useTempCart();
 
   // Dynamic font size based on card height
   const baseHeight = 180;
@@ -45,14 +45,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     onDoubleClick(product.productId);
   };
 
-  const handleAddToTempCart = (e: React.MouseEvent) => {
+  const isInTempCart = tempCartState.items.some(item => item.product.id === product.productId);
+
+  const handleToggleBundle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (actualProduct) {
-      addItem(actualProduct);
+      if (isInTempCart) {
+        removeItem(product.productId);
+      } else {
+        addItem(actualProduct);
+      }
     }
   };
-
-  const isInTempCart = tempCartState.items.some(item => item.product.id === product.productId);
 
   return (
     <CanvasItem
@@ -75,40 +79,37 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         className="w-full h-full bg-card rounded-lg shadow-lg border border-border overflow-hidden hover:shadow-xl transition-all duration-200 group-hover:scale-[1.02] relative"
         style={{ fontSize: nameFontSize }}
       >
-        {/* Selection Checkbox - Top Left */}
+        {/* Bundle Toggle Button - Top Left */}
         {actualProduct && (
           <div className="absolute top-2 left-2 z-10">
-            <Checkbox
-              checked={isInTempCart}
-              onCheckedChange={(checked) => {
-                if (checked) {
-                  addItem(actualProduct);
+            <Toggle
+              pressed={isInTempCart}
+              onPressedChange={(pressed) => {
+                if (actualProduct) {
+                  if (pressed) {
+                    addItem(actualProduct);
+                  } else {
+                    removeItem(product.productId);
+                  }
                 }
               }}
-              className="bg-white/90 border-2"
-            />
-          </div>
-        )}
-
-        {/* Add to Bundle Button - Top Right */}
-        {actualProduct && !isInTempCart && (
-          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
               size="sm"
-              variant="secondary"
-              onClick={handleAddToTempCart}
-              className="w-8 h-8 p-0 bg-white/90 hover:bg-white"
+              className="w-8 h-8 p-0 bg-background/90 hover:bg-background data-[state=on]:bg-primary data-[state=on]:text-primary-foreground border-2"
             >
-              <Plus className="w-4 h-4" />
-            </Button>
+              {isInTempCart ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+            </Toggle>
           </div>
         )}
 
-        {/* In Bundle Indicator */}
+        {/* In Bundle Indicator - Top Right */}
         {isInTempCart && (
           <div className="absolute top-2 right-2 z-10">
-            <div className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center">
-              <ShoppingCart className="w-4 h-4" />
+            <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg">
+              <ShoppingCart className="w-3 h-3" />
             </div>
           </div>
         )}

@@ -21,18 +21,18 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
   maxZoom,
 }) => {
   return (
-    <div className="absolute bottom-4 right-4 flex flex-col gap-2 bg-white rounded-lg shadow-lg p-2">
+    <div className="absolute bottom-4 right-4 flex flex-col gap-2 bg-background border border-border rounded-lg shadow-lg p-2 z-30">
       <Button
         size="sm"
         variant="outline"
         onClick={onZoomIn}
         disabled={zoom >= maxZoom}
-        className="w-10 h-10 p-0"
+        className="w-8 h-8 md:w-10 md:h-10 p-0"
       >
-        <ZoomIn className="w-4 h-4" />
+        <ZoomIn className="w-3 h-3 md:w-4 md:h-4" />
       </Button>
       
-      <div className="text-xs text-center font-medium text-gray-600 px-1">
+      <div className="text-xs text-center font-medium text-muted-foreground px-1">
         {Math.round(zoom * 100)}%
       </div>
       
@@ -41,19 +41,19 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
         variant="outline"
         onClick={onZoomOut}
         disabled={zoom <= minZoom}
-        className="w-10 h-10 p-0"
+        className="w-8 h-8 md:w-10 md:h-10 p-0"
       >
-        <ZoomOut className="w-4 h-4" />
+        <ZoomOut className="w-3 h-3 md:w-4 md:h-4" />
       </Button>
       
       <Button
         size="sm"
         variant="outline"
         onClick={onResetZoom}
-        className="w-10 h-10 p-0"
+        className="w-8 h-8 md:w-10 md:h-10 p-0"
         title="Reset Zoom"
       >
-        <RotateCcw className="w-4 h-4" />
+        <RotateCcw className="w-3 h-3 md:w-4 md:h-4" />
       </Button>
     </div>
   );
