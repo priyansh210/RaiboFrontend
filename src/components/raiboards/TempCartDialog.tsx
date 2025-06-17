@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -28,7 +27,11 @@ export const TempCartDialog: React.FC = () => {
       for (const item of state.items) {
         // Add each item to the real cart with the specified quantity
         for (let i = 0; i < item.quantity; i++) {
-          await addToCart(item.product);
+          await addToCart({
+            ...item.product,
+            selectedColor: { name: 'Default', code: '#000000' },
+            quantity: 1
+          });
         }
       }
       
