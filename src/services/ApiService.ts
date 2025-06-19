@@ -127,7 +127,6 @@ class ApiService {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      credentials: 'include', // Important for handling cookies from Passport
       body: JSON.stringify({ access_token: access_token }), // Passport Google strategy expects access_token
     });
   }
