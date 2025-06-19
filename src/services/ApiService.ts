@@ -548,6 +548,10 @@ class ApiService {
     return this.request(`${API_ENDPOINTS.ROOMS.GET_ALL}`);
   }
 
+  async getRoomById(roomId: string) { 
+    return this.request(`${API_ENDPOINTS.ROOMS.GET_ALL}/${roomId}`);
+  }
+
   async createRoom(roomData: {
     name: string;
     description?: string;
@@ -562,7 +566,7 @@ class ApiService {
   async addProductToRoom(roomId: string, productId: string) {
     return this.request(`${API_ENDPOINTS.ROOMS.PRODUCT}/${roomId}`, {
       method: 'POST',
-      body: JSON.stringify({ productId, quantity : 1 }),
+      body: JSON.stringify({ product_id : productId, quantity : 1 }),
     });
   }
 
@@ -578,6 +582,7 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
   async getDummyUserRooms() {
     // Return dummy rooms data
     const dummyRooms = [
@@ -617,37 +622,6 @@ class ApiService {
 
     console.log('Fetching user rooms');
     return Promise.resolve({ rooms: dummyRooms });
-  }
-
-  async getRoomById(roomId: string) {
-    // Return dummy room data
-    const dummyRoom = {
-      id: roomId,
-      name: 'Living Room',
-      description: 'Main living area with sofa and TV',
-      room_type: 'living_room',
-      items: [
-        {
-          id: '1',
-          name: 'Modern Sofa',
-          image: 'https://picsum.photos/300/300?random=1',
-          price: 899,
-          description: 'Comfortable modern sofa'
-        },
-        {
-          id: '2',
-          name: 'Coffee Table',
-          image: 'https://picsum.photos/300/300?random=2',
-          price: 299,
-          description: 'Elegant coffee table'
-        },
-      ],
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T00:00:00Z',
-    };
-
-    console.log('Fetching room by ID:', roomId);
-    return Promise.resolve(dummyRoom);
   }
 
   async addItemToRoom(roomId: string, productId: string) {

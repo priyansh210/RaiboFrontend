@@ -2,8 +2,30 @@
 import { boolean } from 'zod';
 import { ExternalProductResponse } from '../models/external/ProductModels';
 import { Product } from '../models/internal/Product';
+import { ProductSummary } from '../models/internal/Product';
 
 export class ProductMapper {
+
+  static mapExternalProductToProductCard(external: ExternalProductResponse): ProductSummary {
+    return {
+      _id: external._id,
+      name: external.name,
+      description: external.description,
+      price: external.price,
+      categoryName: external.category_id?.name ?? '',
+      companyName: external.company_id?.name ?? '',
+      tags: [], // You can map tags if available in external
+      imageUrls: external.imageUrls && external.imageUrls.length > 0 ? external.imageUrls : external.images,
+      isLikedByUser: external.isLikedByUser, // Set based on user interaction if available
+      likesCount: external.likesCount ?? 0, // Or use another field if available
+      commentsCount: external.comments.length ?? 0, // Or use another field if available
+    };
+  }
+
+  static mapExternalProductListToProductCardList(externals: ExternalProductResponse[]): ProductSummary[] {
+    return externals.map(ProductMapper.mapExternalProductToProductCard);
+  }
+
   static mapExternalToProduct(external: ExternalProductResponse): Product {
     if (!external || !external._id || !external.name || !external.company_id) {
       throw new Error('Invalid external product response');
@@ -77,3 +99,6 @@ export class ProductMapper {
     };
   }
 }
+
+
+  

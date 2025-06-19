@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { roomService } from '@/services/RoomService';
 
 const MyRooms = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -30,8 +31,8 @@ const MyRooms = () => {
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
-      const response = await apiService.getDummyUserRooms();
-      setRooms(response.rooms);
+      const rooms = await roomService.getUserRooms();
+      setRooms(rooms);
     } catch (error) {
       console.error('Failed to fetch rooms:', error);
       toast({
@@ -55,7 +56,7 @@ const MyRooms = () => {
     }
 
     try {
-      const createdRoom = await apiService.createRoom(newRoom);
+      const createdRoom = await roomService.createRoom(newRoom);
       setRooms(prev => [...prev, createdRoom as Room]);
       setIsCreateModalOpen(false);
       setNewRoom({ name: '', description: '', room_type: 'living_room' });
@@ -76,7 +77,7 @@ const MyRooms = () => {
 
   const handleDeleteRoom = async (roomId: string) => {
     try {
-      await apiService.deleteRoom(roomId);
+      await roomService.deleteRoom(roomId);
       setRooms(prev => prev.filter(room => room.id !== roomId));
       
       toast({

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '@/models/internal/Product';
@@ -18,6 +17,7 @@ import { RaiBoardNotFound } from '@/components/raiboards/RaiBoardNotFound';
 import { useBoardData } from '@/hooks/useBoardData';
 import { useBoardNavigation } from '@/hooks/useBoardNavigation';
 import { useBoardInteractions } from '@/hooks/useBoardInteractions';
+import SimilarProductsDialog from '@/components/raiboards/SimilarProductsDialog';
 
 const RaiBoardDetailContent: React.FC = () => {
   const navigate = useNavigate();
@@ -46,6 +46,8 @@ const RaiBoardDetailContent: React.FC = () => {
 
   const [showCollaborators, setShowCollaborators] = useState(false);
   const [showProductSearch, setShowProductSearch] = useState(false);
+  const [showSimilarDialog, setShowSimilarDialog] = useState(false);
+  const [similarProductId, setSimilarProductId] = useState<string | null>(null);
   const [userRole] = useState<'owner' | 'editor' | 'viewer'>('owner');
 
   const handleProductDoubleClick = (productId: string) => {
@@ -55,6 +57,18 @@ const RaiBoardDetailContent: React.FC = () => {
   const onAddProduct = (product: Product) => {
       handleAddProductToBoard(product);
       setShowProductSearch(false);
+  };
+
+  // Handler for opening similar products dialog from ProductCard
+  const handleOpenSimilarProducts = (productId: string) => {
+    setSimilarProductId(productId);
+    setShowSimilarDialog(true);
+  };
+
+  // Handler for adding a similar product
+  const handleAddSimilarProduct = (product: Product) => {
+    handleAddProductToBoard(product);
+    setShowSimilarDialog(false);
   };
 
   if (isLoading) {
@@ -83,15 +97,15 @@ const RaiBoardDetailContent: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-row overflow-hidden">
         <RaiBoardToolbar
-            onAddProduct={() => setShowProductSearch(true)}
-            onAddHeading={() => handleAddTextElement('heading')}
-            onAddParagraph={() => handleAddTextElement('paragraph')}
-            onAddImage={() => toast({ title: 'Coming Soon', description: 'This feature is not yet implemented.'})}
-            userRole={userRole}
-            boardStats={{
-                products: board.products.length,
-                textElements: board.textElements.length
-            }}
+          onAddProduct={() => setShowProductSearch(true)}
+          onAddHeading={() => handleAddTextElement('heading')}
+          onAddParagraph={() => handleAddTextElement('paragraph')}
+          onAddImage={() => toast({ title: 'Coming Soon', description: 'This feature is not yet implemented.'})}
+          userRole={userRole}
+          boardStats={{
+              products: board.products.length,
+              textElements: board.textElements.length
+          }}
         />
         <div className="flex-1 relative bg-background">
           <RaiBoardCanvas
@@ -105,6 +119,7 @@ const RaiBoardDetailContent: React.FC = () => {
             onTextElementUpdate={handleTextElementUpdate}
             onTextElementRemove={handleTextElementRemove}
             userRole={userRole}
+            onOpenSimilarProducts={handleOpenSimilarProducts} // <-- pass handler
           />
           
           <CollaboratorPanel
@@ -135,6 +150,13 @@ const RaiBoardDetailContent: React.FC = () => {
         onSave={handleSaveAndNavigate}
         onDiscard={handleDiscardAndNavigate}
         onCancel={handleCancelNavigation}
+      />
+
+      <SimilarProductsDialog
+        isOpen={showSimilarDialog}
+        onOpenChange={setShowSimilarDialog}
+        parentProductId={similarProductId}
+        onAddProduct={handleAddSimilarProduct}
       />
     </div>
   );

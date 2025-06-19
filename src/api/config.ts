@@ -3,7 +3,7 @@
  */
 
 // Base API URL - Updated to use your hosted backend
-export const API_BASE_URL = "https://3000-firebase-raibobackend-1748292729909.cluster-c23mj7ubf5fxwq6nrbev4ugaxa.cloudworkstations.dev";
+export const API_BASE_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
 // API endpoints
 export const API_ENDPOINTS = {

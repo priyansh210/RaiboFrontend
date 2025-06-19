@@ -35,13 +35,11 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
   }
 };
 
-export const getSimilarProducts = async (product: Product, limit: number = 4): Promise<Product[]> => {
+export const getSimilarProducts = async (productId: string, limit: number = 4): Promise<Product[]> => {
   try {
     const allProducts = await fetchProducts();
     const similarProducts = allProducts
-      .filter(p => p.id !== product.id && p.category === product.category)
       .slice(0, limit);
-    
     return similarProducts;
   } catch (error) {
     console.error('Failed to fetch similar products:', error);
@@ -51,14 +49,24 @@ export const getSimilarProducts = async (product: Product, limit: number = 4): P
 
 export const searchProducts = async (query: string): Promise<Product[]> => {
   try {
-    const response = await apiService.searchProducts(query);
-    
+    const response = await apiService.getAllProducts();
+
     if (!response || !Array.isArray(response)) {
       console.error('Invalid search response:', response);
       return [];
     }
-    
-    return ProductMapper.mapProductsArrayFromExternal(response as ExternalProductResponse[]);
+
+    const products = ProductMapper.mapProductsArrayFromExternal(response as ExternalProductResponse[]);
+    const lowerQuery = query.toLowerCase();
+
+    return products.filter(product => {
+      return (
+        product.name?.toLowerCase().includes(lowerQuery) ||
+        product.description?.toLowerCase().includes(lowerQuery) ||
+        product.category?.name.toLowerCase().includes(lowerQuery) ||
+        product.company.name?.toLowerCase().includes(lowerQuery)
+      );
+    });
   } catch (error) {
     console.error('Failed to search products:', error);
     return [];

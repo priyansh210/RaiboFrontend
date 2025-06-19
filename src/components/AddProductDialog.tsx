@@ -13,6 +13,8 @@ import { toast } from '@/hooks/use-toast';
 import { Room } from '@/models/internal/Room';
 import { RaiBoard } from '@/models/internal/RaiBoard';
 import { Product } from '@/models/internal/Product';
+import { roomService } from '@/services/RoomService';
+import { raiBoardService } from '@/services/RaiBoardService';
 
 interface AddProductDialogProps {
   isOpen: boolean;
@@ -38,73 +40,11 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
   const fetchRoomsAndBoards = async () => {
     setIsLoading(true);
     try {
-      // Mock data - replace with actual API calls
-      const mockRooms: Room[] = [
-        {
-          id: '1',
-          name: 'Living Room',
-          description: 'Modern living space',
-          room_type: 'living_room',
-          items: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          name: 'Bedroom',
-          description: 'Cozy bedroom setup',
-          room_type: 'bedroom',
-          items: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ];
+      const rooms = await roomService.getUserRooms();
+      const boards = await raiBoardService.getUserBoards();
 
-      const mockBoards: RaiBoard[] = [
-        {
-          id: '1',
-          name: 'Home Inspiration',
-          description: 'Ideas for home decoration',
-          ownerId: 'user1',
-          ownerName: 'John Doe',
-          products: [],
-          textElements: [],
-          collaborators: [],
-          settings: {
-            gridSize: 20,
-            showGrid: true,
-            allowOverlap: false,
-            maxZoom: 3,
-            minZoom: 0.5,
-          },
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          isPublic: false,
-        },
-        {
-          id: '2',
-          name: 'Wishlist',
-          description: 'Products I want to buy',
-          ownerId: 'user1',
-          ownerName: 'John Doe',
-          products: [],
-          textElements: [],
-          collaborators: [],
-          settings: {
-            gridSize: 20,
-            showGrid: true,
-            allowOverlap: false,
-            maxZoom: 3,
-            minZoom: 0.5,
-          },
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          isPublic: false,
-        },
-      ];
-
-      setRooms(mockRooms);
-      setBoards(mockBoards);
+      setRooms(rooms);
+      setBoards(boards);
     } catch (error) {
       console.error('Failed to fetch rooms and boards:', error);
       toast({
@@ -120,8 +60,9 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
   const handleAddToRoom = async (roomId: string, roomName: string) => {
     try {
       // TODO: Implement actual API call to add product to room
+      await roomService.addProductToRoom(roomId, product.id);
       console.log('Adding product to room:', { productId: product.id, roomId });
-      
+    
       toast({
         title: 'Added to Room',
         description: `${product.name} has been added to ${roomName}`,

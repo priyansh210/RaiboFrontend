@@ -4,7 +4,7 @@ import { apiService } from './ApiService';
 
 class RaiBoardService {
   // Get all user's boards
-  async getUserBoards(userId: string): Promise<RaiBoard[]> {
+  async getUserBoards(): Promise<RaiBoard[]> {
     // Dummy implementation - replace with real API later
     const response = await apiService.getBoards() as { data: RaiBoard[] };
     return response.data.map(board => ({
@@ -50,49 +50,6 @@ class RaiBoardService {
     return ;
   }
 
-  // Add text element to board
-  async addTextElementToBoard(boardId: string, type: 'heading' | 'paragraph', position: { x: number; y: number }): Promise<RaiBoardTextElement> {
-    // Dummy implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          id: 'text-' + Date.now(),
-          type,
-          content: '',
-          position,
-          size: { width: 200, height: type === 'heading' ? 50 : 100 },
-          zIndex: 1,
-          fontSize: type === 'heading' ? 24 : 16,
-          fontWeight: type === 'heading' ? 'bold' : 'normal',
-          color: '#000000',
-        });
-      }, 200);
-    });
-  }
-
-  // Update text element
-  async updateTextElement(boardId: string, elementId: string, updates: Partial<RaiBoardTextElement>): Promise<void> {
-    // Dummy implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log('Updated text element:', { boardId, elementId, updates });
-        resolve();
-      }, 100);
-    });
-  }
-
-  // Remove text element from board
-  async removeTextElementFromBoard(boardId: string, elementId: string): Promise<void> {
-    // Dummy implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log('Removed text element from board:', { boardId, elementId });
-        resolve();
-      }, 200);
-    });
-  }
-
-  // Add product to board
   async addProductToBoard(boardId: string, product: Product, position: { x: number; y: number }): Promise<RaiBoardProduct> {
     // Dummy implementation
     return new Promise((resolve) => {

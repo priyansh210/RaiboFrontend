@@ -132,7 +132,7 @@ const ProductDetail = () => {
           setSelectedImage(productData.images?.[0] || 'https://picsum.photos/600/400');
           setSelectedColor(productData.userPreferences?.preferredColors?.[0] || null);
           
-          const similar = await getSimilarProducts(productData);
+          const similar = await getSimilarProducts(productData.id);
           setSimilarProducts(similar);
         }
       } catch (error) {

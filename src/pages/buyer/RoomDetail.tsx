@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { roomService } from '@/services/RoomService';
 
 const RoomDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +24,7 @@ const RoomDetail = () => {
   const fetchRoom = async (roomId: string) => {
     try {
       setIsLoading(true);
-      const roomData = await apiService.getRoomById(roomId);
+      const roomData = await roomService.getRoomById(roomId);
       setRoom(roomData);
     } catch (error) {
       console.error('Failed to fetch room:', error);

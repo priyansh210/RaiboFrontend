@@ -33,7 +33,7 @@ const RaiBoards: React.FC = () => {
   const loadBoards = async () => {
     try {
       setLoading(true);
-      const userBoards = await raiBoardService.getUserBoards('user-1');
+      const userBoards = await raiBoardService.getUserBoards();
       console.log('Loaded boards:', userBoards);
       setBoards(userBoards);
     } catch (error) {

@@ -1,9 +1,9 @@
-
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { RaiBoard, RaiBoardProduct, RaiBoardTextElement } from '@/models/internal/RaiBoard';
 import { ProductCard } from './ProductCard';
 import { TextElement } from './TextElement';
 import { ZoomControls } from './ZoomControls';
+import SimilarProductsDialog from './SimilarProductsDialog';
 
 interface RaiBoardCanvasProps {
   board: RaiBoard;
@@ -16,6 +16,7 @@ interface RaiBoardCanvasProps {
   onTextElementUpdate: (elementId: string, updates: Partial<RaiBoardTextElement>) => void;
   onTextElementRemove: (elementId: string) => void;
   userRole: 'owner' | 'editor' | 'viewer';
+  onOpenSimilarProducts?: (productId: string) => void;
 }
 
 export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
@@ -29,6 +30,7 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   onTextElementUpdate,
   onTextElementRemove,
   userRole,
+  onOpenSimilarProducts,
 }) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
@@ -36,7 +38,6 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
   const [isPanning, setIsPanning] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [selectedTextElement, setSelectedTextElement] = useState<string | null>(null);
-  
   const panRef = useRef(pan);
   const lastPanPointRef = useRef({ x: 0, y: 0 });
   const animationFrameRef = useRef<number | null>(null);
@@ -196,6 +197,7 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
             onSelect={handleProductSelect}
             zoom={zoom}
             actualProduct={createMockProduct(product)}
+            onOpenSimilarProducts={onOpenSimilarProducts}
           />
         ))}
 

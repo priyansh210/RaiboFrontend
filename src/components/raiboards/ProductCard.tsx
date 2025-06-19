@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { RaiBoardProduct } from '@/models/internal/RaiBoard';
 import { CanvasItem } from './CanvasItem';
 import { useTempCart } from '@/context/TempCartContext';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Plus, Check } from 'lucide-react';
+import { ShoppingCart, Plus, Check, MoreVertical } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 
 interface ProductCardProps {
@@ -18,6 +17,7 @@ interface ProductCardProps {
   onSelect: (productId: string) => void;
   zoom: number;
   actualProduct?: any; // The actual product data for temp cart
+  onOpenSimilarProducts?: (productId: string) => void; // <-- add this
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -31,6 +31,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onSelect,
   zoom,
   actualProduct,
+  onOpenSimilarProducts,
 }) => {
   const { addItem, removeItem, state: tempCartState } = useTempCart();
 
@@ -102,8 +103,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 <Plus className="w-4 h-4" />
               )}
             </Toggle>
+
           </div>
         )}
+
+
 
         {/* In Bundle Indicator - Top Right */}
         {isInTempCart && (
@@ -124,7 +128,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             style={{ borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
           />
         </div>
-        
+
         {/* Product Info */}
         <div
           className="flex flex-col justify-between bg-card"
@@ -145,11 +149,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </h4>
           <div className="flex items-center justify-between">
             <span
-              className="font-semibold text-green-600 dark:text-green-400"
+              className="font-semibold text-terracotta"
               style={{ fontSize: priceFontSize }}
             >
               ${product.productPrice.toFixed(2)}
             </span>
+            {/* Add Similar Products Button */}
+            {<Button
+              size="icon"
+              className="bg-white shadow border border-gray-200 rounded-full w-9 h-9 flex items-center justify-center hover:bg-gray-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onOpenSimilarProducts) {
+                  onOpenSimilarProducts(product.productId);
+                }
+              }}
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+              aria-label="Show Similar Products"
+            >
+              <MoreVertical className="w-5 h-5 text-terracotta" />
+            </Button>}
           </div>
         </div>
       </div>

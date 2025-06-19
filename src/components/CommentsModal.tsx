@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { X } from 'lucide-react';
 import CommentSection from './CommentSection';
@@ -44,7 +43,7 @@ const CommentsModal: React.FC<CommentsModalProps> = ({
           isMobile 
             ? 'h-3/4 rounded-t-xl' 
             : 'max-h-[80vh] rounded-xl'
-        } overflow-hidden`}
+        } flex flex-col overflow-hidden`}
         style={{ backgroundColor: theme.background }}
       >
         {/* Header */}

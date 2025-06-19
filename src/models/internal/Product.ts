@@ -88,3 +88,17 @@ export interface ProductCategory {
   parentId?: string;
   createdAt?: Date;
 }
+
+export interface ProductSummary {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  categoryName: string;
+  companyName: string;
+  tags?: string[];
+  imageUrls: string[];
+  isLikedByUser: boolean;
+  likesCount: number;
+  commentsCount: number;
+}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Product } from '@/models/internal/Product';
 import { searchProducts } from '@/services/ProductService';
@@ -20,17 +19,23 @@ export const ProductSearchDialog: React.FC<ProductSearchDialogProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async (term: string) => {
     if (!term.trim()) {
       setSearchResults([]);
+      setIsLoading(false);
       return;
     }
+    setIsLoading(true);
     try {
       const results = await searchProducts(term);
       setSearchResults(results);
     } catch (error) {
       console.error('Failed to search products:', error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -38,12 +43,13 @@ export const ProductSearchDialog: React.FC<ProductSearchDialogProps> = ({
     if (!isOpen) {
       setSearchTerm('');
       setSearchResults([]);
+      setIsLoading(false);
     }
   }, [isOpen]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if(isOpen) {
+      if (isOpen) {
         handleSearch(searchTerm);
       }
     }, 300);
@@ -73,29 +79,37 @@ export const ProductSearchDialog: React.FC<ProductSearchDialogProps> = ({
           </div>
           
           <div className="max-h-96 overflow-y-auto space-y-2">
-            {searchResults.map((product) => (
-              <div
-                key={product.id}
-                className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-muted cursor-pointer"
-                onClick={() => handleAddProduct(product)}
-              >
-                <img
-                  src={product.displayImage || product.imageUrls[0] || '/placeholder.svg'}
-                  alt={product.name}
-                  className="w-12 h-12 object-cover rounded"
-                />
-                <div className="flex-1">
-                  <h4 className="font-medium text-card-foreground">{product.name}</h4>
-                  <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
-                </div>
-                <Button size="sm">Add</Button>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <span className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-400"></span>
+                <span className="ml-3 text-muted-foreground">Searching...</span>
               </div>
-            ))}
-            
-            {searchTerm && searchResults.length === 0 && (
-              <p className="text-center text-muted-foreground py-8">
-                No products found for "{searchTerm}"
-              </p>
+            ) : (
+              <>
+                {searchResults.map((product) => (
+                  <div
+                    key={product.id}
+                    className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-muted cursor-pointer"
+                    onClick={() => handleAddProduct(product)}
+                  >
+                    <img
+                      src={product.displayImage || product.imageUrls[0] || '/placeholder.svg'}
+                      alt={product.name}
+                      className="w-12 h-12 object-cover rounded"
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-card-foreground">{product.name}</h4>
+                      <p className="text-sm text-muted-foreground">${product.price.toFixed(2)}</p>
+                    </div>
+                    <Button size="sm">Add</Button>
+                  </div>
+                ))}
+                {searchTerm && searchResults.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">
+                    No products found for "{searchTerm}"
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
