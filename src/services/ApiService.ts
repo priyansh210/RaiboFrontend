@@ -1,5 +1,5 @@
 import { API_BASE_URL, API_ENDPOINTS, getAuthHeaders, getFormDataHeaders, REQUEST_TIMEOUT } from '../api/config';
-import { ExternalProductResponse } from '../models/external/ProductModels';
+import { ExternalProductDetailSellerResponse, ExternalProductResponse } from '../models/external/ProductModels';
 import { PaymentMethod, PaymentMethodsResponse, CreateOrderResponse, PaymentResponse, Address, AddressesResponse } from '../api/types';
 import {
   StripeCheckoutSession,
@@ -42,6 +42,13 @@ class ApiService {
         ...options.headers,
       },
     };
+
+    const isFormData = options.body instanceof FormData;
+    if (isFormData && config.headers) {
+      if ('Content-Type' in config.headers) {
+        delete config.headers['Content-Type'];
+      }
+    }
 
     try {
       console.log('Request config:', config);
@@ -161,6 +168,11 @@ class ApiService {
     return response.product;
   }
 
+  async getSellerProductById(productId: string) {
+    const response = await this.request<{ product: ExternalProductDetailSellerResponse }>(`${API_ENDPOINTS.PRODUCTS.GET_BY_ID_FOR_SELLER}/${productId}`);
+    return response.product;
+  }
+
   async getAllProducts() {
     const response = await this.request<{ products: ExternalProductResponse[] }>(`${API_ENDPOINTS.PRODUCTS.GET_ALL}`);
     return response.products;
@@ -225,8 +237,20 @@ class ApiService {
   }
 
   //Implement search query
-  async searchProducts(query: string) {
-    return this.request(`${API_ENDPOINTS.PRODUCTS.GET_ALL}`);
+  async searchProducts(query?: string, imageFile?: File) {
+    const formData = new FormData();
+    if (query) {
+      formData.append('text_query', query);
+    }
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+    return this.request(`${API_ENDPOINTS.PRODUCTS.SEARCH}`, {
+      method: 'POST',
+      body: formData,
+      headers: getFormDataHeaders(),
+
+    });
   }
 
   async getCategories() {
@@ -547,7 +571,7 @@ class ApiService {
     return this.request(`${API_ENDPOINTS.ROOMS.GET_ALL}`);
   }
 
-  async getRoomById(roomId: string) { 
+  async getRoomById(roomId: string) {
     return this.request(`${API_ENDPOINTS.ROOMS.GET_ALL}/${roomId}`);
   }
 
@@ -565,7 +589,7 @@ class ApiService {
   async addProductToRoom(roomId: string, productId: string) {
     return this.request(`${API_ENDPOINTS.ROOMS.PRODUCT}/${roomId}`, {
       method: 'POST',
-      body: JSON.stringify({ product_id : productId, quantity : 1 }),
+      body: JSON.stringify({ product_id: productId, quantity: 1 }),
     });
   }
 

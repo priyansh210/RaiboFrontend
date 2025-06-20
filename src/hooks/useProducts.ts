@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Product } from '../models/internal/Product';
 import { ProductReview } from '../models/internal/Product';
-import { fetchProducts, addComment, replyToComment } from '../services/ProductService';
+import { productService } from '../services/ProductService';
 import { toast } from '@/hooks/use-toast';
 
 export const useProducts = () => {
@@ -13,7 +13,7 @@ export const useProducts = () => {
     const fetchProductsData = async () => {
       setIsLoading(true);
       try {
-        const productsData = await fetchProducts();
+        const productsData = await productService.fetchProducts();
         
         const productsWithInteractions = productsData.map(product => ({
           ...product,
@@ -103,7 +103,7 @@ export const useProducts = () => {
 
   const handleAddComment = async (productId: string, comment: string): Promise<ProductReview | undefined> => {
     try {
-      const response = await addComment(productId, comment);
+      const response = await productService.addComment(productId, comment);
       
       const newComment: ProductReview = {
         id: response.id || Date.now().toString(),
@@ -142,7 +142,7 @@ export const useProducts = () => {
 
   const handleReplyToComment = async (commentId: string, reply: string) => {
     try {
-      await replyToComment(commentId, reply);
+      await productService.replyToComment(commentId, reply);
       // Here you would typically update the state to show the reply
       toast({
         title: "Success",

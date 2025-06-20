@@ -48,3 +48,46 @@ export interface ExternalCategoryResponse {
   parent_id?: string;
   created_at?: string;
 }
+
+export interface ExternalProductDetailSellerResponse {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  category: {
+    _id: string;
+    name: string;
+  };
+  company: {
+    _id: string;
+    name: string;
+    email: string;
+    address: string;
+  };
+  images: string[];
+  imageUrls: string[];
+  displayImage?: string;
+  discount: number;
+  discountValidUntil?: string | null;
+  averageRating: number;
+  totalRatings: number;
+  version: number;
+  interactions: any;
+  userPreferences?: any;
+  featured?: boolean;
+  new?: boolean;
+  bestSeller?: boolean;
+  brand?: string;
+  colors?: any[];
+  subcategory?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt: string;
+  salesCount: number;
+  viewsCount: number;
+  isActive: boolean;
+  model3dUrl?: string;
+  featureMap?: Record<string, string>;
+}

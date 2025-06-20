@@ -64,14 +64,13 @@ export const TextElement: React.FC<TextElementProps> = ({
       zoom={zoom}
       resizable={true}
       className="group"
-    >
-      {isEditing ? (
-        <div className="w-full h-full bg-card rounded-lg shadow-lg border-2 border-blue-500 p-3">
+    >      {isEditing ? (
+        <div className="w-full h-full bg-card dark:bg-gray-800 rounded-lg shadow-lg border-2 border-blue-500 p-3">
           {element.type === 'heading' ? (
             <Input
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="mb-2"
+              className="mb-2 dark:bg-gray-700 dark:text-white"
               placeholder="Enter heading..."
               autoFocus
             />
@@ -79,7 +78,7 @@ export const TextElement: React.FC<TextElementProps> = ({
             <Textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
-              className="mb-2 resize-none"
+              className="mb-2 resize-none dark:bg-gray-700 dark:text-white"
               placeholder="Enter paragraph..."
               rows={3}
               autoFocus
@@ -88,18 +87,14 @@ export const TextElement: React.FC<TextElementProps> = ({
           <div className="flex gap-2">
             <Button size="sm" onClick={handleSaveEdit}>Save</Button>
             <Button size="sm" variant="outline" onClick={handleCancelEdit}>Cancel</Button>
-          </div>
-        </div>
-      ) : (
-        <div className="w-full h-full bg-card/95 backdrop-blur-sm rounded-lg shadow-sm border border-border p-3 overflow-hidden group-hover:shadow-md transition-shadow duration-200">
-          {element.type === 'heading' ? (
+          </div>        </div>      ) : (
+        <div className="w-full h-full bg-background/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg shadow-sm border border-border dark:border-gray-600 p-3 overflow-hidden group-hover:shadow-md transition-shadow duration-200">          {element.type === 'heading' ? (
             <h2
               style={{
                 fontSize: element.fontSize,
                 fontWeight: element.fontWeight,
                 color: element.color,
-              }}
-              className="break-words leading-tight"
+              }}              className="break-words leading-tight font-semibold text-primary-foreground dark:text-white"
             >
               {element.content || 'Double-click to edit heading'}
             </h2>
@@ -110,7 +105,7 @@ export const TextElement: React.FC<TextElementProps> = ({
                 fontWeight: element.fontWeight,
                 color: element.color,
               }}
-              className="break-words leading-relaxed"
+              className="break-words leading-relaxed font-medium text-primary-foreground dark:text-white"
             >
               {element.content || 'Double-click to edit paragraph'}
             </p>

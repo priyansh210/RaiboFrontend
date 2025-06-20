@@ -6,7 +6,7 @@ import CommentsModal from '../../components/CommentsModal';
 import AddToRoomModal from '../../components/AddToRoomModal';
 import Product3DViewer from '../../components/Product3DViewer';
 import { useCart } from '../../context/CartContext';
-import { getProductById, getSimilarProducts, addComment, replyToComment } from '../../services/ProductService';
+import { productService } from '../../services/ProductService';
 import { Product } from '../../models/internal/Product';
 import { toast } from '@/hooks/use-toast';
 import { apiService } from '@/services/ApiService';
@@ -43,16 +43,6 @@ const ProductDetail = () => {
     productId: string;
     productName: string;
   }>({ isOpen: false, productId: '', productName: '' });
-
-  // Dummy comparison data
-  const comparisonData = [
-    { feature: 'Material', value: 'Premium Oak Wood', competitor: 'Pine Wood' },
-    { feature: 'Warranty', value: '5 Years', competitor: '2 Years' },
-    { feature: 'Assembly', value: 'Professional Setup Included', competitor: 'Self Assembly' },
-    { feature: 'Dimensions', value: '120 x 80 x 75 cm', competitor: '110 x 75 x 70 cm' },
-    { feature: 'Weight Capacity', value: '150 kg', competitor: '100 kg' },
-    { feature: 'Finish', value: 'Hand-crafted Polish', competitor: 'Machine Polish' },
-  ];
 
   // Dummy reviews data
   const dummyReviews = [
@@ -95,7 +85,7 @@ const ProductDetail = () => {
       
       setIsLoading(true);
       try {
-        const productData = await getProductById(id);
+        const productData = await productService.getProductById(id);
         
         if (productData) {
           // Generate interactions for this product
@@ -132,7 +122,7 @@ const ProductDetail = () => {
           setSelectedImage(productData.images?.[0] || 'https://picsum.photos/600/400');
           setSelectedColor(productData.userPreferences?.preferredColors?.[0] || null);
           
-          const similar = await getSimilarProducts(productData.id);
+          const similar = await productService.getSimilarProducts(productData.id);
           setSimilarProducts(similar);
         }
       } catch (error) {
@@ -265,7 +255,7 @@ const ProductDetail = () => {
 
   const handleAddComment = async (productId: string, comment: string) => {
     try {
-      const response = await addComment(productId, comment);
+      const response = await productService.addComment(productId, comment);
       
       if (product) {
         const newComment = {
@@ -295,7 +285,7 @@ const ProductDetail = () => {
 
   const handleReplyToComment = async (commentId: string, reply: string) => {
     try {
-      await replyToComment(commentId, reply);
+      await productService.replyToComment(commentId, reply);
     } catch (error) {
       console.error('Failed to reply to comment:', error);
       throw error;
@@ -339,6 +329,22 @@ const ProductDetail = () => {
       </Layout>
     );
   }
+
+  // Build comparison data from product.featureMap if available
+  const comparisonData = product && product.featureMap
+    ? Object.entries(product.featureMap).map(([feature, value]) => ({
+        feature,
+        value,
+        competitor: '-', // Placeholder, can be replaced with real competitor data if available
+      }))
+    : [
+        { feature: 'Material', value: 'Premium Oak Wood', competitor: 'Pine Wood' },
+        { feature: 'Warranty', value: '5 Years', competitor: '2 Years' },
+        { feature: 'Assembly', value: 'Professional Setup Included', competitor: 'Self Assembly' },
+        { feature: 'Dimensions', value: '120 x 80 x 75 cm', competitor: '110 x 75 x 70 cm' },
+        { feature: 'Weight Capacity', value: '150 kg', competitor: '100 kg' },
+        { feature: 'Finish', value: 'Hand-crafted Polish', competitor: 'Machine Polish' },
+      ];
 
   return (
     <Layout>

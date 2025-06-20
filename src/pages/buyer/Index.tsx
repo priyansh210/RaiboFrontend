@@ -6,7 +6,7 @@ import BrandSlider from '../../components/BrandSlider';
 import ProductCard from '../../components/ProductCard';
 import FeaturedBanner from '../../components/FeaturedBanner';
 import { brands } from '../../data/products';
-import { fetchProducts } from '../../services/ProductService';
+import { productService } from '../../services/ProductService';
 import { Product } from '../../models/internal/Product';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -25,7 +25,7 @@ const Index = () => {
     const loadProducts = async () => {
       setIsLoading(true);
       try {
-        const products = await fetchProducts();
+        const products = await productService.fetchProducts();
         
         // Filter featured products
         const featured = products.filter(product => product.featured).slice(0, 4);

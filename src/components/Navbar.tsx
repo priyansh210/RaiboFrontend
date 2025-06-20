@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, Menu, X, ChevronDown, LogOut, Package, CreditCard, Truck, BarChart3, User, ArrowLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import ThemeLanguageToggle from './ThemeLanguageToggle';
+import { productService } from '../services/ProductService';
 
 import {
   DropdownMenu,
@@ -17,12 +18,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Product } from '@/models/internal/Product';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { cart: cartItems } = useCart();
@@ -101,16 +107,26 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  // Run search and redirect to Search page with results
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       if (isSeller) {
         // For sellers, search could be for their products/orders
         console.log('Seller search:', searchQuery);
       } else {
-        navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-        
-        // Show different message for guests vs authenticated users
+        // Show loading state in navbar if desired
+        setIsLoading(true);
+        try {
+          let productsData;
+          productsData = await productService.searchProducts(searchQuery);
+          // Pass results to Search page
+          navigate('/search', { state: { searchTerm: searchQuery, products: productsData } });
+        } catch (error) {
+          console.error('Error loading products:', error);
+        } finally {
+          setIsLoading(false);
+        }
         if (isGuest) {
           toast({
             title: "Search results",

@@ -5,7 +5,7 @@ import ProductCard from '../../components/ProductCard';
 import CategoryFilter from '../../components/CategoryFilter';
 import PriceRangeSlider from '../../components/PriceRangeSlider';
 import { categories } from '../../data/products';
-import { fetchProducts, searchProducts } from '../../services/ProductService';
+import { productService } from '../../services/ProductService';
 import { Filter, Grid, List, SlidersHorizontal, X } from 'lucide-react';
 import { Product } from '../../models/internal/Product';
 
@@ -32,10 +32,10 @@ const Browse = () => {
         
         if (query) {
           // Use search function if there's a query
-          productsData = await fetchProducts();
+          productsData = await productService.fetchProducts();
         } else {
           // Otherwise fetch all products
-          productsData = await fetchProducts();
+          productsData = await productService.fetchProducts();
         }
         
         setProducts(productsData);

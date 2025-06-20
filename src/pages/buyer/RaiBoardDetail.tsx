@@ -77,10 +77,8 @@ const RaiBoardDetailContent: React.FC = () => {
 
   if (!board) {
     return <RaiBoardNotFound onNavigateBack={() => navigate('/raiboards')} />;
-  }
-
-  return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
+  }  return (
+    <div className="h-screen flex flex-col bg-background text-foreground dark:bg-gray-900 dark:text-white">
       <RaiBoardHeader
         boardName={board.name}
         boardDescription={board.description}
@@ -107,7 +105,11 @@ const RaiBoardDetailContent: React.FC = () => {
               textElements: board.textElements.length
           }}
         />
-        <div className="flex-1 relative bg-background">
+        <div className="flex-1 relative bg-background">          {/* Mobile Instructions Hint - only on smaller screens */}
+          {/* <div className="md:hidden absolute top-2 left-14 right-2 z-20 bg-card/70 backdrop-blur-sm rounded-lg px-3 py-2 text-xs text-foreground dark:text-white dark:bg-card/80 shadow-sm">
+            <p>• Pinch to zoom • Drag with one finger • Tap elements to edit</p>
+          </div>
+           */}
           <RaiBoardCanvas
             board={board}
             onProductMove={handleProductMove}
@@ -119,7 +121,7 @@ const RaiBoardDetailContent: React.FC = () => {
             onTextElementUpdate={handleTextElementUpdate}
             onTextElementRemove={handleTextElementRemove}
             userRole={userRole}
-            onOpenSimilarProducts={handleOpenSimilarProducts} // <-- pass handler
+            onOpenSimilarProducts={handleOpenSimilarProducts}
           />
           
           <CollaboratorPanel

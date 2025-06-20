@@ -10,9 +10,8 @@ export const BundleCartButton: React.FC = () => {
   const itemCount = getItemCount();
 
   if (itemCount === 0) return null;
-
   return (
-    <div className="fixed bottom-6 left-6 z-40 md:bottom-6 md:left-6">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:left-6 z-40">
       <Button
         onClick={toggleDialog}
         size="lg"

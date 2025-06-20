@@ -78,26 +78,30 @@ function DummyCube() {
 
 interface Product3DViewerProps {
   productName: string;
+  url?: string; // Add url prop
   className?: string;
 }
 
-const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, className }) => {
+const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, url, className }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAR, setShowAR] = useState(false);
   const controlsRef = useRef<any>();
   const isMobile = useIsMobile();
 
+  // Use the provided url or fallback to dummy
+  const modelUrl = url || DUMMY_MODEL_URL;
+
   // For AR, show <model-viewer> dialog
   const ARContent = () => (
     <div className="w-full flex flex-col items-center">
       <model-viewer
-        src={DUMMY_MODEL_URL}
+        src={modelUrl}
         ar
         ar-modes="webxr scene-viewer quick-look"
         camera-controls
         auto-rotate
         style={{ width: '100%', height: '60vh', background: '#f3f4f6', borderRadius: 12 }}
-        ios-src={DUMMY_MODEL_URL}
+        ios-src={modelUrl}
         alt="3D model"
         shadow-intensity="1"
         exposure="1"
@@ -115,18 +119,17 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
     </div>
   );
 
-  const ViewerContent = ({ fullscreen = false }) => (
+  const ViewerContent = ({ fullscreen = false }: { fullscreen?: boolean }) => (
     <div className={`relative ${fullscreen ? 'h-[80vh]' : 'h-64 md:h-80'} w-full bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-lg overflow-hidden`}>
       <Canvas camera={{ position: [0, 2, 5], fov: 45 }}>
-      <ambientLight intensity={0.4} />
-      <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
-      <Suspense fallback={null}>
-        <CenteredGLTF url={DUMMY_MODEL_URL} />
-        <Environment preset="apartment" />
-        <OrbitControls enablePan enableZoom enableRotate />
-      </Suspense>
-    </Canvas>
-      
+        <ambientLight intensity={0.4} />
+        <directionalLight position={[10, 10, 5]} intensity={1} castShadow />
+        <Suspense fallback={null}>
+          <CenteredGLTF url={modelUrl} />
+          <Environment preset="apartment" />
+          <OrbitControls enablePan enableZoom enableRotate />
+        </Suspense>
+      </Canvas>
       {/* Controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         {!fullscreen && (
@@ -148,7 +151,6 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
           <Camera size={16} />
         </Button>
       </div>
-      
       {/* Instructions */}
       <div className="absolute bottom-4 left-4 right-4">
         <div className="bg-black/50 text-white px-3 py-2 rounded-lg text-sm">
@@ -170,10 +172,8 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
             Interact with the 3D model to see {productName} from all angles
           </p>
         </div>
-        
         <ViewerContent />
       </div>
-
       {/* Fullscreen Dialog */}
       <Dialog open={isFullscreen} onOpenChange={setIsFullscreen}>
         <DialogContent className="max-w-5xl h-[90vh] p-6">
@@ -183,7 +183,6 @@ const Product3DViewer: React.FC<Product3DViewerProps> = ({ productName, classNam
           <ViewerContent fullscreen />
         </DialogContent>
       </Dialog>
-
       {/* AR Dialog */}
       <Dialog open={showAR} onOpenChange={setShowAR}>
         <DialogContent className="max-w-2xl">

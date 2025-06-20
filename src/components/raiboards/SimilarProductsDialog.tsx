@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Product } from '@/models/internal/Product';
-import { getSimilarProducts } from '@/services/ProductService';
+import { productService } from '@/services/ProductService';
 
 interface SimilarProductsDialogProps {
   isOpen: boolean;
@@ -23,7 +23,7 @@ export const SimilarProductsDialog: React.FC<SimilarProductsDialogProps> = ({
   useEffect(() => {
     if (isOpen && parentProductId) {
       setIsLoading(true);
-      getSimilarProducts(parentProductId)
+      productService.getSimilarProducts(parentProductId)
         .then((products) => setSimilarProducts(products))
         .catch(() => setSimilarProducts([]))
         .finally(() => setIsLoading(false));

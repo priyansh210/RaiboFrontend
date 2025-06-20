@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '../../context/AuthContext';
 import { Product } from '../../models/internal/Product';
-import { fetchProducts } from '../../services/ProductService';
+import { productService } from '../../services/ProductService';
 import { apiService } from '@/services/ApiService';
 import { toast } from '@/hooks/use-toast';
 
@@ -28,7 +28,7 @@ const SellerProducts = () => {
 
     const loadProducts = async () => {
       try {
-        const allProducts = await fetchProducts();
+        const allProducts = await productService.fetchProducts();
         // For now, show all products since we don't have seller filtering implemented
         // In a real app, you would filter by seller ID from the API
         setProducts(allProducts);

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Upload, X } from 'lucide-react';
+import { ArrowLeft, Upload, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Layout from '../../components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,37 +12,52 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '../../context/AuthContext';
 import {apiService} from '../../services/ApiService';
 import { ExternalProductResponse } from '@/models/external/ProductModels';
+import FeatureMapTable from '../../components/FeatureMapTable';
+import { productService } from '@/services/ProductService';
+import { ProductDetailSeller } from '@/models/internal/Product';
+import Product3DViewer from '../../components/Product3DViewer';
+import ProductPreview from '@/components/ProductPreview';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ProductFormData {
   name: string;
   description: string;
   price: number;
   quantity: number;
-  category_id: string;
+  categoryId: string;
   images: string[];
   discount: number;
   discountValidUntil: string;
+  model3dUrl?: string;
+  featureMap?: { [key: string]: string };
 }
 
-const SellerProductForm = () => {
+interface SellerProductFormProps {
+  mode?: 'create' | 'update';
+}
+
+const SellerProductForm: React.FC<SellerProductFormProps> = ({ mode }) => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const { isSeller, user } = useAuth();
-  const isEditing = Boolean(productId);
+  const isEditing = mode === 'update' || Boolean(productId);
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     description: '',
     price: 0,
     quantity: 0,
-    category_id: '',
+    categoryId: '',
     images: [],
     discount: 0,
     discountValidUntil: '',
+    model3dUrl: '',
+    featureMap: {},
   });
 
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (!isSeller) {
@@ -69,17 +84,23 @@ const SellerProductForm = () => {
     if (isEditing && productId) {
       const fetchProduct = async () => {
         try {
-          const response = await apiService.getProductById(productId) as ExternalProductResponse;
+          const response = await productService.getSellerProductDetailsById(productId) as ProductDetailSeller;
       
           const transformedResponse: ProductFormData = {
             name: response.name,
             description: response.description,
             price: response.price,
             quantity: response.quantity,
-            category_id: response.category_id?._id || '',
-            images: response.images || [],
+            categoryId: response.category?.id || '',
+            images: response.imageUrls || [],
             discount: response.discount || 0,
-            discountValidUntil: response.discount_valid_until || '',
+            discountValidUntil: response.discountValidUntil
+              ? (typeof response.discountValidUntil === 'string'
+                  ? response.discountValidUntil
+                  : (response.discountValidUntil as Date).toISOString().slice(0, 10))
+              : '',
+            model3dUrl: response.model3dUrl || 'https://res.cloudinary.com/df4kum9dh/image/upload/v1750175561/Ramsebo_Wing_Chair_Glb_rcthto.glb',
+            featureMap: response.featureMap || {},
           };
       
           setFormData(transformedResponse);
@@ -142,6 +163,31 @@ const SellerProductForm = () => {
     }));
   };
 
+  // 3D Model upload handler
+  const handle3DModelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files[0]) {
+      try {
+        const response = await apiService.uploadImage(files[0]); // Reuse image upload for 3D model
+        setFormData(prev => ({
+          ...prev,
+          model3dUrl: response.url,
+        }));
+        toast({
+          title: '3D Model Uploaded',
+          description: 'Your 3D model has been uploaded successfully.',
+        });
+      } catch (error) {
+        console.error('Error uploading 3D model:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to upload 3D model. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -179,10 +225,89 @@ const SellerProductForm = () => {
     }
   };
 
+  // Add drag-and-drop functionality for image reordering
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
+
+  const handleDragStart = (index: number) => {
+    dragItem.current = index;
+  };
+
+  const handleDragEnter = (index: number) => {
+    dragOverItem.current = index;
+  };
+
+  const handleDragEnd = () => {
+    if (
+      dragItem.current !== null &&
+      dragOverItem.current !== null &&
+      dragItem.current !== dragOverItem.current
+    ) {
+      setFormData((prev) => {
+        const images = [...prev.images];
+        const draggedImage = images[dragItem.current!];
+        images.splice(dragItem.current!, 1);
+        images.splice(dragOverItem.current!, 0, draggedImage);
+        return { ...prev, images };
+      });
+    }
+    dragItem.current = null;
+    dragOverItem.current = null;
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-cream pt-24">
         <div className="container-custom py-8">
+          {/* Product Preview Button */}
+          <div className="flex justify-end mb-6">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowPreview(true)}
+            >
+              Product Preview Page
+            </Button>
+          </div>
+          {showPreview && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4"
+                  onClick={() => setShowPreview(false)}
+                >
+                  ×
+                </Button>
+                <ProductPreview
+                  product={{
+                    id: productId || 'preview-id',
+                    name: formData.name || 'Product Name',
+                    company: { id: user?.companyId || 'company-id', name: 'Company Name', email: user?.email || 'company@email.com', address: '123 Main St' },
+                    averageRating: 4.5,
+                    totalRatings: 12,
+                    category: { id: formData.categoryId || 'cat-id', name: (categories.find(c => c._id === formData.categoryId)?.name) || 'Category' },
+                    price: formData.price,
+                    discount: formData.discount,
+                    quantity: formData.quantity,
+                    description: formData.description || 'Product description...',
+                    imageUrls: formData.images,
+                    images: formData.images,
+                    displayImage: formData.images[0] || '/placeholder.svg',
+                    interactions: { likes: 0, comments: [], shares: 0, userHasLiked: false, userHasShared: false },
+                    version: 1,
+                    featureMap: formData.featureMap || {},
+                    model3dUrl: formData.model3dUrl,
+                  }}
+                  userRole="seller"
+                  isPreview={true}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div className="flex items-center mb-8">
             <Button
@@ -235,8 +360,8 @@ const SellerProductForm = () => {
                 <div>
                   <Label htmlFor="category">Category *</Label>
                   <Select
-                    value={formData.category_id}
-                    onValueChange={(value) => handleInputChange('category_id', value)}
+                    value={formData.categoryId}
+                    onValueChange={(value) => handleInputChange('categoryId', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
@@ -326,7 +451,7 @@ const SellerProductForm = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => document.getElementById('images')?.click()}
+                        onClick={() => document.getElementById('image')?.click()}
                         className="border-terracotta text-terracotta hover:bg-terracotta hover:text-white"
                       >
                         <Upload size={16} className="mr-2" />
@@ -338,7 +463,16 @@ const SellerProductForm = () => {
                   {formData.images.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {formData.images.map((image, index) => (
-                        <div key={index} className="relative group">
+                        <div
+                          key={index}
+                          className="relative group cursor-move"
+                          draggable
+                          onDragStart={() => handleDragStart(index)}
+                          onDragEnter={() => handleDragEnter(index)}
+                          onDragEnd={handleDragEnd}
+                          onDragOver={(e) => e.preventDefault()}
+                          tabIndex={0}
+                        >
                           <img
                             src={image}
                             alt={`Product ${index + 1}`}
@@ -358,6 +492,61 @@ const SellerProductForm = () => {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* 3D Model Upload */}
+            <Card className="bg-white border-taupe/20">
+              <CardHeader>
+                <CardTitle className="text-charcoal">Product 3D Model</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Label htmlFor="model3d">Upload 3D Model File</Label>
+                  <input
+                    id="model3d-file"
+                    type="file"
+                    accept=".glb,.gltf,.obj,.fbx"
+                    onChange={handle3DModelUpload}
+                    style={{ display: 'none' }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('model3d-file')?.click()}
+                    className="border-terracotta text-terracotta hover:bg-terracotta hover:text-white"
+                  >
+                    <Upload size={16} className="mr-2" />
+                    Upload 3D Model File
+                  </Button>
+                  {formData.model3dUrl && (
+                    <div className="mt-4 flex flex-col gap-2">
+                      <Product3DViewer productName={formData.name || 'Product'} className="w-full" url={formData.model3dUrl} />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setFormData(prev => ({ ...prev, model3dUrl: '' }))}
+                        className="w-fit"
+                      >
+                        Remove 3D Model
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Feature Map Table */}
+            <Card className="bg-white border-taupe/20">
+              <CardHeader>
+                <CardTitle className="text-charcoal">Product Features</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FeatureMapTable
+                  featureMap={formData.featureMap || {}}
+                  onChange={(newMap) => handleInputChange('featureMap', newMap)}
+                />
               </CardContent>
             </Card>
 

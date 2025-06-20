@@ -1,7 +1,6 @@
-
 import { boolean } from 'zod';
-import { ExternalProductResponse } from '../models/external/ProductModels';
-import { Product } from '../models/internal/Product';
+import { ExternalProductDetailSellerResponse, ExternalProductResponse } from '../models/external/ProductModels';
+import { Product, ProductDetailSeller } from '../models/internal/Product';
 import { ProductSummary } from '../models/internal/Product';
 
 export class ProductMapper {
@@ -75,7 +74,51 @@ export class ProductMapper {
     return externals.map(external => this.mapExternalToProduct(external));
   }
 
-  private static generateInteractions(userHasLiked: boolean = false, likesCount : number = 0) {
+  static mapExternalProductDetailSellerToInternal(external: ExternalProductDetailSellerResponse): ProductDetailSeller {
+    return {
+      id: external._id,
+      name: external.name,
+      description: external.description,
+      price: external.price,
+      quantity: external.quantity,
+      category: {
+        id: external.category?._id || '',
+        name: external.category?.name || '',
+      },
+      company: {
+        id: external.company?._id || '',
+        name: external.company?.name || '',
+        email: external.company?.email || '',
+        address: external.company?.address || '',
+      },
+      images: external.images || [],
+      imageUrls: external.imageUrls || [],
+      displayImage: external.displayImage,
+      discount: external.discount,
+      discountValidUntil: external.discountValidUntil ? new Date(external.discountValidUntil) : null,
+      averageRating: external.averageRating,
+      totalRatings: external.totalRatings,
+      version: external.version,
+      interactions: external.interactions,
+      userPreferences: external.userPreferences,
+      featured: external.featured,
+      new: external.new,
+      bestSeller: external.bestSeller,
+      brand: external.brand,
+      colors: external.colors,
+      subcategory: external.subcategory,
+      status: external.status,
+      rejectionReason: external.rejectionReason,
+      createdAt: new Date(external.createdAt),
+      updatedAt: new Date(external.updatedAt),
+      salesCount: external.salesCount,
+      viewsCount: external.viewsCount,
+      isActive: external.isActive,
+      model3dUrl: external.model3dUrl,
+      featureMap: external.featureMap,
+    };
+  }
+  private static generateInteractions(userHasLiked: boolean = false, likesCount: number = 0) {
     return {
       likes: likesCount,
       shares: Math.floor(Math.random() * 100) + 5,
@@ -92,13 +135,10 @@ export class ProductMapper {
       { name: 'White', code: '#FFFFFF' },
       { name: 'Brown', code: '#8B4513' },
     ];
-    
+
     return {
       preferredColors: colors.slice(0, Math.floor(Math.random() * 3) + 1),
       preferredQuantity: 1,
     };
   }
 }
-
-
-  

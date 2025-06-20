@@ -18,9 +18,10 @@ export const API_ENDPOINTS = {
   // Products
   PRODUCTS: {
     CREATE: '/api/v1/product/seller',
+    SEARCH: '/api/v1/search',
     GET_ALL: '/api/v1/product',
     GET_BY_ID: '/api/v1/product', // Will append /:id
-    GET_BY_ID_FOR_SELLER: '/api/v1/products/seller',
+    GET_BY_ID_FOR_SELLER: '/api/v1/product/seller',
     UPDATE: '/api/v1/product/seller',
     DELETE: '/api/v1/product/seller', // Will append /:id
     LIKE: '/api/v1/product/like', // Will append /:id

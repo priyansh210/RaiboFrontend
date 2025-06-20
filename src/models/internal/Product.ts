@@ -1,4 +1,3 @@
-
 export interface UserPreferences {
   preferredColors: ProductColor[]; // Array of preferred colors
   preferredQuantity: number; // Default quantity for the user
@@ -79,6 +78,8 @@ export interface Product {
   brand?: string;
   colors?: ProductColor[];
   subcategory?: string;
+  featureMap?: Record<string, string>;
+  model3dUrl?: string; // URL to the 3D model for preview
 }
 export interface ProductCategory {
   id: string;
@@ -101,4 +102,50 @@ export interface ProductSummary {
   isLikedByUser: boolean;
   likesCount: number;
   commentsCount: number;
+}
+
+export interface ProductDetailSeller {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  category: {
+    id: string;
+    name: string;
+  };
+  company: {
+    id: string;
+    name: string;
+    email: string;
+    address: string;
+  };
+  images: string[];
+  imageUrls: string[];
+  displayImage?: string;
+  discount: number;
+  discountValidUntil?: Date | null;
+  averageRating: number;
+  totalRatings: number;
+  version: number;
+  interactions: ProductInteraction;
+  userPreferences?: UserPreferences;
+  featured?: boolean;
+  new?: boolean;
+  bestSeller?: boolean;
+  brand?: string;
+  colors?: ProductColor[];
+  subcategory?: string;
+  // Seller-specific fields
+  status: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  salesCount: number;
+  viewsCount: number;
+  isActive: boolean;
+  // New fields for 3D model and feature map
+  model3dUrl?: string; // URL to the 3D model for preview
+  featureMap?: Record<string, string>; // Map of feature name to value
+  // Add more seller-specific fields as needed
 }

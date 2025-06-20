@@ -35,12 +35,17 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({ label, icon: Icon, isColl
     const button = (
         <Button
           variant="ghost"
-          className={cn("w-full justify-start h-9", isCollapsed ? "justify-center px-2" : "px-3")}
+          className={cn(
+            "w-full justify-start h-8 md:h-9", 
+            isCollapsed 
+              ? "justify-center px-1 md:px-2" 
+              : "px-2 md:px-3"
+          )}
           onClick={onClick}
           disabled={disabled}
         >
-          <Icon className="w-4 h-4" />
-          {!isCollapsed && <span className="ml-2 text-sm font-medium">{label}</span>}
+          <Icon className="w-3 h-3 md:w-4 md:h-4" />
+          {!isCollapsed && <span className="ml-2 text-xs md:text-sm font-medium truncate">{label}</span>}
         </Button>
     );
 
@@ -65,31 +70,53 @@ export const RaiBoardToolbar: React.FC<RaiBoardToolbarProps> = ({
   userRole,
   boardStats,
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const canEdit = userRole === 'owner' || userRole === 'editor';
+
+  // Auto collapse on small screens
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsCollapsed(true);
+      }
+    };
+    
+    // Set initial state
+    handleResize();
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <TooltipProvider delayDuration={0}>
-        <div className={cn("bg-card border-r border-border flex flex-col h-full relative transition-all duration-300 ease-in-out", isCollapsed ? "w-20" : "w-64")}>
+        <div className={cn(
+          "bg-card border-r border-border flex flex-col h-full relative transition-all duration-300 ease-in-out z-20", 
+          isCollapsed ? "w-[50px] md:w-16" : "w-64"
+        )}>
             
             <Button 
               variant="outline"
               size="icon" 
-              className="absolute -right-4 top-8 bg-card h-8 w-8 rounded-full z-10 hover:bg-muted"
+              className="absolute -right-3 md:-right-4 top-8 bg-card h-6 w-6 md:h-8 md:w-8 rounded-full z-10 hover:bg-muted shadow-sm"
               onClick={() => setIsCollapsed(!isCollapsed)}
             >
-                {isCollapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />}
+                {isCollapsed ? <ChevronsRight className="w-3 h-3 md:w-4 md:h-4" /> : <ChevronsLeft className="w-3 h-3 md:w-4 md:h-4" />}
                 <span className="sr-only">Toggle Toolbar</span>
-            </Button>
-
-            <div className={cn("p-4 border-b border-border h-[69px]")}>
-                <div className={cn(isCollapsed && "hidden")}>
+            </Button>            <div className={cn("p-2 md:p-4 border-b border-border h-[50px] md:h-[69px] flex items-center justify-center md:justify-start")}>
+                <div className={cn(isCollapsed ? "hidden" : "block")}>
                     <h3 className="font-semibold text-lg text-foreground">Tools</h3>
                     <p className="text-sm text-muted-foreground">Add elements</p>
                 </div>
+                {isCollapsed && (
+                  <span className="text-xs font-semibold text-muted-foreground">Tools</span>
+                )}
             </div>
 
-            <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4">
+            <div className="flex-1 overflow-y-auto px-1 md:px-2 py-2 md:py-4 space-y-2 md:space-y-4">
                 <div className="space-y-1">
                     {!isCollapsed && <h4 className="font-semibold text-xs text-muted-foreground uppercase tracking-wider px-3 pb-2">Add Elements</h4>}
                     <ToolbarButton label="Add Product" icon={Square} isCollapsed={isCollapsed} onClick={onAddProduct} disabled={!canEdit} />
