@@ -4,6 +4,7 @@ import { Check, ChevronLeft, CreditCard, MapPin, ShoppingBag, Truck, Plus, Minus
 import Layout from '@/components/Layout';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { toast } from '@/hooks/use-toast';
 import { apiService } from '@/services/ApiService';
 import { Address, PaymentMethod } from '@/api/types';
@@ -12,6 +13,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { cart, cartTotals, updateQuantity, removeFromCart, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
+  const { theme } = useTheme();
   
   const [currentStep, setCurrentStep] = useState<string>('review');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -212,20 +214,21 @@ const Checkout = () => {
   if (orderPlaced) {
     return (
       <Layout>
-        <div className="min-h-screen bg-cream py-12">
+        <div className="min-h-screen py-12" style={{ backgroundColor: theme.muted }}>
           <div className="container-custom max-w-3xl">
-            <div className="bg-white p-8 rounded-lg shadow-sm text-center">
-              <div className="mx-auto w-16 h-16 mb-6 bg-olive/20 rounded-full flex items-center justify-center">
-                <Check size={32} className="text-olive" />
+            <div className="p-8 rounded-lg shadow-sm text-center" style={{ backgroundColor: theme.background }}>
+              <div className="mx-auto w-16 h-16 mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.accent }}>
+                <Check size={32} style={{ color: '#22c55e' }} />
               </div>
-              <h1 className="font-playfair text-3xl text-charcoal mb-4">Order Confirmed!</h1>
-              <p className="text-earth mb-6">
+              <h1 className="font-playfair text-3xl mb-4" style={{ color: theme.foreground }}>Order Confirmed!</h1>
+              <p className="mb-6" style={{ color: theme.mutedForeground }}>
                 Thank you for your purchase. Your order has been placed successfully.
               </p>
               <div className="flex justify-center space-x-4">
                 <Link
                   to="/"
-                  className="bg-terracotta text-white px-6 py-3 rounded-lg hover:bg-umber transition-colors"
+                  className="px-6 py-3 rounded-lg transition-colors"
+                  style={{ backgroundColor: theme.primary, color: theme.primaryForeground }}
                 >
                   Continue Shopping
                 </Link>
@@ -239,15 +242,15 @@ const Checkout = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-cream py-8">
+      <div className="min-h-screen py-8" style={{ backgroundColor: theme.muted }}>
         <div className="container-custom max-w-7xl">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <Link to="/cart" className="flex items-center text-earth hover:text-charcoal transition-colors">
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+            <Link to="/cart" className="flex items-center transition-colors" style={{ color: theme.mutedForeground }}>
               <ChevronLeft size={20} className="mr-2" />
               Back to Cart
             </Link>
-            <h1 className="font-playfair text-3xl text-charcoal">Checkout</h1>
+            <h1 className="font-playfair text-3xl" style={{ color: theme.foreground }}>Checkout</h1>
             <div></div>
           </div>
 
@@ -255,57 +258,58 @@ const Checkout = () => {
             {/* Left Column - Cart & Forms */}
             <div className="lg:col-span-2 space-y-8">
               {/* Cart Review */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-charcoal mb-6 flex items-center">
+              <div className="rounded-lg shadow-sm p-6" style={{ backgroundColor: theme.background }}>
+                <h2 className="text-xl font-semibold mb-6 flex items-center" style={{ color: theme.foreground }}>
                   <ShoppingBag size={20} className="mr-2" />
                   Review Your Items
                 </h2>
-                
                 <div className="space-y-4">
                   {cart.map((item) => (
-                    <div key={`${item.id}-${item.selectedColor?.name}`} className="flex items-center space-x-4 p-4 border border-sand rounded-lg">
-                      <img 
-                        src={item.image} 
-                        alt={item.name} 
-                        className="w-20 h-20 object-cover rounded-lg bg-linen"
+                    <div
+                      key={item.id}
+                      className="flex flex-row items-center p-4 border rounded-lg gap-3"
+                      style={{ borderColor: theme.border, backgroundColor: theme.muted }}
+                    >
+                      {/* Image */}
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-16 h-16 object-cover rounded-lg bg-linen flex-shrink-0"
                       />
-                      <div className="flex-1">
-                        <h3 className="font-medium text-charcoal">{item.name}</h3>
-                        <p className="text-earth text-sm">Price: ${item.price}</p>
-                        {item.selectedColor && (
-                          <div className="flex items-center mt-1">
-                            <span className="text-sm text-earth mr-2">Color:</span>
-                            <span 
-                              className="w-4 h-4 rounded-full border border-gray-200" 
-                              style={{ backgroundColor: item.selectedColor.code }}
-                            ></span>
-                            <span className="text-sm text-earth ml-1">{item.selectedColor.name}</span>
-                          </div>
-                        )}
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium truncate" style={{ color: theme.foreground }}>{item.name}</h3>
+                        <p className="text-sm" style={{ color: theme.mutedForeground }}>Price: ${item.price}</p>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <button 
-                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                          className="w-8 h-8 rounded-full border border-sand hover:border-terracotta flex items-center justify-center"
-                        >
-                          <Minus size={14} />
-                        </button>
-                        <span className="font-medium w-8 text-center">{item.quantity}</span>
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-8 h-8 rounded-full border border-sand hover:border-terracotta flex items-center justify-center"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-charcoal">${(item.price * item.quantity).toFixed(2)}</p>
-                        <button 
-                          onClick={() => removeFromCart(item.id)}
-                          className="text-earth hover:text-terracotta mt-1"
-                        >
-                          <X size={16} />
-                        </button>
+                      {/* Quantity & Price */}
+                      <div className="flex flex-col items-end gap-2 min-w-[90px]">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                            className="w-8 h-8 rounded-full border flex items-center justify-center"
+                            style={{ borderColor: theme.border, color: theme.mutedForeground }}
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="font-medium w-8 text-center" style={{ color: theme.foreground }}>{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="w-8 h-8 rounded-full border flex items-center justify-center"
+                            style={{ borderColor: theme.border, color: theme.mutedForeground }}
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold" style={{ color: theme.foreground }}>${(item.price * item.quantity).toFixed(2)}</span>
+                          <button
+                            onClick={() => removeFromCart(item.id)}
+                            className="mt-0"
+                            style={{ color: theme.mutedForeground }}
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -313,33 +317,36 @@ const Checkout = () => {
               </div>
 
               {/* Address Selection */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-charcoal mb-6 flex items-center">
+              <div className="rounded-lg shadow-sm p-6" style={{ backgroundColor: theme.background }}>
+                <h2 className="text-xl font-semibold mb-6 flex items-center" style={{ color: theme.foreground }}>
                   <MapPin size={20} className="mr-2" />
                   Delivery Address
                 </h2>
-                
                 <div className="space-y-4">
                   {addresses.map((address) => (
                     <div
                       key={address._id}
                       className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        selectedAddressId === address._id ? 'border-terracotta bg-terracotta/5' : 'border-sand hover:border-terracotta/50'
+                        selectedAddressId === address._id ? '' : 'hover:opacity-90'
                       }`}
+                      style={{
+                        borderColor: selectedAddressId === address._id ? theme.primary : theme.border,
+                        backgroundColor: selectedAddressId === address._id ? theme.accent : theme.muted,
+                      }}
                       onClick={() => setSelectedAddressId(address._id)}
                     >
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-row justify-between items-center gap-2">
                         <div>
-                          <p className="font-medium text-charcoal">{address.receiver_name}</p>
-                          <p className="text-earth text-sm">{address.street}</p>
-                          <p className="text-earth text-sm">{address.city}, {address.state} {address.zip}</p>
-                          <p className="text-earth text-sm">{address.receiver_phone}</p>
+                          <p className="font-medium" style={{ color: theme.foreground }}>{address.receiver_name}</p>
+                          <p className="text-sm" style={{ color: theme.mutedForeground }}>{address.street}</p>
+                          <p className="text-sm" style={{ color: theme.mutedForeground }}>{address.city}, {address.state} {address.zip}</p>
+                          <p className="text-sm" style={{ color: theme.mutedForeground }}>{address.receiver_phone}</p>
                         </div>
                         <input
                           type="radio"
                           checked={selectedAddressId === address._id}
                           onChange={() => setSelectedAddressId(address._id)}
-                          className="mt-1"
+                          className="ml-2"
                         />
                       </div>
                     </div>
@@ -430,31 +437,35 @@ const Checkout = () => {
               </div>
 
               {/* Payment Method Selection */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-charcoal mb-6 flex items-center">
+              <div className="rounded-lg shadow-sm p-6" style={{ backgroundColor: theme.background }}>
+                <h2 className="text-xl font-semibold mb-6 flex items-center" style={{ color: theme.foreground }}>
                   <CreditCard size={20} className="mr-2" />
                   Payment Method
                 </h2>
-                
                 <div className="space-y-4">
                   {paymentMethods.map((method) => (
                     <div
                       key={method.id}
                       className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        selectedPaymentMethodId === method.id ? 'border-terracotta bg-terracotta/5' : 'border-sand hover:border-terracotta/50'
+                        selectedPaymentMethodId === method.id ? '' : 'hover:opacity-90'
                       }`}
+                      style={{
+                        borderColor: selectedPaymentMethodId === method.id ? theme.primary : theme.border,
+                        backgroundColor: selectedPaymentMethodId === method.id ? theme.accent : theme.muted,
+                      }}
                       onClick={() => setSelectedPaymentMethodId(method.id)}
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <p className="font-medium text-charcoal">**** **** **** {method.card_number.slice(-4)}</p>
-                          <p className="text-earth text-sm">{method.card_holder}</p>
-                          <p className="text-earth text-sm">Expires: {method.expiry_date}</p>
+                          <p className="font-medium" style={{ color: theme.foreground }}>**** **** **** {method.card_number.slice(-4)}</p>
+                          <p className="text-sm" style={{ color: theme.mutedForeground }}>{method.card_holder}</p>
+                          <p className="text-sm" style={{ color: theme.mutedForeground }}>Expires: {method.expiry_date}</p>
                         </div>
                         <input
                           type="radio"
                           checked={selectedPaymentMethodId === method.id}
                           onChange={() => setSelectedPaymentMethodId(method.id)}
+                          className="mt-2 sm:mt-0"
                         />
                       </div>
                     </div>
@@ -525,40 +536,38 @@ const Checkout = () => {
             </div>
 
             {/* Right Column - Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-                <h2 className="text-xl font-semibold text-charcoal mb-6">Order Summary</h2>
-                
+            <div className="lg:col-span-1 mt-8 lg:mt-0">
+              <div className="rounded-lg shadow-sm p-6 sticky top-8" style={{ backgroundColor: theme.background }}>
+                <h2 className="text-xl font-semibold mb-6" style={{ color: theme.foreground }}>Order Summary</h2>
                 <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-earth">
+                  <div className="flex justify-between" style={{ color: theme.mutedForeground }}>
                     <span>Subtotal ({cart.length} items)</span>
                     <span>${cartTotals.subtotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-earth">
+                  <div className="flex justify-between" style={{ color: theme.mutedForeground }}>
                     <span>Shipping</span>
                     <span>${cartTotals.shipping.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-earth">
+                  <div className="flex justify-between" style={{ color: theme.mutedForeground }}>
                     <span>Tax</span>
                     <span>${cartTotals.tax.toFixed(2)}</span>
                   </div>
-                  <div className="border-t border-sand pt-3">
-                    <div className="flex justify-between text-lg font-semibold text-charcoal">
+                  <div className="border-t pt-3" style={{ borderColor: theme.border }}>
+                    <div className="flex justify-between text-lg font-semibold" style={{ color: theme.foreground }}>
                       <span>Total</span>
                       <span>${cartTotals.total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
-                
                 <button
                   onClick={handlePlaceOrder}
                   disabled={isLoading || !selectedAddressId || !selectedPaymentMethodId}
-                  className="w-full bg-terracotta text-white py-3 rounded-lg hover:bg-umber transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  className="w-full py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  style={{ backgroundColor: theme.primary, color: theme.primaryForeground }}
                 >
                   {isLoading ? 'Processing...' : 'Place Order'}
                 </button>
-                
-                <div className="mt-4 text-xs text-earth text-center">
+                <div className="mt-4 text-xs text-center" style={{ color: theme.mutedForeground }}>
                   <p>By placing your order, you agree to our Terms of Service and Privacy Policy.</p>
                 </div>
               </div>

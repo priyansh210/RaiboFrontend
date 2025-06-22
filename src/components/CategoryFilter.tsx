@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 
 interface FilterOption {
   id: string;
@@ -19,6 +19,7 @@ interface CategoryFilterProps {
 }
 
 const CategoryFilter: React.FC<CategoryFilterProps> = ({ filters, onFilterChange }) => {
+  const { theme } = useTheme();
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
     Object.fromEntries(filters.map(group => [group.name, true]))
   );
@@ -53,37 +54,39 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ filters, onFilterChange
   };
 
   return (
-    <div className="bg-white p-6 rounded-sm transition-all duration-300 hover:card-shadow">
-      <h2 className="font-playfair text-xl text-charcoal mb-6">Filters</h2>
-      
+    <div
+      className="p-6 rounded-sm transition-all duration-300 hover:card-shadow"
+      style={{ backgroundColor: theme.background }}
+    >
+      <h2 className="font-playfair text-xl mb-6" style={{ color: theme.foreground }}>Filters</h2>
       <div className="space-y-6">
         {filters.map((group) => (
-          <div key={group.name} className="border-b border-taupe/10 pb-4">
+          <div key={group.name} className="border-b pb-4" style={{ borderColor: theme.border }}>
             <button
               className="flex items-center justify-between w-full text-left py-2"
               onClick={() => toggleGroup(group.name)}
             >
-              <h3 className="font-medium text-charcoal">{group.name}</h3>
+              <h3 className="font-medium" style={{ color: theme.foreground }}>{group.name}</h3>
               {expandedGroups[group.name] ? (
-                <ChevronUp size={18} className="text-earth" />
+                <ChevronUp size={18} style={{ color: theme.mutedForeground }} />
               ) : (
-                <ChevronDown size={18} className="text-earth" />
+                <ChevronDown size={18} style={{ color: theme.mutedForeground }} />
               )}
             </button>
-            
             {expandedGroups[group.name] && (
               <div className="mt-3 space-y-2">
                 {group.options.map((option) => (
                   <label key={option.id} className="flex items-center space-x-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 rounded border-taupe text-terracotta focus:ring-terracotta/25"
+                      className="w-4 h-4 rounded"
+                      style={{ borderColor: theme.border, accentColor: theme.primary }}
                       checked={selectedFilters[group.name]?.has(option.id) || false}
                       onChange={() => handleFilterSelect(group.name, option.id)}
                     />
-                    <span className="text-sm text-earth flex-grow">{option.name}</span>
+                    <span className="text-sm flex-grow" style={{ color: theme.mutedForeground }}>{option.name}</span>
                     {option.count !== undefined && (
-                      <span className="text-xs text-earth/70">{option.count}</span>
+                      <span className="text-xs" style={{ color: theme.mutedForeground }}>{option.count}</span>
                     )}
                   </label>
                 ))}
@@ -92,10 +95,10 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ filters, onFilterChange
           </div>
         ))}
       </div>
-      
       {Object.keys(selectedFilters).some(group => selectedFilters[group].size > 0) && (
         <button
-          className="mt-6 w-full py-2 text-sm text-terracotta hover:text-umber transition-colors"
+          className="mt-6 w-full py-2 text-sm rounded-sm transition-colors"
+          style={{ color: theme.primary }}
           onClick={() => {
             setSelectedFilters({});
             filters.forEach(group => {

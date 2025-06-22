@@ -8,10 +8,12 @@ import { categories } from '../../data/products';
 import { productService } from '../../services/ProductService';
 import { Filter, Grid, List, SlidersHorizontal, X } from 'lucide-react';
 import { Product } from '../../models/internal/Product';
+import { useTheme } from '@/context/ThemeContext';
 
 const Browse = () => {
   const { category } = useParams();
   const [searchParams] = useSearchParams();
+  const { theme, isDark } = useTheme();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -134,11 +136,11 @@ const Browse = () => {
   
   return (
     <Layout>
-      <div className="page-transition min-h-screen bg-cream py-10">
+      <div className="page-transition min-h-screen py-10" style={{ backgroundColor: theme.muted }}>
         <div className="container-custom">
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="font-playfair text-3xl md:text-4xl text-charcoal">
+            <h1 className="font-playfair text-3xl md:text-4xl" style={{ color: theme.foreground }}>
               {category 
                 ? `${category.charAt(0).toUpperCase()}${category.slice(1)} Collection`
                 : 'All Products'
@@ -146,7 +148,7 @@ const Browse = () => {
             </h1>
             
             {searchParams.get('q') && (
-              <p className="text-earth mt-2">
+              <p className="mt-2" style={{ color: theme.mutedForeground }}>
                 Search results for "{searchParams.get('q')}"
               </p>
             )}
@@ -156,23 +158,25 @@ const Browse = () => {
           <div className="md:hidden flex justify-between items-center mb-4">
             <button
               onClick={toggleFilterPanel}
-              className="flex items-center space-x-2 bg-white py-2 px-4 shadow-sm hover:bg-linen transition-colors"
+              className="flex items-center space-x-2 py-2 px-4 shadow-sm transition-colors rounded-sm"
+              style={{ backgroundColor: theme.background, color: theme.foreground }}
             >
               <Filter size={18} />
               <span>Filters</span>
             </button>
-            
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setView('grid')}
-                className={`p-2 ${view === 'grid' ? 'text-terracotta' : 'text-earth'}`}
+                className={`p-2 rounded-sm ${view === 'grid' ? '' : ''}`}
+                style={{ color: view === 'grid' ? theme.primary : theme.mutedForeground }}
                 aria-label="Grid view"
               >
                 <Grid size={18} />
               </button>
               <button
                 onClick={() => setView('list')}
-                className={`p-2 ${view === 'list' ? 'text-terracotta' : 'text-earth'}`}
+                className={`p-2 rounded-sm ${view === 'list' ? '' : ''}`}
+                style={{ color: view === 'list' ? theme.primary : theme.mutedForeground }}
                 aria-label="List view"
               >
                 <List size={18} />
@@ -184,13 +188,14 @@ const Browse = () => {
             {/* Filter Sidebar - Desktop */}
             <aside className="hidden md:block w-64 flex-shrink-0">
               <div className="sticky top-24">
-                <CategoryFilter 
-                  filters={categories} 
-                  onFilterChange={handleFilterChange} 
-                />
-                
-                <div className="mt-6 bg-white p-6 rounded-sm">
-                  <h3 className="font-medium text-charcoal mb-4">Price Range</h3>
+                <div className="rounded-sm mb-6" style={{ backgroundColor: theme.background }}>
+                  <CategoryFilter 
+                    filters={categories} 
+                    onFilterChange={handleFilterChange} 
+                  />
+                </div>
+                <div className="p-6 rounded-sm" style={{ backgroundColor: theme.background }}>
+                  <h3 className="font-medium mb-4" style={{ color: theme.foreground }}>Price Range</h3>
                   <PriceRangeSlider 
                     min={0} 
                     max={5000} 
@@ -204,16 +209,17 @@ const Browse = () => {
             
             {/* Mobile Filter Panel */}
             <div className={`
-              fixed inset-0 bg-white z-40 transition-transform duration-300 md:hidden overflow-auto
+              fixed inset-0 z-40 transition-transform duration-300 md:hidden overflow-auto
               ${isFilterOpen ? 'translate-x-0' : '-translate-x-full'}
-            `}>
-              <div className="p-4 border-b">
+            `} style={{ backgroundColor: theme.background }}>
+              <div className="p-4 border-b" style={{ borderColor: theme.border }}>
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-lg">Filters</h3>
+                  <h3 className="font-medium text-lg" style={{ color: theme.foreground }}>Filters</h3>
                   <button 
                     onClick={toggleFilterPanel}
                     className="p-1"
                     aria-label="Close filter panel"
+                    style={{ color: theme.mutedForeground }}
                   >
                     <X size={24} />
                   </button>
@@ -227,7 +233,7 @@ const Browse = () => {
                 />
                 
                 <div className="mt-6">
-                  <h3 className="font-medium text-charcoal mb-4">Price Range</h3>
+                  <h3 className="font-medium mb-4" style={{ color: theme.foreground }}>Price Range</h3>
                   <PriceRangeSlider 
                     min={0} 
                     max={5000} 
@@ -238,10 +244,11 @@ const Browse = () => {
                 </div>
               </div>
               
-              <div className="p-4 border-t">
+              <div className="p-4 border-t" style={{ borderColor: theme.border }}>
                 <button
                   onClick={toggleFilterPanel}
-                  className="w-full py-3 bg-terracotta text-white"
+                  className="w-full py-3 rounded-sm transition-colors"
+                  style={{ backgroundColor: theme.primary, color: theme.primaryForeground }}
                 >
                   View Results ({filteredProducts.length})
                 </button>
@@ -252,33 +259,33 @@ const Browse = () => {
             <div className="flex-grow">
               {/* Results Info and View Toggle - Desktop */}
               <div className="hidden md:flex justify-between items-center mb-6">
-                <p className="text-earth">
+                <p style={{ color: theme.mutedForeground }}>
                   Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
                 </p>
-                
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
-                    <SlidersHorizontal size={16} className="text-earth" />
-                    <span className="text-earth">Sort by:</span>
-                    <select className="bg-white border border-taupe/20 py-1 px-2 text-sm">
+                    <SlidersHorizontal size={16} style={{ color: theme.mutedForeground }} />
+                    <span style={{ color: theme.mutedForeground }}>Sort by:</span>
+                    <select className="py-1 px-2 text-sm rounded-sm" style={{ backgroundColor: theme.background, color: theme.foreground, borderColor: theme.border }}>
                       <option>Newest</option>
                       <option>Price: Low to High</option>
                       <option>Price: High to Low</option>
                       <option>Most Popular</option>
                     </select>
                   </div>
-                  
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setView('grid')}
-                      className={`p-2 ${view === 'grid' ? 'text-terracotta' : 'text-earth'}`}
+                      className={`p-2 rounded-sm`}
+                      style={{ color: view === 'grid' ? theme.primary : theme.mutedForeground }}
                       aria-label="Grid view"
                     >
                       <Grid size={18} />
                     </button>
                     <button
                       onClick={() => setView('list')}
-                      className={`p-2 ${view === 'list' ? 'text-terracotta' : 'text-earth'}`}
+                      className={`p-2 rounded-sm`}
+                      style={{ color: view === 'list' ? theme.primary : theme.mutedForeground }}
                       aria-label="List view"
                     >
                       <List size={18} />
@@ -289,9 +296,9 @@ const Browse = () => {
               
               {/* Loading State */}
               {isLoading ? (
-                <div className="bg-white p-8 text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-terracotta mx-auto mb-4"></div>
-                  <p className="text-earth">Loading products...</p>
+                <div className="p-8 text-center rounded-sm" style={{ backgroundColor: theme.background }}>
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 mx-auto mb-4" style={{ borderColor: theme.primary }}></div>
+                  <p style={{ color: theme.mutedForeground }}>Loading products...</p>
                 </div>
               ) : (
                 <>
@@ -303,9 +310,9 @@ const Browse = () => {
                       ))}
                     </div>
                   ) : (
-                    <div className="bg-white p-8 text-center">
-                      <p className="text-lg text-earth mb-2">No products found</p>
-                      <p className="text-sm text-earth/70">Try adjusting your filters or search terms</p>
+                    <div className="p-8 text-center rounded-sm" style={{ backgroundColor: theme.background }}>
+                      <p className="text-lg mb-2" style={{ color: theme.foreground }}>No products found</p>
+                      <p className="text-sm" style={{ color: theme.mutedForeground }}>Try adjusting your filters or search terms</p>
                     </div>
                   )}
                 </>

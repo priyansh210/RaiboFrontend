@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
@@ -50,8 +49,7 @@ const Cart = () => {
       const orderItems = cart.map(item => ({
         product_id: item.id,
         quantity: item.quantity,
-        price: item.price,
-        color: item.selectedColor?.name || null
+        price: item.price
       }));
       
       const response = await apiService.getCart() as { error?: any; cart?: any };
@@ -118,75 +116,54 @@ const Cart = () => {
                   </div>
                   
                   {cart.map((item) => (
-                    <div key={`${item.id}-${item.selectedColor?.name || 'default'}`} className="p-4 border-b" style={{ borderColor: theme.border }}>
-                      <div className="grid grid-cols-8 gap-4 items-center">
-                        <div className="col-span-4 md:col-span-5">
-                          <div className="flex items-center">
-                            <div className="w-16 h-16 flex-shrink-0 overflow-hidden mr-4" style={{ backgroundColor: theme.muted }}>
-                              <img 
-                                src={item.image} 
-                                alt={item.name} 
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div>
-                              <h3 className="font-medium" style={{ color: theme.foreground }}>{item.name}</h3>
-                              <div className="flex flex-col md:flex-row md:items-center mt-1 text-sm" style={{ color: theme.mutedForeground }}>
-                                {item.selectedColor && (
-                                  <div className="flex items-center mt-1 md:mt-0">
-                                    <span>Color:</span>
-                                    <span 
-                                      className="w-4 h-4 rounded-full inline-block ml-1 border border-gray-200" 
-                                      style={{ backgroundColor: item.selectedColor.code }}
-                                    ></span>
-                                    <span className="ml-1">{item.selectedColor.name}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
+                    <div
+                      key={item.id}
+                      className="flex flex-row items-center p-4 border-b gap-3"
+                      style={{ borderColor: theme.border }}
+                    >
+                      {/* Image */}
+                      <div className="w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg bg-linen">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      {/* Product Info */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium truncate" style={{ color: theme.foreground }}>{item.name}</h3>
+                      </div>
+                      {/* Quantity & Price */}
+                      <div className="flex flex-col items-end gap-2 min-w-[90px]">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                            className="w-8 h-8 flex items-center justify-center border rounded-full transition-colors"
+                            style={{ borderColor: theme.border, color: theme.mutedForeground }}
+                            aria-label="Decrease quantity"
+                          >
+                            <Minus size={16} />
+                          </button>
+                          <span className="w-8 text-center mx-1 font-medium" style={{ color: theme.foreground }}>{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="w-8 h-8 flex items-center justify-center border rounded-full transition-colors"
+                            style={{ borderColor: theme.border, color: theme.mutedForeground }}
+                            aria-label="Increase quantity"
+                          >
+                            <Plus size={16} />
+                          </button>
                         </div>
-                        
-                        <div className="col-span-2 md:col-span-1">
-                          <div className="flex items-center justify-center">
-                            <button 
-                              onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                              className="w-8 h-8 flex items-center justify-center border transition-colors"
-                              style={{
-                                borderColor: theme.border,
-                                color: theme.mutedForeground,
-                              }}
-                              aria-label="Decrease quantity"
-                            >
-                              <Minus size={16} />
-                            </button>
-                            <span className="w-8 text-center mx-1" style={{ color: theme.foreground }}>{item.quantity}</span>
-                            <button 
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="w-8 h-8 flex items-center justify-center border transition-colors"
-                              style={{
-                                borderColor: theme.border,
-                                color: theme.mutedForeground,
-                              }}
-                              aria-label="Increase quantity"
-                            >
-                              <Plus size={16} />
-                            </button>
-                          </div>
-                        </div>
-                        
-                        <div className="col-span-2 md:col-span-2 text-right">
-                          <div className="flex items-center justify-end">
-                            <span className="font-medium" style={{ color: theme.foreground }}>${(item.price * item.quantity).toFixed(2)}</span>
-                            <button 
-                              onClick={() => removeFromCart(item.id)}
-                              className="ml-4 transition-colors"
-                              style={{ color: theme.mutedForeground }}
-                              aria-label="Remove item"
-                            >
-                              <X size={18} />
-                            </button>
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium" style={{ color: theme.foreground }}>${(item.price * item.quantity).toFixed(2)}</span>
+                          <button
+                            onClick={() => removeFromCart(item.id)}
+                            className="ml-0 transition-colors"
+                            style={{ color: theme.mutedForeground }}
+                            aria-label="Remove item"
+                          >
+                            <X size={18} />
+                          </button>
                         </div>
                       </div>
                     </div>

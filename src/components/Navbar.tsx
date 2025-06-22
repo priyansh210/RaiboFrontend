@@ -23,7 +23,6 @@ import { Product } from '@/models/internal/Product';
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,19 +48,6 @@ const Navbar: React.FC = () => {
     return (firstInitial + lastInitial).toUpperCase();
   };
 
-  const categories = [
-    { name: t('furniture'), path: '/browse/furniture' },
-    { name: t('outdoor'), path: '/browse/outdoor' },
-    { name: t('bedding'), path: '/browse/bedding-bath' },
-    { name: t('rugs'), path: '/browse/rugs' },
-    { name: t('decor'), path: '/browse/decor' },
-    { name: t('lighting'), path: '/browse/lighting' },
-    { name: t('organization'), path: '/browse/organization' },
-    { name: t('kitchen'), path: '/browse/kitchen' },
-    { name: t('homeImprovement'), path: '/browse/home-improvement' },
-    { name: t('shopByRooms'), path: '/browse/rooms' },
-  ];
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -83,10 +69,6 @@ const Navbar: React.FC = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-  };
-
-  const toggleCategories = () => {
-    setIsCategoriesOpen(!isCategoriesOpen);
   };
 
   const handleLogout = async () => {
@@ -315,7 +297,7 @@ const Navbar: React.FC = () => {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>
-                      <Link to="/orders" className="cursor-pointer w-full">{t('orders')}</Link>
+                      <Link to="/my-orders" className="cursor-pointer w-full">{t('orders')}</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/wishlist" className="cursor-pointer w-full">{t('wishlist')}</Link>
@@ -403,26 +385,6 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Categories Navigation for desktop - only show for non-sellers */}
-      {!isSeller && (
-        <nav className={`bg-secondary hidden md:block border-t border-border transition-all ${isScrolled ? 'py-2' : 'py-3'}`}>
-          <div className="container-custom">
-            <ul className="flex items-center justify-between flex-wrap">
-              {categories.map((category) => (
-                <li key={category.name}>
-                  <Link 
-                    to={category.path} 
-                    className="text-foreground text-xs hover:text-primary transition-colors"
-                  >
-                    {category.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </nav>
-      )}
-
       {/* Mobile Menu */}
       <div 
         className={`md:hidden fixed inset-0 bg-background z-40 transition-transform duration-300 ease-in-out ${
@@ -459,6 +421,11 @@ const Navbar: React.FC = () => {
               </button>
             </div>
           </form>
+
+          {/* Theme and Language Toggle for mobile */}
+          <div className="mb-6 md:hidden flex justify-center">
+            <ThemeLanguageToggle />
+          </div>
           
           <div className="space-y-6">
             <div className="space-y-2">
@@ -592,40 +559,6 @@ const Navbar: React.FC = () => {
                 )}
               </ul>
             </div>
-            
-            {!isSeller && (
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-semibold text-muted-foreground">Categories</h3>
-                  <button 
-                    onClick={toggleCategories}
-                    className="text-foreground p-1"
-                  >
-                    {isCategoriesOpen ? (
-                      <ChevronDown size={18} className="transform rotate-180" />
-                    ) : (
-                      <ChevronDown size={18} />
-                    )}
-                  </button>
-                </div>
-                
-                {isCategoriesOpen && (
-                  <ul className="space-y-3">
-                    {categories.map((category) => (
-                      <li key={category.name}>
-                        <Link 
-                          to={category.path} 
-                          className="text-foreground hover:text-primary"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          {category.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
