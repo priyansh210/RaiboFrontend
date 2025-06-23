@@ -149,55 +149,50 @@ const Checkout = () => {
     }
 
     setIsLoading(true);
-    
+    const response = await apiService.getCart() as { cart: any };
+    const cart_id = response.cart._id;
     try {
       // Create order
       const orderData = {
-        cart_id: "temp-cart-id",
+        cart_id: cart_id,
         address_id: selectedAddressId,
-        payment_method: selectedPaymentMethodId,
+        payment_method: "credit_card",
         receiver_name: addresses.find(a => a._id === selectedAddressId)?.receiver_name || '',
         receiver_phone: addresses.find(a => a._id === selectedAddressId)?.receiver_phone || '',
         method_id: selectedPaymentMethodId,
         delivery_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
       };
 
-      const orderResponse = await apiService.createOrder(orderData);
-      
-      if (orderResponse.error) {
-        throw new Error(orderResponse.error);
-      }
-
-      // Process payment
-      const paymentResponse = await apiService.processPayment({
-        order_id: orderResponse.id,
-        payment_method_id: selectedPaymentMethodId,
-        amount: Math.round(cartTotals.total * 100), // Convert to cents
-        currency: 'usd',
-      });
-
+      const orderResponse = await apiService.createOrder(orderData) as { order: any };
+      // Type assertion for payment response
+      const paymentResponse = await apiService.processPayment(orderResponse.order._id) as { success: boolean; error?: string };
       if (paymentResponse.success) {
-        // Update order status to placed
-        await apiService.updateOrderStatus(orderResponse.id, 'placed');
-        
-        clearCart();
         setOrderPlaced(true);
-        
-        toast({
-          title: "Order Placed Successfully",
-          description: "Your payment has been processed and your order is confirmed.",
+        // Redirect to success page with order/cart info
+        navigate('/checkout/success', {
+          state: {
+            order: orderResponse.order,
+            cart: cart,
+            total: cartTotals.total
+          }
         });
-        
-        navigate('/checkout/success', { state: { orderId: orderResponse.id } });
       } else {
-        throw new Error(paymentResponse.error || 'Payment failed');
+        // Redirect to failure page with cart info
+        navigate('/checkout/failure', {
+          state: {
+            cart: cart,
+            total: cartTotals.total
+          }
+        });
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      toast({
-        title: "Checkout Failed",
-        description: "There was an error processing your order. Please try again.",
-        variant: "destructive",
+      // Redirect to failure page with cart info
+      navigate('/checkout/failure', {
+        state: {
+          cart: cart,
+          total: cartTotals.total
+        }
       });
     } finally {
       setIsLoading(false);

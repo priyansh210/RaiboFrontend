@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -26,6 +25,9 @@ import NotFound from './pages/buyer/NotFound';
 import StripeCheckout from './pages/buyer/StripeCheckout';
 import RaiBoards from './pages/buyer/RaiBoards';
 import RaiBoardDetail from './pages/buyer/RaiBoardDetail';
+import CheckoutSuccess from './pages/buyer/CheckoutSuccess';
+import CheckoutFailure from './pages/buyer/CheckoutFailure';
+import OrderDetail from './pages/buyer/OrderDetail';
 
 // Auth Pages
 import Login from './pages/buyer/Login';
@@ -116,6 +118,11 @@ const AppContent = () => {
                 <Route path="/seller/products/add" element={<SellerProductForm />} />
                 <Route path="/seller/products/edit/:productId" element={<SellerProductForm />} />
                 <Route path="/seller/products/preview/:productId" element={<SellerProductPreview />} />
+
+                {/* Checkout Success/Failure Routes */}
+                <Route path="/checkout/success" element={<CheckoutSuccess />} />
+                <Route path="/checkout/failure" element={<CheckoutFailure />} />
+                <Route path="/order/:orderId" element={<OrderDetail />} />
 
                 {/* 404 */}
                 <Route path="*" element={<NotFound />} />

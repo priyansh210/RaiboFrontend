@@ -46,6 +46,7 @@ export const API_ENDPOINTS = {
   ORDERS: {
     CREATE: '/api/v1/order/',
     GET_BY_ID: '/api/v1/order', // Will append /:id
+    GET_ALL: '/api/v1/order',
   },
   
   // Payment Methods
@@ -55,6 +56,10 @@ export const API_ENDPOINTS = {
     GET_BY_ID: '/api/v1/payment-methods', // Will append /:id
     UPDATE: '/api/v1/payment-methods/update', // Will append /:id
     DELETE: '/api/v1/payment-methods', // Will append /:id
+  },
+
+  PAYMENT: {
+    INITIATE: '/api/v1/payments',
   },
   
   // Address
@@ -95,7 +100,8 @@ export const API_ENDPOINTS = {
     GET_ALL: '/api/v1/board',
     GET_BY_ID: '/api/v1/board', // Will append /:id
     UPDATE: '/api/v1/board', // Will append /:id
-    DELETE: '/api/v1/board', // Will append /:id
+    DELETE: '/api/v1/board',
+    ADD_PRODUCT: '/api/v1/board/addProduct'  // Will append /:id
   },
 
   ROOMS: {

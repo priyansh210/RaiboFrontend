@@ -50,23 +50,9 @@ class RaiBoardService {
     return ;
   }
 
-  async addProductToBoard(boardId: string, product: Product, position: { x: number; y: number }): Promise<RaiBoardProduct> {
-    // Dummy implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          id: 'board-product-' + Date.now(),
-          productId: product.id,
-          productName: product.name,
-          productImage: product.displayImage || product.imageUrls[0] || '/placeholder.svg',
-          productPrice: product.price,
-          position,
-          size: { width: 200, height: 200 },
-          zIndex: 1,
-          rotation: 0,
-        });
-      }, 200);
-    });
+  async addProductToBoard(boardId: string, productId: string){
+    const response = await apiService.addProductToBoard(boardId, productId) as { success: any };
+    return response.success;
   }
 
   // Remove product from board

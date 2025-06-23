@@ -98,7 +98,7 @@ export interface PaymentMethodsResponse {
 }
 
 export interface CreateOrderResponse {
-  id: string;
+  orderId: string;
   error?: string;
 }
 

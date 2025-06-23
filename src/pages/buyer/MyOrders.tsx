@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -48,15 +47,13 @@ const MyOrders = () => {
     }
   };
 
-  const getStatusIcon = (status: OrderStatus) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending':
         return <Clock className="w-5 h-5 text-yellow-500" />;
-      case 'processing':
+      case 'confirmed':
         return <Package className="w-5 h-5 text-blue-500" />;
-      case 'shipped':
-        return <Truck className="w-5 h-5 text-purple-500" />;
-      case 'delivered':
+      case 'completed':
         return <CheckCircle className="w-5 h-5 text-green-500" />;
       case 'cancelled':
         return <XCircle className="w-5 h-5 text-red-500" />;
@@ -65,15 +62,13 @@ const MyOrders = () => {
     }
   };
 
-  const getStatusColor = (status: OrderStatus) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'processing':
+      case 'confirmed':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
-      case 'delivered':
+      case 'completed':
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
       case 'cancelled':
         return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
@@ -170,7 +165,7 @@ const MyOrders = () => {
                                 </span>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => navigate(`/order/${order.id}`)}>
                               <Eye className="w-4 h-4 mr-2" />
                               View Details
                             </Button>
@@ -218,7 +213,7 @@ const MyOrders = () => {
                                 ${order.totalAmount.toFixed(2)}
                               </TableCell>
                               <TableCell>
-                                <Button variant="outline" size="sm">
+                                <Button variant="outline" size="sm" onClick={() => navigate(`/order/${order.id}`)}>
                                   <Eye className="w-4 h-4 mr-2" />
                                   View
                                 </Button>

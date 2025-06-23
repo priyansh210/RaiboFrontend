@@ -1,4 +1,3 @@
-
 // Internal Order model
 export interface OrderItem {
   id: string;
@@ -7,6 +6,7 @@ export interface OrderItem {
   quantity: number;
   price: number;
   selectedColor?: ProductColor;
+  itemStatus?: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled';
 }
 
 export interface Order {
@@ -20,7 +20,7 @@ export interface Order {
   methodId: string;
   deliveryDate: Date;
   totalAmount: number;
-  status: OrderStatus;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
   items: OrderItem[];
   createdAt: Date;
   updatedAt?: Date;

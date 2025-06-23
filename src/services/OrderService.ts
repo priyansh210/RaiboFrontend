@@ -1,6 +1,7 @@
-
 import { Order } from '../models/internal/Order';
-import { ordersApi } from '../api/mockApi';
+import { apiService } from './ApiService';
+import { OrderMapper } from '../mappers/OrderMapper';
+import { ExternalOrderResponse } from '../models/external/ExternalOrderResponse';
 
 export class OrderService {
   /**
@@ -8,80 +9,13 @@ export class OrderService {
    */
   static async getUserOrders(): Promise<Order[]> {
     try {
-      const response = await ordersApi.getUserOrders();
-      
-      if (response.error) {
-        throw new Error(response.error);
-      }
-      
-      if (!response.data) {
-        return [];
-      }
-      
-      // Map API response to internal Order model
-      return response.data.map(apiOrder => ({
-        id: apiOrder.id,
-        buyerId: apiOrder.buyer_id,
-        cartId: '', // Not provided in API response
-        addressId: '', // Not provided in API response
-        paymentMethod: 'Credit Card', // Default value
-        receiverName: 'John Doe', // Default value
-        receiverPhone: '+1234567890', // Default value
-        methodId: '', // Not provided in API response
-        deliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-        totalAmount: apiOrder.total_amount,
-        status: apiOrder.status,
-        items: apiOrder.items.map(item => ({
-          id: item.product_id,
-          productId: item.product_id,
-          product: {
-            id: item.product_id,
-            name: `Product ${item.product_id}`,
-            description: 'Product description',
-            price: item.price,
-            quantity: 10, // Default stock quantity
-            category: {
-              id: 'furniture',
-              name: 'Furniture'
-            },
-            company: {
-              id: 'company-1',
-              name: 'Default Company',
-              email: 'contact@company.com',
-              address: '123 Company St'
-            },
-            images: ['/placeholder.svg'], // Legacy field
-            imageUrls: ['/placeholder.svg'], // New field
-            displayImage: '/placeholder.svg',
-            discount: 0,
-            discountValidUntil: null,
-            averageRating: 4.5,
-            totalRatings: 100,
-            version: 1,
-            interactions: {
-              likes: 0,
-              shares: 0,
-              comments: [],
-              userHasLiked: false,
-              userHasShared: false
-            },
-            // Legacy compatibility properties
-            brand: 'Brand',
-            colors: [],
-            subcategory: 'chairs',
-            featured: false,
-            bestSeller: false,
-            new: false
-          },
-          quantity: item.quantity,
-          price: item.price,
-          selectedColor: item.color ? { name: item.color, code: '#000000' } : undefined
-        })),
-        createdAt: new Date(apiOrder.created_at),
-        updatedAt: apiOrder.created_at ? new Date(apiOrder.created_at) : undefined
-      }));
+      // Use the real API to fetch user orders
+      const response = await apiService.getOrderByUserId() as { orders?: ExternalOrderResponse[] };
+      if (!response.orders) return [];
+      return response.orders.map(OrderMapper.fromExternal);
     } catch (error) {
-      console.error('Error fetching user orders:', error);
+      console.error('Error fetching user orders:', error)
+      ;
       throw error;
     }
   }
@@ -91,8 +25,10 @@ export class OrderService {
    */
   static async getOrderById(orderId: string): Promise<Order | null> {
     try {
-      const orders = await this.getUserOrders();
-      return orders.find(order => order.id === orderId) || null;
+      // Use the real API to fetch order by ID
+      const apiOrder = await apiService.getOrderById(orderId) as any;
+      if (!apiOrder) return null;
+      return OrderMapper.fromExternal(apiOrder as import('../models/external/ExternalOrderResponse').ExternalOrderResponse);
     } catch (error) {
       console.error('Error fetching order:', error);
       throw error;
@@ -104,33 +40,21 @@ export class OrderService {
    */
   static async createOrder(orderData: Omit<Order, 'id' | 'createdAt'>): Promise<Order> {
     try {
-      const apiOrderData = {
-        buyer_id: orderData.buyerId,
-        total_amount: orderData.totalAmount,
-        shipping_address: `${orderData.receiverName}, ${orderData.receiverPhone}`,
-        status: orderData.status,
-        items: orderData.items.map(item => ({
-          product_id: item.productId,
-          quantity: item.quantity,
-          price: item.price,
-          color: item.selectedColor?.name
-        }))
-      };
-
-      const response = await ordersApi.createOrder(apiOrderData);
-      
-      if (response.error) {
-        throw new Error(response.error);
-      }
-      
-      if (!response.data) {
-        throw new Error('No order data returned');
-      }
-      
+      // Use the real API to create an order
+      const response: any = await apiService.createOrder({
+        cart_id: orderData.cartId,
+        address_id: orderData.addressId,
+        payment_method: orderData.paymentMethod,
+        receiver_name: orderData.receiverName,
+        receiver_phone: orderData.receiverPhone,
+        method_id: orderData.methodId,
+        delivery_date: orderData.deliveryDate ? orderData.deliveryDate.toISOString() : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+      const apiOrder = response.order || response;
       return {
         ...orderData,
-        id: response.data.id,
-        createdAt: new Date(response.data.created_at)
+        id: apiOrder._id || apiOrder.id,
+        createdAt: apiOrder.created_at ? new Date(apiOrder.created_at) : new Date(),
       };
     } catch (error) {
       console.error('Error creating order:', error);

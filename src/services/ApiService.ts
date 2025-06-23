@@ -317,8 +317,8 @@ class ApiService {
     receiver_phone: string;
     method_id: string;
     delivery_date: string;
-  }): Promise<CreateOrderResponse> {
-    return this.request<CreateOrderResponse>(API_ENDPOINTS.ORDERS.CREATE, {
+  }){
+    return this.request(API_ENDPOINTS.ORDERS.CREATE, {
       method: 'POST',
       body: JSON.stringify(orderData),
     });
@@ -328,17 +328,15 @@ class ApiService {
     return this.request(`${API_ENDPOINTS.ORDERS.GET_BY_ID}/${id}`);
   }
 
-  async updateOrderStatus(orderId: string, status: string) {
-    return this.request(`${API_ENDPOINTS.ORDERS.GET_BY_ID}/${orderId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ status }),
-    });
+  async getOrderByUserId() {
+    return this.request(`${API_ENDPOINTS.ORDERS.GET_ALL}`);
   }
+
 
   // Enhanced Payment Methods
   async getPaymentMethods(): Promise<PaymentMethod[]> {
-    const response = await this.request<PaymentMethodsResponse>(API_ENDPOINTS.PAYMENT_METHODS.GET_ALL);
-    return response.payment_methods || [];
+    const response = await this.request(API_ENDPOINTS.PAYMENT_METHODS.GET_ALL) as {cards : PaymentMethod[]};
+    return response.cards || [];
   }
 
   async addPaymentMethod(paymentData: {
@@ -367,15 +365,9 @@ class ApiService {
     });
   }
 
-  async processPayment(paymentData: {
-    order_id: string;
-    payment_method_id: string;
-    amount: number;
-    currency?: string;
-  }): Promise<PaymentResponse> {
-    return this.request<PaymentResponse>('/api/v1/payment/process', {
+  async processPayment(orderId : string) {
+    return this.request(`${API_ENDPOINTS.PAYMENT.INITIATE}/${orderId}`, {
       method: 'POST',
-      body: JSON.stringify(paymentData),
     });
   }
 
@@ -698,7 +690,11 @@ class ApiService {
       body: JSON.stringify(boardData),
     });
   }
-
+  async addProductToBoard(boardId: string, productId: string) {
+    return this.request(`${API_ENDPOINTS.BOARDS.ADD_PRODUCT}/${boardId}/${productId}`, {
+      method: 'POST',
+    });
+  }
   async deleteBoard(boardId: string) {
     return this.request(`${API_ENDPOINTS.BOARDS.DELETE}/${boardId}`, {
       method: 'DELETE',

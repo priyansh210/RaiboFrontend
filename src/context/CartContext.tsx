@@ -15,6 +15,7 @@ export interface CartItem {
 
 // Define context props
 interface CartContextProps {
+  cart_id?: string; // Optional cart ID for future use
   cartItems: CartItem[];
   cart: CartItem[]; // Added for compatibility
   total: number; // Added for total calculation

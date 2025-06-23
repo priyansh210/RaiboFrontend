@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -65,7 +64,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
     
       toast({
         title: 'Added to Room',
-        description: `${product.name} has been added to ${roomName}`,
+        description: `${product.name} has been added to ${roomName} (Room)`
       });
       onClose();
     } catch (error) {
@@ -80,9 +79,8 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
 
   const handleAddToBoard = async (boardId: string, boardName: string) => {
     try {
-      // TODO: Implement actual API call to add product to board
+      await raiBoardService.addProductToBoard(boardId, product.id);
       console.log('Adding product to board:', { productId: product.id, boardId });
-      
       toast({
         title: 'Added to Board',
         description: `${product.name} has been added to ${boardName}`,
