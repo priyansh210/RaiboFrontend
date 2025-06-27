@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { useProducts } from '../../hooks/useProducts';
+import { useProducts } from '../hooks/useProducts';
 import { ProductReview } from '@/models/internal/Product';
-import InstagramStylePost from '../../components/InstagramStylePost';
-import CommentsModal from '../../components/CommentsModal';
-import Navbar from '../../components/Navbar';
+import InstagramStylePost from '../components/InstagramStylePost';
+import CommentsModal from '../components/CommentsModal';
+import Navbar from '../components/Navbar';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 

@@ -31,7 +31,7 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { cart: cartItems } = useCart();
-  const { isAuthenticated, user, logout, isSeller, isGuest } = useAuth();
+  const { isAuthenticated, user, logout, isGuest } = useAuth();
   const { t } = useLanguage();
   const isMobile = useIsMobile();
 
@@ -93,36 +93,31 @@ const Navbar: React.FC = () => {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      if (isSeller) {
-        // For sellers, search could be for their products/orders
-        console.log('Seller search:', searchQuery);
-      } else {
-        // Show loading state in navbar if desired
-        setIsLoading(true);
-        try {
-          let productsData;
-          productsData = await productService.searchProducts(searchQuery);
-          // Pass results to Search page
-          navigate('/search', { state: { searchTerm: searchQuery, products: productsData } });
-        } catch (error) {
-          console.error('Error loading products:', error);
-        } finally {
-          setIsLoading(false);
-        }
-        if (isGuest) {
-          toast({
-            title: "Search results",
-            description: "Sign in to save your search history and get personalized recommendations.",
-            action: (
-              <ToastAction 
-                altText={t('signIn')}
-                onClick={() => navigate('/login')}
-              >
-                {t('signIn')}
-              </ToastAction>
-            ),
-          });
-        }
+      // Only buyer search
+      setIsLoading(true);
+      try {
+        let productsData;
+        productsData = await productService.searchProducts(searchQuery);
+        // Pass results to Search page
+        navigate('/search', { state: { searchTerm: searchQuery, products: productsData } });
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+      if (isGuest) {
+        toast({
+          title: "Search results",
+          description: "Sign in to save your search history and get personalized recommendations.",
+          action: (
+            <ToastAction 
+              altText={t('signIn')}
+              onClick={() => navigate('/login')}
+            >
+              {t('signIn')}
+            </ToastAction>
+          ),
+        });
       }
     }
   };
@@ -130,8 +125,6 @@ const Navbar: React.FC = () => {
   const redirectToAccountPage = () => {
     if (!isAuthenticated) {
       navigate('/login');
-    } else if (isSeller) {
-      navigate('/seller/dashboard');
     } else {
       navigate('/account');
     }
@@ -168,7 +161,7 @@ const Navbar: React.FC = () => {
           <form onSubmit={handleSearch} className="hidden md:flex relative flex-grow max-w-md mx-4">
             <input
               type="text"
-              placeholder={isSeller ? "Search products, orders..." : t('searchForFurniture')}
+              placeholder={t('searchForFurniture')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={`w-full rounded-md border-none pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-ring ${
@@ -190,66 +183,29 @@ const Navbar: React.FC = () => {
             {/* Theme and Language Toggle */}
             <ThemeLanguageToggle />
 
-            {/* Seller Navigation */}
-            {isSeller ? (
-              <>
-                <Link 
-                  to="/seller/dashboard" 
-                  className={`flex items-center space-x-1 ${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
-                >
-                  <BarChart3 size={16} />
-                  <span>{t('dashboard')}</span>
-                </Link>
-                
-                <Link 
-                  to="/seller/products" 
-                  className={`flex items-center space-x-1 ${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
-                >
-                  <Package size={16} />
-                  <span>{t('products')}</span>
-                </Link>
-                
-                <Link 
-                  to="/seller/payments" 
-                  className={`flex items-center space-x-1 ${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
-                >
-                  <CreditCard size={16} />
-                  <span>{t('payments')}</span>
-                </Link>
-                
-                <Link 
-                  to="/seller/logistics" 
-                  className={`flex items-center space-x-1 ${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
-                >
-                  <Truck size={16} />
-                  <span>{t('logistics')}</span>
-                </Link>
-              </>
-            ) : (
-              <Link 
-                to="/for-you" 
-                className={`${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
-                onClick={(e) => {
-                  if (isGuest) {
-                    e.preventDefault();
-                    toast({
-                      title: "Sign in for personalized recommendations",
-                      description: "Create an account to get recommendations tailored just for you.",
-                      action: (
-                        <ToastAction 
-                          altText={t('signIn')}
-                          onClick={() => navigate('/login')}
-                        >
-                          {t('signIn')}
-                        </ToastAction>
-                      ),
-                    });
-                  }
-                }}
-              >
-                {t('forYou')}
-              </Link>
-            )}
+            <Link 
+              to="/for-you" 
+              className={`${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors`}
+              onClick={(e) => {
+                if (isGuest) {
+                  e.preventDefault();
+                  toast({
+                    title: "Sign in for personalized recommendations",
+                    description: "Create an account to get recommendations tailored just for you.",
+                    action: (
+                      <ToastAction 
+                        altText={t('signIn')}
+                        onClick={() => navigate('/login')}
+                      >
+                        {t('signIn')}
+                      </ToastAction>
+                    ),
+                  });
+                }
+              }}
+            >
+              {t('forYou')}
+            </Link>
             
             {/* Account Dropdown with Avatar for authenticated users */}
             <DropdownMenu>
@@ -276,26 +232,9 @@ const Navbar: React.FC = () => {
                       {user?.firstName || ''} {user?.lastName || ''}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    {isSeller ? (
-                      <>
-                        <DropdownMenuItem asChild>
-                          <Link to="/seller/dashboard" className="cursor-pointer w-full">{t('dashboard')}</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to="/seller/products" className="cursor-pointer w-full">{t('products')}</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to="/seller/payments" className="cursor-pointer w-full">{t('payments')}</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link to="/seller/logistics" className="cursor-pointer w-full">{t('logistics')}</Link>
-                        </DropdownMenuItem>
-                      </>
-                    ) : (
-                      <DropdownMenuItem asChild>
-                        <Link to="/account" className="cursor-pointer w-full">{t('myAccount')}</Link>
-                      </DropdownMenuItem>
-                    )}
+                    <DropdownMenuItem asChild>
+                      <Link to="/account" className="cursor-pointer w-full">{t('myAccount')}</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/my-orders" className="cursor-pointer w-full">{t('orders')}</Link>
                     </DropdownMenuItem>
@@ -322,58 +261,47 @@ const Navbar: React.FC = () => {
                     <DropdownMenuItem asChild>
                       <Link to="/register" className="cursor-pointer w-full">{t('signUp')}</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/seller/login" className="cursor-pointer w-full">Seller Login</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/seller/register" className="cursor-pointer w-full">Seller Register</Link>
-                    </DropdownMenuItem>
                   </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
             
             {/* Cart Icon - show for everyone but with different behavior */}
-            {!isSeller && (
-              <Link 
-                to="/cart" 
-                className={`${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors relative`}
-                onClick={(e) => {
-                  if (isGuest && cartItems.length === 0) {
-                    e.preventDefault();
-                    toast({
-                      title: "Your cart is empty",
-                      description: "Browse our products to add items to your cart.",
-                    });
-                  }
-                }}
-              >
-                <ShoppingCart size={20} />
-                {cartItems.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-umber text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                    {cartItems.length}
-                  </span>
-                )}
-              </Link>
-            )}
+            <Link 
+              to="/cart" 
+              className={`${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors relative`}
+              onClick={(e) => {
+                if (isGuest && cartItems.length === 0) {
+                  e.preventDefault();
+                  toast({
+                    title: "Your cart is empty",
+                    description: "Browse our products to add items to your cart.",
+                  });
+                }
+              }}
+            >
+              <ShoppingCart size={20} />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-umber text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartItems.length}
+                </span>
+              )}
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            {!isSeller && (
-              <Link 
-                to="/cart" 
-                className={`${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors relative mr-4`}
-              >
-                <ShoppingCart size={20} />
-                {cartItems.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-umber text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                    {cartItems.length}
-                  </span>
-                )}
-              </Link>
-            )}
+            <Link 
+              to="/cart" 
+              className={`${isScrolled ? 'text-foreground' : 'text-white'} hover:text-primary/80 transition-colors relative mr-4`}
+            >
+              <ShoppingCart size={20} />
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-umber text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                  {cartItems.length}
+                </span>
+              )}
+            </Link>
             <button 
               className={`${isScrolled ? 'text-foreground' : 'text-white'} p-1`}
               onClick={toggleMenu}
@@ -408,7 +336,7 @@ const Navbar: React.FC = () => {
             <div className="relative">
               <input
                 type="text"
-                placeholder={isSeller ? "Search products, orders..." : t('searchForFurniture')}
+                placeholder={t('searchForFurniture')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full rounded-md border bg-background pl-4 pr-10 py-2 focus:outline-none focus:ring-2 focus:ring-ring"
@@ -441,80 +369,49 @@ const Navbar: React.FC = () => {
                       </Avatar>
                       <span className="text-foreground">{user?.firstName} {user?.lastName}</span>
                     </li>
-                    {isSeller ? (
-                      <>
-                        <li>
-                          <Link to="/seller/dashboard" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
-                            <BarChart3 size={16} className="mr-2" />
-                            Dashboard
-                          </Link>
-                        </li>
-                        <li>
-                          <Link to="/seller/products" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
-                            <Package size={16} className="mr-2" />
-                            Products
-                          </Link>
-                        </li>
-                        <li>
-                          <Link to="/seller/payments" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
-                            <CreditCard size={16} className="mr-2" />
-                            Payments
-                          </Link>
-                        </li>
-                        <li>
-                          <Link to="/seller/logistics" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
-                            <Truck size={16} className="mr-2" />
-                            Logistics
-                          </Link>
-                        </li>
-                      </>
-                    ) : (
-                      <>
-                        <li>
-                          <Link to="/account" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
-                            My Account
-                          </Link>
-                        </li>
-                        <li>
-                          <Link 
-                            to="/for-you" 
-                            className="text-foreground hover:text-primary"
-                            onClick={(e) => {
-                              if (isGuest) {
-                                e.preventDefault();
-                                setIsMenuOpen(false);
-                                toast({
-                                  title: "Sign in for personalized recommendations",
-                                  description: "Create an account to get recommendations tailored just for you.",
-                                  action: (
-                                    <ToastAction 
-                                      altText={t('signIn')}
-                                      onClick={() => navigate('/login')}
-                                    >
-                                      {t('signIn')}
-                                    </ToastAction>
-                                  ),
-                                });
-                              } else {
-                                setIsMenuOpen(false);
-                              }
-                            }}
-                          >
-                            For You
-                          </Link>
-                        </li>
-                        <li>
-                          <Link to="/my-rooms" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
-                            My Rooms
-                          </Link>
-                        </li>
-                        <li>
-                          <Link to="/raiboards" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
-                            RaiBoards
-                          </Link>
-                        </li>
-                      </>
-                    )}
+                    <li>
+                      <Link to="/account" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
+                        My Account
+                      </Link>
+                    </li>
+                    <li>
+                      <Link 
+                        to="/for-you" 
+                        className="text-foreground hover:text-primary"
+                        onClick={(e) => {
+                          if (isGuest) {
+                            e.preventDefault();
+                            setIsMenuOpen(false);
+                            toast({
+                              title: "Sign in for personalized recommendations",
+                              description: "Create an account to get recommendations tailored just for you.",
+                              action: (
+                                <ToastAction 
+                                  altText={t('signIn')}
+                                  onClick={() => navigate('/login')}
+                                >
+                                  {t('signIn')}
+                                </ToastAction>
+                              ),
+                            });
+                          } else {
+                            setIsMenuOpen(false);
+                          }
+                        }}
+                      >
+                        For You
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/my-rooms" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
+                        My Rooms
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/raiboards" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
+                        RaiBoards
+                      </Link>
+                    </li>
                     <li>
                       <button 
                         onClick={handleLogout}
@@ -537,26 +434,14 @@ const Navbar: React.FC = () => {
                         Register
                       </Link>
                     </li>
-                    <li>
-                      <Link to="/seller/login" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
-                        Seller Sign In
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/seller/register" className="text-foreground hover:text-primary" onClick={() => setIsMenuOpen(false)}>
-                        Seller Register
-                      </Link>
-                    </li>
                   </>
                 )}
-                {!isSeller && (
-                  <li>
-                    <Link to="/cart" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
-                      <ShoppingCart size={18} className="mr-2" />
-                      Cart ({cartItems.length})
-                    </Link>
-                  </li>
-                )}
+                <li>
+                  <Link to="/cart" className="text-foreground hover:text-primary flex items-center" onClick={() => setIsMenuOpen(false)}>
+                    <ShoppingCart size={18} className="mr-2" />
+                    Cart ({cartItems.length})
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

@@ -1,18 +1,17 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import Layout from '../../components/Layout';
+import { useAuth } from '../context/AuthContext';
+import Layout from '../components/Layout';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { Phone, Mail, MapPin, User, Package, LogOut, Save, AlertCircle, Store, ArrowRight } from 'lucide-react';
+import { Phone, Mail, MapPin, User, Package, LogOut, Save, AlertCircle, ArrowRight, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 
 const Account = () => {
-  const { user, isAuthenticated, logout, isBuyer, isSeller } = useAuth();
+  const { user, isAuthenticated, logout, isBuyer } = useAuth();
   const navigate = useNavigate();
   
   // Profile state
@@ -32,11 +31,7 @@ const Account = () => {
     if (!isAuthenticated) {
       navigate('/login');
     }
-    // If user is a seller, redirect to seller dashboard
-    if (user && isSeller) {
-      navigate('/seller/dashboard');
-    }
-  }, [isAuthenticated, navigate, user, isBuyer]);
+  }, [isAuthenticated, navigate]);
   
   // Get user initials for avatar
   const getUserInitials = (): string => {
@@ -152,33 +147,6 @@ const Account = () => {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-
-            {/* Seller Portal Promotion */}
-            <div className="mb-6 p-4 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-sm border border-primary/20">
-              <div className="flex items-start gap-3">
-                <Store size={24} className="text-primary flex-shrink-0 mt-1" />
-                <div className="flex-grow">
-                  <h3 className="text-foreground font-medium mb-1">Interested in selling?</h3>
-                  <p className="text-muted-foreground text-sm mb-3">
-                    Turn your passion into profit. Join our marketplace as a seller and reach thousands of buyers.
-                  </p>
-                  <div className="flex gap-2">
-                    <Link
-                      to="/seller/register"
-                      className="bg-primary text-primary-foreground px-4 py-2 text-sm hover:bg-primary/90 transition-colors"
-                    >
-                      Become a Seller
-                    </Link>
-                    <Link
-                      to="/seller/login"
-                      className="border border-primary text-primary px-4 py-2 text-sm hover:bg-primary/10 transition-colors"
-                    >
-                      Seller Login
-                    </Link>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <Tabs defaultValue="profile" className="mt-4">

@@ -1,17 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingUp, Star, Search, Store, Sofa, Lightbulb, Palette, Camera, Heart, Home, ShoppingBag } from 'lucide-react';
-import Layout from '../../components/Layout';
-import BrandSlider from '../../components/BrandSlider';
-import ProductCard from '../../components/ProductCard';
-import FeaturedBanner from '../../components/FeaturedBanner';
-import { brands } from '../../data/products';
-import { productService } from '../../services/ProductService';
-import { Product } from '../../models/internal/Product';
+import Layout from '../components/Layout';
+import BrandSlider from '../components/BrandSlider';
+import ProductCard from '../components/ProductCard';
+import FeaturedBanner from '../components/FeaturedBanner';
+import { brands } from '../data/products';
+import { productService } from '../services/ProductService';
+import { Product } from '../models/internal/Product';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/context/ThemeContext';
-import '../../styles/hide-scrollbar.css';
+import '@/styles/hide-scrollbar.css';
 
 const Index = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);

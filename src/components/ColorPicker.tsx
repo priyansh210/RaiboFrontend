@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Color } from '../data/products';
+import { Color } from '@/models/internal/Color';
 
 interface ColorPickerProps {
   colors: Color[];

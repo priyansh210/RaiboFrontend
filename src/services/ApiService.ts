@@ -9,6 +9,9 @@ import {
   CreateCheckoutSessionRequest
 } from '../models/external/StripeModels';
 import { RaiBoard } from '@/models/internal/RaiBoard';
+import { brands } from '../data/brandsData';
+import { categories } from '../data/categoriesData';
+import { forYouSuggestions } from '../data/forYouSuggestionsData';
 
 class ApiService {
   private baseURL: string;
@@ -254,8 +257,8 @@ class ApiService {
   }
 
   async getCategories() {
-    const response = await this.request<{ categories: any[] }>(`${API_ENDPOINTS.CATEGORIES.GET_ALL}`);
-    return response.categories || [];
+    // Return dummy categories from data folder
+    return categories;
   }
 
   // Cart methods
@@ -699,6 +702,14 @@ class ApiService {
     return this.request(`${API_ENDPOINTS.BOARDS.DELETE}/${boardId}`, {
       method: 'DELETE',
     });
+  }
+
+  async getBrands() {
+    return brands;
+  }
+
+  async getForYouSuggestions() {
+    return forYouSuggestions;
   }
 }
 

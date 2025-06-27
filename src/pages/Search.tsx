@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Search as SearchIcon, Filter, X } from 'lucide-react';
 import { Image as ImageIcon } from 'lucide-react';
-import Layout from '../../components/Layout';
-import ProductCard from '../../components/ProductCard';
-import SearchFilters from '../../components/search/SearchFilters';
-import { productService } from '../../services/ProductService';
-import { Product, ProductColor } from '../../models/internal/Product';
-import { useTheme } from '../../context/ThemeContext';
+import Layout from '../components/Layout';
+import ProductCard from '../components/ProductCard';
+import SearchFilters from '../components/search/SearchFilters';
+import { productService } from '../services/ProductService';
+import { Product, ProductColor } from '../models/internal/Product';
+import { useTheme } from '../context/ThemeContext';
 
 const Search = () => {
   const location = useLocation();

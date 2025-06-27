@@ -1,15 +1,15 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import ProductCard from '../../components/ProductCard';
-import CommentsModal from '../../components/CommentsModal';
-import InstagramExploreGrid from '../../components/InstagramExploreGrid';
-import { useIsMobile } from '../../hooks/use-mobile';
+import Layout from '../components/Layout';
+import ProductCard from '../components/ProductCard';
+import CommentsModal from '../components/CommentsModal';
+import InstagramExploreGrid from '../components/InstagramExploreGrid';
+import { useIsMobile } from '../hooks/use-mobile';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Navbar from '../../components/Navbar';
-import { useProducts } from '../../hooks/useProducts';
+import Navbar from '../components/Navbar';
+import { useProducts } from '../hooks/useProducts';
 import { ProductReview } from '@/models/internal/Product';
 
 const ForYou = () => {

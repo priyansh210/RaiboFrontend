@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import { Room, ROOM_TYPES, CreateRoomRequest } from '../../models/internal/Room';
-import { apiService } from '../../services/ApiService';
+import Layout from '../components/Layout';
+import { Room, ROOM_TYPES, CreateRoomRequest } from '../models/internal/Room';
+import { apiService } from '../services/ApiService';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Home, Trash2, Edit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

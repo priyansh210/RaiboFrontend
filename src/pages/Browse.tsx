@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import ProductCard from '../../components/ProductCard';
-import CategoryFilter from '../../components/CategoryFilter';
-import PriceRangeSlider from '../../components/PriceRangeSlider';
-import { categories } from '../../data/products';
-import { productService } from '../../services/ProductService';
+import Layout from '../components/Layout';
+import ProductCard from '../components/ProductCard';
+import CategoryFilter from '../components/CategoryFilter';
+import PriceRangeSlider from '../components/PriceRangeSlider';
+import { apiService } from '../services/ApiService';
 import { Filter, Grid, List, SlidersHorizontal, X } from 'lucide-react';
-import { Product } from '../../models/internal/Product';
+import { Product } from '../models/internal/Product';
 import { useTheme } from '@/context/ThemeContext';
+import { productService } from '@/services/ProductService';
 
 const Browse = () => {
   const { category } = useParams();
@@ -22,33 +22,25 @@ const Browse = () => {
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [categories, setCategories] = useState<any[]>([]);
   
-  // Fetch products from database
+  // Fetch products and categories from API service
   useEffect(() => {
-    const getProducts = async () => {
+    const getProductsAndCategories = async () => {
       setIsLoading(true);
-      
       try {
         const query = searchParams.get('q');
-        let productsData;
-        
-        if (query) {
-          // Use search function if there's a query
-          productsData = await productService.fetchProducts();
-        } else {
-          // Otherwise fetch all products
-          productsData = await productService.fetchProducts();
-        }
-        
+        let productsData = await productService.fetchProducts();
         setProducts(productsData);
+        const categoriesData = await apiService.getCategories();
+        setCategories(categoriesData);
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('Error fetching products or categories:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    
-    getProducts();
+    getProductsAndCategories();
   }, [searchParams]);
   
   // Filtering products based on category parameter, search query, and active filters

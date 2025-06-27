@@ -54,8 +54,6 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   googleLogin: () => Promise<void>;
   isBuyer: boolean;
-  isSeller: boolean;
-  isAdmin: boolean;
   isGuest: boolean;
 }
 
@@ -71,8 +69,6 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
   googleLogin: async () => {},
   isBuyer: false,
-  isSeller: false,
-  isAdmin: false,
   isGuest: true
 });
 
@@ -192,12 +188,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log('AuthContext: Login completed successfully');
       
-      // Handle role-based redirects
-      if (userData.roles.includes('admin')) {
-        // Admin users should be redirected to admin dashboard
-        window.location.href = '/admin/dashboard';
-      }
-      
       return;
     } catch (error: any) {
       console.error('AuthContext: Login error:', error);
@@ -238,39 +228,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('AuthContext: Registration response received:', response);
   
       if (!response) throw new Error('No response from server');
-  
-      // Store the auth token
-      // if (response.access_token) {
-      //   localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.access_token);
-      //   console.log('AuthContext: Token stored after registration');
-      // }
-  
-      // // Create user object from response
-      // const userData: AuthUser = {
-      //   id: response.user?.id || email,
-      //   email: response.user?.email || email,
-      //   firstName: response.user?.firstName || response.user?.first_name || firstName,
-      //   lastName: response.user?.lastName || response.user?.last_name || lastName,
-      //   roles: response.user?.roles || [role], // Use the provided role if not returned by the server
-      // };
-  
-      // console.log('AuthContext: User data created after registration:', userData);
-  
-      // Store user data
-      // localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
-  
-      // setUser(userData);
-      // setRoles(getUserRoles(userData));
-      // setProfile({
-      //   first_name: userData.firstName,
-      //   last_name: userData.lastName,
-      //   email: userData.email,
-      // });
-  
-      // toast({
-      //   title: "Account created successfully",
-      //   description: "You have been automatically logged in.",
-      // });
   
       console.log('AuthContext: Registration completed successfully');
       return; // Return the full response for further use if needed
@@ -329,10 +286,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     console.log('AuthContext: Google login completed successfully');
     
-    // Handle role-based redirects
-    if (userData.roles.includes('admin')) {
-      window.location.href = '/admin/dashboard';
-    }
     return;
   } catch (error: any) {
     console.error('AuthContext: Google login error:', error);
@@ -366,31 +319,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-  const isBuyer = roles.includes('buyer');
-  const isSeller = roles.includes('seller');
-  const isAdmin = roles.includes('admin');
-  const isGuest = !user; // Guest user when not logged in
-  
   return (
-    <AuthContext.Provider value={{
-      user,
-      profile,
-      isAuthenticated: !!user,
-      isLoading,
-      roles,
-      login,
-      register,
-      logout,
-      googleLogin,
-      isBuyer,
-      isSeller,
-      isAdmin,
-      isGuest
-    }}>
+    <AuthContext.Provider value={{ user, profile, isAuthenticated: !!user, isLoading, roles, login, register, logout, googleLogin, isBuyer: roles.includes('buyer'), isGuest: roles.includes('guest') }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook to use auth context
-export const useAuth = () => useContext(AuthContext);
+// Custom hook to use the auth context
+export const useAuth = () => {
+  return useContext(AuthContext);
+};

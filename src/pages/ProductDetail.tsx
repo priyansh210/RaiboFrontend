@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import ProductInteractions from '../../components/ProductInteractions';
-import CommentsModal from '../../components/CommentsModal';
-import AddToRoomModal from '../../components/AddToRoomModal';
-import Product3DViewer from '../../components/Product3DViewer';
-import { useCart } from '../../context/CartContext';
-import { productService } from '../../services/ProductService';
-import { Product } from '../../models/internal/Product';
+import Layout from '../components/Layout';
+import ProductInteractions from '../components/ProductInteractions';
+import CommentsModal from '../components/CommentsModal';
+import AddToRoomModal from '../components/AddToRoomModal';
+import Product3DViewer from '../components/Product3DViewer';
+import { useCart } from '../context/CartContext';
+import { productService } from '../services/ProductService';
+import { Product } from '../models/internal/Product';
 import { toast } from '@/hooks/use-toast';
 import { apiService } from '@/services/ApiService';
 import { 

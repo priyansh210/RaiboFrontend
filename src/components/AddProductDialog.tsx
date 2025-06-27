@@ -29,6 +29,20 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
   const [rooms, setRooms] = useState<Room[]>([]);
   const [boards, setBoards] = useState<RaiBoard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // Room creation uses CreateRoomRequest model
+  const [showCreateRoom, setShowCreateRoom] = useState(false);
+  const [showCreateBoard, setShowCreateBoard] = useState(false);
+  const [newRoom, setNewRoom] = useState({
+    name: '',
+    description: '',
+    room_type: 'living_room',
+  });
+  const [newBoard, setNewBoard] = useState({
+    name: '',
+    description: '',
+    isPublic: false,
+  });
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -41,7 +55,6 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
     try {
       const rooms = await roomService.getUserRooms();
       const boards = await raiBoardService.getUserBoards();
-
       setRooms(rooms);
       setBoards(boards);
     } catch (error) {
@@ -53,6 +66,40 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCreateRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRoom.name.trim()) return;
+    setCreating(true);
+    try {
+      const created = await roomService.createRoom(newRoom); // Use CreateRoomRequest model
+      toast({ title: 'Room Created', description: `Room "${created.name}" created.` });
+      setShowCreateRoom(false);
+      setNewRoom({ name: '', description: '', room_type: 'living_room' });
+      fetchRoomsAndBoards();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to create room', variant: 'destructive' });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleCreateBoard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBoard.name.trim()) return;
+    setCreating(true);
+    try {
+      const created = await raiBoardService.createBoard(newBoard); // Use correct model
+      toast({ title: 'Board Created', description: `Board "${created.name}" created.` });
+      setShowCreateBoard(false);
+      setNewBoard({ name: '', description: '', isPublic: false });
+      fetchRoomsAndBoards();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to create board', variant: 'destructive' });
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -148,8 +195,55 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 <p className="text-sm">Create a room to get started</p>
               </div>
             )}
+            {/* Create Room Button at the bottom */}
+            <div className="mt-4">
+              {showCreateRoom ? (
+                <form onSubmit={handleCreateRoom} className="flex flex-col gap-2 w-full mb-2">
+                  <input
+                    type="text"
+                    placeholder="Room name"
+                    value={newRoom.name}
+                    onChange={e => setNewRoom(prev => ({ ...prev, name: e.target.value }))}
+                    className="border px-2 py-1 rounded text-sm bg-background text-foreground placeholder:text-muted-foreground dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-400"
+                    required
+                  />
+                  <select
+                    value={newRoom.room_type}
+                    onChange={e => setNewRoom(prev => ({ ...prev, room_type: e.target.value }))}
+                    className="border px-2 py-1 rounded text-sm bg-background text-foreground dark:bg-zinc-900 dark:text-white"
+                  >
+                    <option value="living_room">Living Room</option>
+                    <option value="bedroom">Bedroom</option>
+                    <option value="kitchen">Kitchen</option>
+                    <option value="dining_room">Dining Room</option>
+                    <option value="office">Office</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <input
+                    type="text"
+                    placeholder="Description (optional)"
+                    value={newRoom.description}
+                    onChange={e => setNewRoom(prev => ({ ...prev, description: e.target.value }))}
+                    className="border px-2 py-1 rounded text-sm bg-background text-foreground placeholder:text-muted-foreground dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-400"
+                  />
+                  <div className="flex gap-2">
+                    <Button type="submit" size="sm" disabled={creating} className="bg-primary text-white">{creating ? 'Creating...' : 'Create'}</Button>
+                    <Button type="button" size="sm" variant="outline" onClick={() => setShowCreateRoom(false)}>Cancel</Button>
+                  </div>
+                </form>
+              ) : (
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  className="w-full border-2 border-dotted border-primary/40 text-primary mt-2 py-6 flex flex-row items-center justify-center gap-2"
+                  onClick={() => setShowCreateRoom(true)}
+                >
+                  <Plus size={20} />
+                  Create New Room
+                </Button>
+              )}
+            </div>
           </TabsContent>
-          
           <TabsContent value="boards" className="mt-4">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
@@ -183,6 +277,50 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 <p className="text-sm">Create a board to get started</p>
               </div>
             )}
+            {/* Create Board Button at the bottom */}
+            <div className="mt-4">
+              {showCreateBoard ? (
+                <form onSubmit={handleCreateBoard} className="flex flex-col gap-2 w-full mb-2">
+                  <input
+                    type="text"
+                    placeholder="Board name"
+                    value={newBoard.name}
+                    onChange={e => setNewBoard(prev => ({ ...prev, name: e.target.value }))}
+                    className="border px-2 py-1 rounded text-sm bg-background text-foreground placeholder:text-muted-foreground dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-400"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Description (optional)"
+                    value={newBoard.description}
+                    onChange={e => setNewBoard(prev => ({ ...prev, description: e.target.value }))}
+                    className="border px-2 py-1 rounded text-sm bg-background text-foreground placeholder:text-muted-foreground dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-400"
+                  />
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs">Public</label>
+                    <input
+                      type="checkbox"
+                      checked={newBoard.isPublic}
+                      onChange={e => setNewBoard(prev => ({ ...prev, isPublic: e.target.checked }))}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="submit" size="sm" disabled={creating} className="bg-primary text-white">{creating ? 'Creating...' : 'Create'}</Button>
+                    <Button type="button" size="sm" variant="outline" onClick={() => setShowCreateBoard(false)}>Cancel</Button>
+                  </div>
+                </form>
+              ) : (
+                <Button
+                  size="lg"
+                  variant="ghost"
+                  className="w-full border-2 border-dotted border-primary/40 text-primary mt-2 py-6 flex flex-row items-center justify-center gap-2"
+                  onClick={() => setShowCreateBoard(true)}
+                >
+                  <Plus size={20} />
+                  Create New Board
+                </Button>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>

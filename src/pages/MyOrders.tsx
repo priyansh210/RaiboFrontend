@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import Layout from '../../components/Layout';
-import { OrderService } from '../../services/OrderService';
-import { Order, OrderStatus } from '../../models/internal/Order';
+import { useAuth } from '../context/AuthContext';
+import Layout from '../components/Layout';
+import { OrderService } from '../services/OrderService';
+import { Order, OrderStatus } from '../models/internal/Order';
 import { toast } from '@/hooks/use-toast';
 import { Package, Truck, CheckCircle, Clock, XCircle, ArrowLeft, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';

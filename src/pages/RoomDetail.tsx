@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import { Room } from '../../models/internal/Room';
-import { apiService } from '../../services/ApiService';
+import Layout from '../components/Layout';
+import { Room } from '../models/internal/Room';
+import { apiService } from '../services/ApiService';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';

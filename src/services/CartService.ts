@@ -1,5 +1,5 @@
 
-import { Product } from '../data/products';
+import { Product } from '@/models/internal/Product';
 
 export interface CartItem extends Product {
   quantity: number;

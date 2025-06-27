@@ -9,46 +9,31 @@ import { Toaster } from '@/components/ui/toaster';
 import LoadingScreen from './components/LoadingScreen';
 
 // Pages
-import Index from './pages/buyer/Index';
-import Browse from './pages/buyer/Browse';
-import ProductDetail from './pages/buyer/ProductDetail';
-import Search from './pages/buyer/Search';
-import Cart from './pages/buyer/Cart';
-import Checkout from './pages/buyer/Checkout';
-import Account from './pages/buyer/Account';
-import MyOrders from './pages/buyer/MyOrders';
-import ForYou from './pages/buyer/ForYou';
-import ForYouFeed from './pages/buyer/ForYouFeed';
-import MyRooms from './pages/buyer/MyRooms';
-import RoomDetail from './pages/buyer/RoomDetail';
-import NotFound from './pages/buyer/NotFound';
-import StripeCheckout from './pages/buyer/StripeCheckout';
-import RaiBoards from './pages/buyer/RaiBoards';
-import RaiBoardDetail from './pages/buyer/RaiBoardDetail';
-import CheckoutSuccess from './pages/buyer/CheckoutSuccess';
-import CheckoutFailure from './pages/buyer/CheckoutFailure';
-import OrderDetail from './pages/buyer/OrderDetail';
+import Index from './pages/Index';
+import Browse from './pages/Browse';
+import ProductDetail from './pages/ProductDetail';
+import Search from './pages/Search';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import Account from './pages/Account';
+import MyOrders from './pages/MyOrders';
+import ForYou from './pages/ForYou';
+import ForYouFeed from './pages/ForYouFeed';
+import MyRooms from './pages/MyRooms';
+import RoomDetail from './pages/RoomDetail';
+import NotFound from './pages/NotFound';
+import RaiBoards from './pages/RaiBoards';
+import RaiBoardDetail from './pages/RaiBoardDetail';
+import CheckoutSuccess from './pages/CheckoutSuccess';
+import CheckoutFailure from './pages/CheckoutFailure';
+import OrderDetail from './pages/OrderDetail';
 
 // Auth Pages
-import Login from './pages/buyer/Login';
-import BuyerLogin from './pages/buyer/BuyerLogin';
-import BuyerRegister from './pages/buyer/BuyerRegister';
-import SellerLogin from './pages/seller/SellerLogin';
-import SellerRegister from './pages/seller/SellerRegister';
+import Login from './pages/Login';
+import BuyerLogin from './pages/BuyerLogin';
+import BuyerRegister from './pages/BuyerRegister';
 import AccountLogin from './pages/AccountLogin';
 import AuthCallback from './pages/AuthCallback';
-
-// Seller Pages
-import SellerDashboard from './pages/seller/SellerDashboard';
-import SellerProducts from './pages/seller/SellerProducts';
-import SellerProductForm from './pages/seller/SellerProductForm';
-import SellerProductPreview from './pages/seller/SellerProductPreview';
-
-// Admin Pages
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminRegister from './pages/admin/AdminRegister';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminProductPreview from './pages/admin/AdminProductPreview';
 
 import './App.css';
 
@@ -83,7 +68,6 @@ const AppContent = () => {
                 <Route path="/search" element={<Search />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route path="/stripe-checkout" element={<StripeCheckout />} />
                 <Route path="/for-you" element={<ForYou />} />
                 <Route path="/for-you/feed/:startIndex" element={<ForYouFeed />} />
                 <Route path="/my-rooms" element={<MyRooms />} />
@@ -97,27 +81,12 @@ const AppContent = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/buyer/login" element={<BuyerLogin />} />
                 <Route path="/buyer/register" element={<BuyerRegister />} />
-                <Route path="/seller/login" element={<SellerLogin />} />
-                <Route path="/seller/register" element={<SellerRegister />} />
                 <Route path="/account/login" element={<AccountLogin />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
-
-                {/* Admin Routes */}
-                <Route path="/admin/login" element={<AdminLogin />} />
-                <Route path="/admin/register" element={<AdminRegister />} />
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/products/preview/:productId" element={<AdminProductPreview />} />
 
                 {/* User Account */}
                 <Route path="/account" element={<Account />} />
                 <Route path="/my-orders" element={<MyOrders />} />
-
-                {/* Seller Routes */}
-                <Route path="/seller/dashboard" element={<SellerDashboard />} />
-                <Route path="/seller/products" element={<SellerProducts />} />
-                <Route path="/seller/products/add" element={<SellerProductForm />} />
-                <Route path="/seller/products/edit/:productId" element={<SellerProductForm />} />
-                <Route path="/seller/products/preview/:productId" element={<SellerProductPreview />} />
 
                 {/* Checkout Success/Failure Routes */}
                 <Route path="/checkout/success" element={<CheckoutSuccess />} />

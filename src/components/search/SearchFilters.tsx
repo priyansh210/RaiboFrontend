@@ -4,7 +4,7 @@ import { Filter, X } from 'lucide-react';
 import PriceRangeSlider from '../PriceRangeSlider';
 import ColorPicker from '../ColorPicker';
 import CategoryFilters from './CategoryFilters';
-import { Color } from '../../data/products';
+import { Color } from '@/models/internal/Color';
 import { useTheme } from '../../context/ThemeContext';
 
 interface SearchFiltersProps {
