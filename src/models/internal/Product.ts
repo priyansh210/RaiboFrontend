@@ -42,6 +42,8 @@ export interface ProductInteraction {
   comments: ProductReview[];
   userHasLiked: boolean;
   userHasShared: boolean;
+  views: number;
+  orderCount: number; // Number of people who have ordered this item
 }
 
 export interface Product {
@@ -70,10 +72,16 @@ export interface Product {
   version: number;
   interactions: ProductInteraction;
   userPreferences?: UserPreferences;
+  // Enhanced product information
+  tags?: string[]; // Product tags for better categorization
+  specifications?: Record<string, string>; // Product specifications
+  availability?: 'in_stock' | 'low_stock' | 'out_of_stock';
+  stockCount?: number; // Available stock count
   // Additional properties for product filtering and display
   featured?: boolean;
   new?: boolean;
   bestSeller?: boolean;
+  trending?: boolean; // If the product is trending
   // Legacy compatibility properties
   brand?: string;
   colors?: ProductColor[];

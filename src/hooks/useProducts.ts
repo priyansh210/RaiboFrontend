@@ -20,6 +20,8 @@ export const useProducts = () => {
           interactions: {
             likes: Math.floor(Math.random() * 500) + 10,
             shares: Math.floor(Math.random() * 100) + 5,
+            views: Math.floor(Math.random() * 5000) + 100,
+            orderCount: Math.floor(Math.random() * 200) + 5,
             comments: [
               {
                 id: `${product.id}-comment-1`,

@@ -190,7 +190,7 @@ const Browse = () => {
                   <h3 className="font-medium mb-4" style={{ color: theme.foreground }}>Price Range</h3>
                   <PriceRangeSlider 
                     min={0} 
-                    max={5000} 
+                    max={50000} 
                     step={100} 
                     value={priceRange} 
                     onChange={setPriceRange} 

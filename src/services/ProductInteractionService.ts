@@ -55,6 +55,8 @@ export class ProductInteractionService {
       comments: this.generateDummyReviews(productId),
       userHasLiked: Math.random() > 0.7, // 30% chance user liked
       userHasShared: Math.random() > 0.9, // 10% chance user shared
+      views: Math.floor(Math.random() * 2000) + 100, // Add dummy views
+      orderCount: Math.floor(Math.random() * 50) + 1, // Add dummy order count
     };
   }
 

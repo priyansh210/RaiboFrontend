@@ -59,10 +59,16 @@ export class ProductMapper {
       version: external.__v || 0,
       interactions: this.generateInteractions(external.isLikedByUser, external.likesCount),
       userPreferences: this.generateDefaultUserPreferences(),
+      // Enhanced product information
+      tags: this.generateProductTags(external.category_id.name),
+      specifications: this.generateSpecifications(),
+      availability: this.generateAvailability(),
+      stockCount: Math.floor(Math.random() * 100) + 1,
       // Add dummy values for display properties
       featured: Math.random() > 0.8, // 20% chance of being featured
       new: Math.random() > 0.7, // 30% chance of being new
       bestSeller: Math.random() > 0.8, // 20% chance of being bestseller
+      trending: Math.random() > 0.85, // 15% chance of being trending
       // Legacy compatibility
       brand: external.company_id.name,
       colors: this.generateDefaultUserPreferences().preferredColors,
@@ -125,6 +131,8 @@ export class ProductMapper {
       comments: [],
       userHasLiked: userHasLiked,
       userHasShared: false,
+      views: Math.floor(Math.random() * 5000) + 100,
+      orderCount: Math.floor(Math.random() * 100) + 5,
     };
   }
 
@@ -140,5 +148,39 @@ export class ProductMapper {
       preferredColors: colors.slice(0, Math.floor(Math.random() * 3) + 1),
       preferredQuantity: 1,
     };
+  }
+
+  private static generateProductTags(categoryName: string): string[] {
+    const commonTags = ['Modern', 'Stylish', 'Comfortable', 'Durable', 'Premium'];
+    const categorySpecificTags: Record<string, string[]> = {
+      'Furniture': ['Home Decor', 'Living Room', 'Bedroom'],
+      'Lighting': ['Ambient', 'LED', 'Energy Efficient'],
+      'Storage': ['Organized', 'Space Saving', 'Functional'],
+    };
+    
+    const tags = [...commonTags.slice(0, Math.floor(Math.random() * 3) + 1)];
+    const specificTags = categorySpecificTags[categoryName] || [];
+    if (specificTags.length > 0) {
+      tags.push(...specificTags.slice(0, Math.floor(Math.random() * 2) + 1));
+    }
+    
+    return tags;
+  }
+
+  private static generateSpecifications(): Record<string, string> {
+    const specs = {
+      'Material': ['Wood', 'Metal', 'Fabric', 'Leather', 'Plastic'][Math.floor(Math.random() * 5)],
+      'Dimensions': `${Math.floor(Math.random() * 100 + 50)}cm x ${Math.floor(Math.random() * 100 + 50)}cm`,
+      'Weight': `${Math.floor(Math.random() * 50 + 5)}kg`,
+      'Color Options': Math.floor(Math.random() * 5 + 1).toString(),
+    };
+    return specs;
+  }
+
+  private static generateAvailability(): 'in_stock' | 'low_stock' | 'out_of_stock' {
+    const rand = Math.random();
+    if (rand > 0.8) return 'out_of_stock';
+    if (rand > 0.6) return 'low_stock';
+    return 'in_stock';
   }
 }

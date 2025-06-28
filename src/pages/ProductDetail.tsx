@@ -116,6 +116,8 @@ const ProductDetail = () => {
             ],
             userHasLiked: false,
             userHasShared: false,
+            views: Math.floor(Math.random() * 1000) + 100,
+            orderCount: Math.floor(Math.random() * 50) + 1,
           };
 
           setProduct({ ...productData, interactions });

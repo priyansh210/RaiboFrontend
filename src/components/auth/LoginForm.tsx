@@ -1,9 +1,11 @@
-
 import React, { useState } from 'react';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import GoogleSignInButton from './GoogleSignInButton';
+import { useTheme } from '@/context/ThemeContext';
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -21,6 +23,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const { theme } = useTheme();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,44 +33,44 @@ const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <>
       {error && (
-        <div className="mb-6 p-3 bg-red-50 text-red-700 rounded-sm flex items-center">
+        <div className="mb-6 p-3 bg-destructive/10 text-destructive rounded-md flex items-center">
           <AlertCircle size={18} className="mr-2 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm text-earth mb-1">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-foreground">
             Email address
-          </label>
-          <input
+          </Label>
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
+            className="bg-background border-input text-foreground"
             required
           />
         </div>
         
-        <div>
-          <label htmlFor="password" className="block text-sm text-earth mb-1">
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-foreground">
             Password
-          </label>
+          </Label>
           <div className="relative">
-            <input
+            <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full py-2 px-3 border border-taupe/30 focus:outline-none focus:border-terracotta/50"
+              className="bg-background border-input text-foreground"
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-earth"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -75,13 +78,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
           </div>
         </div>
         
-        <button
+        <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-terracotta hover:bg-umber text-white py-3 transition-colors disabled:bg-taupe"
+          className="w-full"
         >
           {isLoading ? 'Signing in...' : 'Sign In'}
-        </button>
+        </Button>
       </form>
       
       <div className="mt-6">
@@ -90,7 +93,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             <Separator className="w-full" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-earth">
+            <span className="bg-background px-2 text-muted-foreground">
               Or continue with
             </span>
           </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -6,10 +5,12 @@ import Layout from '../components/Layout';
 import { toast } from '@/hooks/use-toast';
 import LoginForm from '../components/auth/LoginForm';
 import { googleAuthService } from '../services/GoogleAuthService';
-import { STORAGE_KEYS } from '../api/config';
+import { useTheme } from '@/context/ThemeContext';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Login = () => {
-  const { login, googleLogin,  isAuthenticated, isLoading } = useAuth();
+  const { login, googleLogin, isAuthenticated, isLoading } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const redirectPath = location.state?.redirect || '/';
@@ -36,11 +37,8 @@ const Login = () => {
       return;
     }
     
-    console.log('Attempting login with:', { email, backendUrl: 'http://ec2-15-207-55-211.ap-south-1.compute.amazonaws.com:3000' });
-    
     try {
       await login(email, password);
-      console.log('Login successful');
       toast({
         title: "Login successful",
         description: "Welcome back!",
@@ -68,36 +66,29 @@ const Login = () => {
   
   return (
     <Layout>
-      <div className="min-h-screen bg-cream py-10">
-        <div className="container-custom max-w-md">
-          <div className="bg-white p-8 rounded-sm shadow-sm">
-            <h1 className="font-playfair text-2xl text-center text-charcoal mb-6">Sign In</h1>
-            
-            <LoginForm
-              onSubmit={handleLogin}
-              onGoogleLogin={handleGoogleLogin}
-              isLoading={isLoading}
-              error={error}
-            />
-            
-            <div className="mt-6 text-center text-sm text-earth">
-              Don't have an account?{' '}
-              <Link to="/buyer/register" className="text-terracotta hover:underline">
-                Register
-              </Link>
-            </div>
-            
-            <div className="mt-4 text-center text-xs text-earth">
-              Are you a seller?{' '}
-              <Link to="/seller/login" className="text-terracotta hover:underline">
-                Sign in as Seller
-              </Link>
-              {' '}or{' '}
-              <Link to="/seller/register" className="text-terracotta hover:underline">
-                Register as Seller
-              </Link>
-            </div>
-          </div>
+      <div className="min-h-screen bg-background py-10">
+        <div className="container mx-auto px-4 max-w-md">
+          <Card className="border border-border shadow-sm">
+            <CardContent className="p-6 sm:p-8">
+              <h1 className="font-playfair text-2xl text-center font-semibold text-foreground mb-6">Sign In</h1>
+              
+              <LoginForm
+                onSubmit={handleLogin}
+                onGoogleLogin={handleGoogleLogin}
+                isLoading={isLoading}
+                error={error}
+              />
+              
+              <div className="mt-6 text-center text-sm text-muted-foreground">
+                Don't have an account?{' '}
+                <Link to="/buyer/register" className="text-primary hover:underline font-medium">
+                  Register
+                </Link>
+              </div>
+              
+              {/* Remove seller references as this is now buyer-focused */}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </Layout>
