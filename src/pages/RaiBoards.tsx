@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { RaiBoard } from '@/models/internal/RaiBoard';
+import { RaiBoard, RaiBoardInvite } from '@/models/internal/RaiBoard';
 import { raiBoardService } from '@/services/RaiBoardService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Users, Calendar, Search, Grid3X3 } from 'lucide-react';
+import { Plus, Users, Calendar, Search, Grid3X3, X, Check, EyeOff, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/Layout';
 
@@ -24,10 +23,13 @@ const RaiBoards: React.FC = () => {
     description: '',
     isPublic: false,
   });
+  const [invitations, setInvitations] = useState<RaiBoardInvite[]>([]);
+  const [showInvites, setShowInvites] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     loadBoards();
+    loadInvitations();
   }, []);
 
   const loadBoards = async () => {
@@ -47,6 +49,23 @@ const RaiBoards: React.FC = () => {
     }
   };
 
+  const loadInvitations = async () => {
+    try {
+      const invites = await raiBoardService.getAllBoardInvite();
+      setInvitations(
+        invites
+          .filter(inv => inv.status === 'pending')
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      );
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load invitations',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleCreateBoard = async () => {
     try {
       const board = await raiBoardService.createBoard(newBoard);
@@ -63,6 +82,27 @@ const RaiBoards: React.FC = () => {
         description: 'Failed to create board',
         variant: 'destructive',
       });
+    }
+  };
+
+  const handleAcceptInvite = async (inviteId: string) => {
+    try {
+      await raiBoardService.acceptBoardInvite(inviteId);
+      setInvitations(prev => prev.filter(inv => inv.id !== inviteId));
+      toast({ title: 'Invitation Accepted', description: 'You have joined the board.' });
+      loadBoards();
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to accept invitation', variant: 'destructive' });
+    }
+  };
+
+  const handleDeclineInvite = async (inviteId: string) => {
+    try {
+      await raiBoardService.declineBoardInvite(inviteId);
+      setInvitations(prev => prev.filter(inv => inv.id !== inviteId));
+      toast({ title: 'Invitation Declined', description: 'You have declined the invitation.' });
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to decline invitation', variant: 'destructive' });
     }
   };
 
@@ -156,6 +196,56 @@ const RaiBoards: React.FC = () => {
             className="pl-10"
           />
         </div>
+
+        {/* Invitations Section */}
+        {showInvites && invitations.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Users className="w-5 h-5 text-primary" />
+                Board Invitations
+              </h2>
+              <Button variant="ghost" size="icon" onClick={() => setShowInvites(false)} title="Hide invitations">
+                <EyeOff className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {invitations.map((invite) => (
+                <Card key={invite.id} className="border-primary/30 w-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>{invite.boardName}</span>
+                      <Badge variant="secondary">{invite.role.charAt(0).toUpperCase() + invite.role.slice(1)}</Badge>
+                    </CardTitle>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Invited by <span className="font-medium">{invite.inviterName}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {invite.numberOfProducts} products • Expires {new Date(invite.expiresAt).toLocaleDateString()}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-2">
+                      <Button size="sm" className="flex-1" onClick={() => handleAcceptInvite(invite.id)}>
+                        <Check className="w-4 h-4 mr-1" /> Accept
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1" onClick={() => handleDeclineInvite(invite.id)}>
+                        <X className="w-4 h-4 mr-1" /> Decline
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+        {!showInvites && invitations.length > 0 && (
+          <div className="flex items-center gap-2 mb-8">
+            <Button variant="ghost" size="sm" onClick={() => setShowInvites(true)}>
+              <Eye className="w-4 h-4 mr-1" /> Show Invitations ({invitations.length})
+            </Button>
+          </div>
+        )}
 
         {/* Boards Grid */}
         {filteredBoards.length === 0 ? (

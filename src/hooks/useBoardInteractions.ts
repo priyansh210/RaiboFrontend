@@ -1,4 +1,3 @@
-
 import { useRaiBoard } from '@/context/RaiBoardContext';
 import { useToast } from '@/hooks/use-toast';
 import { RaiBoardTextElement } from '@/models/internal/RaiBoard';
@@ -62,6 +61,19 @@ export const useBoardInteractions = () => {
     }
   };
 
+  const handleChangeCollaboratorRole = async (userId: string, newRole: 'editor' | 'viewer') => {
+    if (!state.board) return;
+    try {
+      await raiBoardService.changeCollaboratorRole(state.board.id, userId, newRole);
+      // Update local state immediately after successful API call
+      dispatch({ type: 'UPDATE_COLLABORATOR_ROLE', payload: { userId, newRole } });
+      toast({ title: 'Role updated', description: 'Collaborator role updated successfully.' });
+    } catch (error) {
+      toast({ title: 'Error', description: 'Failed to update role', variant: 'destructive' });
+      throw error;
+    }
+  };
+
   return {
     handleAddTextElement,
     handleTextElementMove,
@@ -72,6 +84,7 @@ export const useBoardInteractions = () => {
     handleProductMove,
     handleProductResize,
     handleProductRemove,
-    handleInviteCollaborator
+    handleInviteCollaborator,
+    handleChangeCollaboratorRole,
   };
 };

@@ -67,14 +67,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       zIndex={product.zIndex}
       isSelected={isSelected}
       canEdit={canEdit}
-      onMove={onMove}
-      onResize={onResize}
-      onRemove={onRemove}
+      onMove={canEdit ? onMove : () => {}}
+      onResize={canEdit ? onResize : () => {}}
+      onRemove={canEdit ? onRemove : () => {}}
       onSelect={onSelect}
       onDoubleClick={handleDoubleClick}
       zoom={zoom}
       className="group"
-      resizable={true}
+      resizable={canEdit}
     >
       <div
         className="w-full h-full bg-card rounded-lg shadow-lg border border-border overflow-hidden hover:shadow-xl transition-all duration-200 group-hover:scale-[1.02] relative"

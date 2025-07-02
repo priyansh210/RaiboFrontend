@@ -55,16 +55,17 @@ export const TextElement: React.FC<TextElementProps> = ({
       size={element.size}
       zIndex={element.zIndex}
       isSelected={isSelected}
-      canEdit={canEdit && !isEditing}
-      onMove={onMove}
-      onResize={onResize}
-      onRemove={onRemove}
+      canEdit={canEdit}
+      onMove={canEdit ? onMove : () => {}}
+      onResize={canEdit ? onResize : () => {}}
+      onRemove={canEdit ? onRemove : () => {}}
       onSelect={onSelect}
       onDoubleClick={handleDoubleClick}
       zoom={zoom}
-      resizable={true}
+      resizable={canEdit}
       className="group"
-    >      {isEditing ? (
+    >
+      {isEditing ? (
         <div className="w-full h-full bg-card dark:bg-gray-800 rounded-lg shadow-lg border-2 border-blue-500 p-3">
           {element.type === 'heading' ? (
             <Input

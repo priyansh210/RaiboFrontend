@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,8 +40,8 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
   return (
     <div className={`bg-card text-card-foreground border-b border-border px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between transition-all duration-300 ${isExpanded ? 'pb-6' : ''}`}>
       {/* Top row - always visible */}
-      <div className="flex items-center justify-between w-full md:w-auto">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center w-full">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <Button
             variant="ghost"
             size="sm"
@@ -52,7 +51,6 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-semibold text-base md:text-lg truncate max-w-[150px] md:max-w-none">
@@ -73,8 +71,30 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
           </div>
         </div>
 
+        {/* Desktop Actions - moved to right end */}
+        <div className="hidden md:flex items-center gap-2 ml-auto">
+          <Button
+            variant={hasUnsavedChanges ? "default" : "outline"}
+            size="sm"
+            onClick={onSave}
+            disabled={saving || userRole === 'viewer'}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? 'Saving...' : hasUnsavedChanges ? 'Save*' : 'Save'}
+          </Button>
+          {userRole === 'owner' && (
+            <Button variant="outline" size="sm" onClick={onShare}>
+              <Users className="w-4 h-4 mr-2" />
+              Share
+              {collaboratorCount > 0 && (
+                <Badge variant="secondary" className="ml-2">{collaboratorCount}</Badge>
+              )}
+            </Button>
+          )}
+        </div>
+
         {/* Mobile Actions */}
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2 md:hidden ml-auto">
           {/* Save button always visible on mobile */}
           <Button
             variant={hasUnsavedChanges ? "default" : "outline"}
@@ -97,38 +117,21 @@ export const RaiBoardHeader: React.FC<RaiBoardHeaderProps> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={onShare}>
-                  <Users className="w-4 h-4 mr-2" />
-                  Share
-                  {collaboratorCount > 0 && (
-                    <Badge variant="secondary" className="ml-2">{collaboratorCount}</Badge>
-                  )}
-                </DropdownMenuItem>
+                {userRole === 'owner' && (
+                  <DropdownMenuItem onClick={onShare}>
+                    <Users className="w-4 h-4 mr-2" />
+                    Share
+                    {collaboratorCount > 0 && (
+                      <Badge variant="secondary" className="ml-2">{collaboratorCount}</Badge>
+                    )}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => setIsExpanded(!isExpanded)}>
                   {isExpanded ? 'Hide details' : 'Show details'}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>        {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-2 ml-auto">
-          <Button
-            variant={hasUnsavedChanges ? "default" : "outline"}
-            size="sm"
-            onClick={onSave}
-            disabled={saving || userRole === 'viewer'}
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? 'Saving...' : hasUnsavedChanges ? 'Save*' : 'Save'}
-          </Button>
-          
-          <Button variant="outline" size="sm" onClick={onShare}>
-            <Users className="w-4 h-4 mr-2" />
-            Share
-            {collaboratorCount > 0 && (
-              <Badge variant="secondary" className="ml-2">{collaboratorCount}</Badge>
-            )}
-          </Button>
         </div>
       </div>
       

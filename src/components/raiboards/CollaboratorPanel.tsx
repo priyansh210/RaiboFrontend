@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { RaiBoardCollaborator } from '@/models/internal/RaiBoard';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,8 @@ interface CollaboratorPanelProps {
   userRole: 'owner' | 'editor' | 'viewer';
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  onChangeRole?: (userId: string, newRole: 'editor' | 'viewer') => void;
+  currentUserId?: string;
 }
 
 export const CollaboratorPanel: React.FC<CollaboratorPanelProps> = ({
@@ -29,6 +30,8 @@ export const CollaboratorPanel: React.FC<CollaboratorPanelProps> = ({
   userRole,
   isOpen,
   onOpenChange,
+  onChangeRole,
+  currentUserId,
 }) => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'editor' | 'viewer'>('editor');
@@ -84,23 +87,54 @@ export const CollaboratorPanel: React.FC<CollaboratorPanelProps> = ({
                     {collaborator.userName.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium truncate">
                       {collaborator.userName}
+                      {collaborator.id === currentUserId && (
+                        <span className="ml-2 text-xs text-primary">(You)</span>
+                      )}
                     </span>
                     {collaborator.isOnline && (
                       <div className="w-2 h-2 bg-green-500 rounded-full" />
                     )}
                   </div>
-                  <Badge
-                    variant={getRoleBadgeVariant(collaborator.role)}
-                    className="text-xs flex items-center gap-1 w-fit"
-                  >
-                    {getRoleIcon(collaborator.role)}
-                    {collaborator.role}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {/* Show dropdown for editable roles (owner can edit non-owner collaborators except themselves) */}
+                    {userRole === 'owner' && onChangeRole && collaborator.role !== 'owner' && collaborator.id !== currentUserId ? (
+                      <Select
+                        value={collaborator.role}
+                        onValueChange={(value: 'editor' | 'viewer') => onChangeRole(collaborator.id, value)}
+                      >
+                        <SelectTrigger className="h-8 w-24 text-xs border-0 bg-muted hover:bg-muted/80 focus:ring-1 focus:ring-primary/20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="editor">
+                            <div className="flex items-center gap-2">
+                              <Edit className="w-3 h-3" />
+                              Editor
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="viewer">
+                            <div className="flex items-center gap-2">
+                              <Eye className="w-3 h-3" />
+                              Viewer
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      /* Show badge for non-editable roles */
+                      <Badge
+                        variant={getRoleBadgeVariant(collaborator.role)}
+                        className="text-xs flex items-center gap-1 w-fit"
+                      >
+                        {getRoleIcon(collaborator.role)}
+                        {collaborator.role}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

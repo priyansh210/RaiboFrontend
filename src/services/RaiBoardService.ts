@@ -66,23 +66,25 @@ class RaiBoardService {
     });
   }
 
-  // Invite collaborator
-  async inviteCollaborator(boardId: string, email: string, role: 'editor' | 'viewer'): Promise<RaiBoardInvite> {
-    // Dummy implementation
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          id: 'invite-' + Date.now(),
-          boardId,
-          inviterName: 'John Doe',
-          inviteeEmail: email,
-          role,
-          status: 'pending',
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-          createdAt: new Date(),
-        });
-      }, 300);
-    });
+  // Create invitation to join a RaiBoard
+  async inviteCollaborator(boardId: string, inviteeEmail: string, role: 'editor' | 'viewer'): Promise<RaiBoardInvite> {
+    const response = await apiService.createBoardInvite(boardId, inviteeEmail, role) as { data: RaiBoardInvite };
+    return response.data;
+  }
+
+  // Accept invitation to join a RaiBoard
+  async acceptBoardInvite(inviteId: string): Promise<void> {
+    await apiService.acceptBoardInvite(inviteId);
+  }
+
+  // Decline invitation to join a RaiBoard
+  async declineBoardInvite(inviteId: string): Promise<void> {
+    await apiService.declineBoardInvite(inviteId);
+  }
+
+  async getAllBoardInvite(): Promise<RaiBoardInvite[]> {
+    const response = await apiService.getAllBoardInvite() as { data: RaiBoardInvite[] };
+    return response.data;
   }
 
   // Get board collaborators
@@ -113,6 +115,11 @@ class RaiBoardService {
         isOnline: false,
       },
     ];
+  }
+
+  // Change collaborator role
+  async changeCollaboratorRole(boardId: string, userId: string, newRole: 'editor' | 'viewer'): Promise<void> {
+    await apiService.changeCollaboratorRole(boardId, userId, newRole);
   }
 }
 

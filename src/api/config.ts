@@ -101,7 +101,11 @@ export const API_ENDPOINTS = {
     GET_BY_ID: '/api/v1/board', // Will append /:id
     UPDATE: '/api/v1/board', // Will append /:id
     DELETE: '/api/v1/board',
-    ADD_PRODUCT: '/api/v1/board/addProduct'  // Will append /:id
+    ADD_PRODUCT: '/api/v1/board/addProduct',  // Will append /:id
+    CREATE_INVITE: '/api/v1/board/invites', // Will append /:boardId
+    ACCEPT_INVITE: '/api/v1/board/invites/accept', // Will append /:inviteId
+    DECLINE_INVITE: '/api/v1/board/invite/decline', // Will append /:inviteId
+    GET_ALL_INVITES: '/api/v1/board/invites', 
   },
 
   ROOMS: {

@@ -23,7 +23,7 @@ const RaiBoardDetailContent: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { board, isLoading, hasUnsavedChanges, isSaving, saveBoard } = useBoardData();
+  const { board, isLoading, hasUnsavedChanges, isSaving, saveBoard, user } = useBoardData();
   const { 
     showSaveConfirmation,
     navigateWithConfirmation,
@@ -41,14 +41,27 @@ const RaiBoardDetailContent: React.FC = () => {
     handleProductMove,
     handleProductResize,
     handleProductRemove,
-    handleInviteCollaborator
+    handleInviteCollaborator,
+    handleChangeCollaboratorRole
   } = useBoardInteractions();
 
   const [showCollaborators, setShowCollaborators] = useState(false);
   const [showProductSearch, setShowProductSearch] = useState(false);
   const [showSimilarDialog, setShowSimilarDialog] = useState(false);
   const [similarProductId, setSimilarProductId] = useState<string | null>(null);
-  const [userRole] = useState<'owner' | 'editor' | 'viewer'>('owner');
+  // Determine user role for this board
+  let userRole: 'owner' | 'editor' | 'viewer' = 'viewer';
+  if (board && user) {
+    if (board.collaborators.some(c => c.id === user.id && c.role === 'owner')) {
+      userRole = 'owner';
+    } else if (board.collaborators.some(c => c.id === user.id && c.role === 'editor')) {
+      userRole = 'editor';
+    } else if (board.collaborators.some(c => c.id === user.id && c.role === 'viewer')) {
+      userRole = 'viewer';
+    }
+  }
+  
+  const canEdit = userRole === 'owner' || userRole === 'editor';
 
   const handleProductDoubleClick = (productId: string) => {
     navigate(`/product/${productId}`);
@@ -92,44 +105,51 @@ const RaiBoardDetailContent: React.FC = () => {
         collaboratorCount={board.collaborators.length}
       />
 
+      {/* Show user role info */}
+      {/* <div className="max-w-2xl mx-auto mt-2 mb-2 text-center">
+        <span className="inline-block rounded bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+          Your role on this board: <span className="font-bold text-primary">{userRole.charAt(0).toUpperCase() + userRole.slice(1)}</span>
+        </span>
+      </div> */}
+
       {/* Main Content */}
       <div className="flex-1 flex flex-row overflow-hidden">
-        <RaiBoardToolbar
-          onAddProduct={() => setShowProductSearch(true)}
-          onAddHeading={() => handleAddTextElement('heading')}
-          onAddParagraph={() => handleAddTextElement('paragraph')}
-          onAddImage={() => toast({ title: 'Coming Soon', description: 'This feature is not yet implemented.'})}
-          userRole={userRole}
-          boardStats={{
-              products: board.products.length,
-              textElements: board.textElements.length
-          }}
-        />
-        <div className="flex-1 relative bg-background">          {/* Mobile Instructions Hint - only on smaller screens */}
-          {/* <div className="md:hidden absolute top-2 left-14 right-2 z-20 bg-card/70 backdrop-blur-sm rounded-lg px-3 py-2 text-xs text-foreground dark:text-white dark:bg-card/80 shadow-sm">
-            <p>• Pinch to zoom • Drag with one finger • Tap elements to edit</p>
-          </div>
-           */}
+        {/* Only show toolbar if owner or editor */}
+        {(userRole === 'owner' || userRole === 'editor') && (
+          <RaiBoardToolbar
+            onAddProduct={() => setShowProductSearch(true)}
+            onAddHeading={() => handleAddTextElement('heading')}
+            onAddParagraph={() => handleAddTextElement('paragraph')}
+            onAddImage={() => toast({ title: 'Coming Soon', description: 'This feature is not yet implemented.'})}
+            userRole={userRole}
+            boardStats={{
+                products: board.products.length,
+                textElements: board.textElements.length
+            }}
+          />
+        )}
+        <div className="flex-1 relative bg-background">
           <RaiBoardCanvas
             board={board}
-            onProductMove={handleProductMove}
-            onProductResize={handleProductResize}
-            onProductRemove={handleProductRemove}
+            onProductMove={canEdit ? handleProductMove : () => {}}
+            onProductResize={canEdit ? handleProductResize : () => {}}
+            onProductRemove={canEdit ? handleProductRemove : () => {}}
             onProductDoubleClick={handleProductDoubleClick}
-            onTextElementMove={handleTextElementMove}
-            onTextElementResize={handleTextElementResize}
-            onTextElementUpdate={handleTextElementUpdate}
-            onTextElementRemove={handleTextElementRemove}
+            onTextElementMove={canEdit ? handleTextElementMove : () => {}}
+            onTextElementResize={canEdit ? handleTextElementResize : () => {}}
+            onTextElementUpdate={canEdit ? handleTextElementUpdate : () => {}}
+            onTextElementRemove={canEdit ? handleTextElementRemove : () => {}}
             userRole={userRole}
             onOpenSimilarProducts={handleOpenSimilarProducts}
           />
-          
           <CollaboratorPanel
             collaborators={board.collaborators}
             onInviteCollaborator={handleInviteCollaborator}
             userRole={userRole}
             isOpen={showCollaborators}
             onOpenChange={setShowCollaborators}
+            onChangeRole={userRole === 'owner' ? handleChangeCollaboratorRole : undefined}
+            currentUserId={user?.id}
           />
 
           {/* Bundle Cart Button */}

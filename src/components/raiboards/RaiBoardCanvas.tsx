@@ -295,14 +295,13 @@ export const RaiBoardCanvas: React.FC<RaiBoardCanvasProps> = ({
       className="relative w-full h-full overflow-hidden bg-gradient-to-br from-background to-secondary"
       onClick={handleCanvasClick} // Add click handler here
     >
-      {/* Enhanced Grid Background */}
+      {/* Enhanced Dotted Grid Background */}
       {board.settings.showGrid && (
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: `
-              linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
-              linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)
+              radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)
             `,
             backgroundSize: `${gridSize}px ${gridSize}px`,
             backgroundPosition: `${gridOffsetX}px ${gridOffsetY}px`,

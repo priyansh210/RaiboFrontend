@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRaiBoard } from '@/context/RaiBoardContext';
 import { raiBoardService } from '@/services/RaiBoardService';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export const useBoardData = () => {
   const { boardId } = useParams<{ boardId: string }>();
@@ -11,6 +11,7 @@ export const useBoardData = () => {
   const { toast } = useToast();
   const { state, dispatch } = useRaiBoard();
   const [isSaving, setIsSaving] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (boardId) {
@@ -65,5 +66,6 @@ export const useBoardData = () => {
     hasUnsavedChanges: state.hasUnsavedChanges,
     isSaving,
     saveBoard,
+    user,
   };
 };

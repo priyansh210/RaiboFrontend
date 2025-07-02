@@ -704,12 +704,47 @@ class ApiService {
     });
   }
 
+  // Board Invitation APIs
+  async createBoardInvite(boardId: string, inviteeEmail: string, role: 'editor' | 'viewer') {
+    return this.request(`${API_ENDPOINTS.BOARDS.CREATE_INVITE}/${boardId}`, {
+      method: 'POST',
+      body: JSON.stringify({ inviteeEmail, role }),
+    });
+  }
+
+  async acceptBoardInvite(inviteId: string) {
+    return this.request(`${API_ENDPOINTS.BOARDS.ACCEPT_INVITE}/${inviteId}`, {
+      method: 'POST',
+    });
+  }
+
+  async declineBoardInvite(inviteId: string) {
+    return this.request(`${API_ENDPOINTS.BOARDS.DECLINE_INVITE}/${inviteId}`, {
+      method: 'POST',
+    });
+  }
+
+  async getAllBoardInvite() {
+    return this.request(`${API_ENDPOINTS.BOARDS.GET_ALL_INVITES}`, {
+      method: 'GET',
+    });
+  }
+
   async getBrands() {
     return brands;
   }
 
   async getForYouSuggestions() {
     return forYouSuggestions;
+  }
+
+  // Change collaborator role
+  async changeCollaboratorRole(boardId: string, userId: string, newRole: 'editor' | 'viewer') {
+    return this.request(`/api/v1/board/collaborators/${boardId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, newRole }),
+    });
   }
 }
 

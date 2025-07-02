@@ -20,6 +20,7 @@ type RaiBoardAction =
   | { type: 'UPDATE_TEXT_ELEMENT_SIZE'; payload: { elementId: string; size: { width: number; height: number } } }
   | { type: 'UPDATE_TEXT_ELEMENT'; payload: { elementId: string; updates: Partial<RaiBoardTextElement> } }
   | { type: 'REMOVE_TEXT_ELEMENT'; payload: string }
+  | { type: 'UPDATE_COLLABORATOR_ROLE'; payload: { userId: string; newRole: 'editor' | 'viewer' } }
   | { type: 'MARK_SAVED' };
 
 const initialState: RaiBoardState = {
@@ -156,6 +157,20 @@ function raiBoardReducer(state: RaiBoardState, action: RaiBoardAction): RaiBoard
         board: {
           ...state.board,
           textElements: state.board.textElements.filter(el => el.id !== action.payload),
+        },
+        hasUnsavedChanges: true,
+      };
+    case 'UPDATE_COLLABORATOR_ROLE':
+      if (!state.board) return state;
+      return {
+        ...state,
+        board: {
+          ...state.board,
+          collaborators: state.board.collaborators.map(collaborator =>
+            collaborator.id === action.payload.userId
+              ? { ...collaborator, role: action.payload.newRole }
+              : collaborator
+          ),
         },
         hasUnsavedChanges: true,
       };

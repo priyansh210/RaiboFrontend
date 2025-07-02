@@ -258,7 +258,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Create user object from response
     const userData: AuthUser = {
-      id: response.user?.id,
+      id: response.user?._id,
       email: response.user?.email,
       firstName: response.user?.firstName || response.user?.first_name,
       lastName: response.user?.lastName || response.user?.last_name,

@@ -67,11 +67,12 @@ export interface RaiBoard {
 
 export interface RaiBoardInvite {
   id: string;
-  boardId: string;
+  boardName: string;
   inviterName: string;
   inviteeEmail: string;
   role: 'editor' | 'viewer';
   status: 'pending' | 'accepted' | 'declined';
+  numberOfProducts: number;
   expiresAt: Date;
   createdAt: Date;
 }
